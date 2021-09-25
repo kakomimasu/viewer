@@ -1,59 +1,53 @@
-/// <reference lib="dom"/>
 import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { makeStyles } from "@mui/styles";
+import { useRouter } from "next/router";
+import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import TextField from "@mui/material/TextField";
 
-import firebase from "../../components/firebase.ts";
+import firebase from "../../src/firebase";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
-import Section from "../../components/section.tsx";
-import Content from "../../components/content.tsx";
+import Section from "../../components/section";
+import Content from "../../components/content";
 
-// @deno-types="@client_js/api_client.d.ts"
-import ApiClient from "@client_js/api_client.js";
-const apiClient = new ApiClient("");
+import { apiClient } from "../../src/apiClient";
 
-const useStyles = makeStyles({
-  content: {
-    textAlign: "center",
-  },
-  signup: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "0 20",
-  },
-  textField: {
-    marginTop: 20,
-    width: "100%",
-  },
-  button: {
-    width: "20em",
-    marginTop: 20,
-  },
+const StyledContent = styled("div")({
+  textAlign: "center",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 });
 
-function Signup(props: { user: firebase.User }) {
-  const classes = useStyles();
+const SignUpForm = styled("form")({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  padding: "0 20",
+});
 
+const StyledTextField = styled(TextField)({ marginTop: 20, width: "100%" });
+
+const StyledButton = styled(Button)({
+  width: "20em",
+  marginTop: 20,
+});
+
+function Signup({ user }: { user: firebase.User }) {
   const [data, setData] = useState({
-    screenName: props.user.displayName || "",
+    screenName: user.displayName || "",
     name: "",
   });
   const [nameHelperText, setNameHelperText] = useState("");
 
   const checkName = async () => {
-    console.log("checkName", data);
     if (!data.name) {
       setNameHelperText("入力必須項目です");
       return false;
     }
     const res = await apiClient.usersSearch(data.name);
-    console.log(res);
     if (res.success) {
-      if (res.data.some((user) => user.name === data.name)) {
+      if (res.data.some((user: any) => user.name === data.name)) {
         setNameHelperText("既にこのユーザネームは使用されています");
         return false;
       }
@@ -69,10 +63,7 @@ function Signup(props: { user: firebase.User }) {
   };
 
   const submit = async () => {
-    const res = await apiClient.usersRegist(
-      data,
-      await props.user.getIdToken(),
-    );
+    const res = await apiClient.usersRegist(data, await user.getIdToken());
     if (res.success) {
       location.href = "/";
     }
@@ -90,103 +81,101 @@ function Signup(props: { user: firebase.User }) {
 
   return (
     <Section title="新規登録">
-      <form className={classes.signup} autoComplete="off">
-        <TextField
+      {user.providerData[0] && (
+        <div>
+          現在、{user.providerData[0].providerId}のアカウントで登録中です。
+          <br />
+          <StyledButton
+            color="primary"
+            onClick={async () => {
+              await firebase.auth().signOut();
+            }}
+          >
+            別のアカウントで登録する
+          </StyledButton>
+        </div>
+      )}
+      <SignUpForm autoComplete="off">
+        <StyledTextField
           required
           name="screenName"
           label="表示名"
           placeholder="囲みマス太郎"
-          className={classes.textField}
           value={data.screenName}
           onChange={handleChange}
           error={!data.screenName}
           helperText={data.screenName ? "" : "入力必須項目です"}
         />
-        <TextField
+        <StyledTextField
           required
           name="name"
           label="ユーザネーム"
           placeholder="kkmm_taro"
-          className={classes.textField}
           value={data.name}
           onChange={handleChange}
           error={Boolean(nameHelperText)}
           helperText={nameHelperText}
         />
-        <Button
-          className={classes.button}
-          onClick={submit}
-          disabled={!validate()}
-        >
+        <StyledButton onClick={submit} disabled={!validate()}>
           上記の内容で登録する
-        </Button>
-      </form>
+        </StyledButton>
+      </SignUpForm>
     </Section>
   );
 }
 
-export default function () {
-  const classes = useStyles();
-  const history = useHistory();
-  const searchParam = new URLSearchParams(location.search);
+export default function Login() {
+  const router = useRouter();
 
   // user : undefined=>認証待ち null=>未ログイン User=>ログイン済み
-  const [user, setUser] = useState<firebase.User | undefined | null>(
-    undefined,
-  );
+  const [user, setUser] = useState<firebase.User | undefined | null>(undefined);
 
   useEffect(() => {
-    console.log("useEffect");
     firebase.auth().onAuthStateChanged(async (user) => {
-      console.log("onAuthStateChanged", user);
-      setUser(user);
       if (user !== null) {
         const idToken = await user.getIdToken(true);
         const res = await apiClient.usersVerify(idToken);
-        if (res.success === true) { // ユーザが登録されていたらトップに戻る
-          history.push("/index");
+        if (res.success === true) {
+          // ユーザが登録されていたらトップに戻る
+          router.push("/");
           return;
-        } else {
-          if (!searchParam.has("signInSuccess")) {
-            console.log("SignOut!");
-            await firebase.auth().signOut();
-          }
         }
       }
+      setUser(user);
     });
   }, []);
 
   return (
     <Content title="ログイン">
-      {(
-        <div className={classes.content}>
-          {user !== undefined
-            ? (
-              <>
-                {(user === null)
-                  ? (
-                    <StyledFirebaseAuth
-                      uiConfig={{
-                        signInSuccessUrl: "/user/login?signInSuccess=true",
-                        signInOptions: [
-                          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-                          //props.firebaseP.auth.FacebookAuthProvider.PROVIDER_ID,
-                          firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-                          firebase.auth.GithubAuthProvider.PROVIDER_ID,
-                          firebase.auth.EmailAuthProvider.PROVIDER_ID,
-                          firebase.auth.PhoneAuthProvider.PROVIDER_ID,
-                          //firebaseP.auth.AnonymousAuthProvider.PROVIDER_ID
-                        ],
-                      }}
-                      firebaseAuth={firebase.auth()}
-                    />
-                  )
-                  : <Signup user={user} />}
-              </>
-            )
-            : <CircularProgress color="secondary" />}
-        </div>
-      )}
+      <StyledContent>
+        {user !== undefined ? (
+          <>
+            {user === null ? (
+              <StyledFirebaseAuth
+                uiConfig={{
+                  callbacks: {
+                    signInSuccessWithAuthResult: () => false,
+                  },
+                  signInOptions: [
+                    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                    //props.firebaseP.auth.FacebookAuthProvider.PROVIDER_ID,
+                    firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+                    firebase.auth.GithubAuthProvider.PROVIDER_ID,
+                    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                    firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+                    //firebaseP.auth.AnonymousAuthProvider.PROVIDER_ID
+                  ],
+                }}
+                firebaseAuth={firebase.auth()}
+              />
+            ) : (
+              <Signup user={user} />
+            )}
+          </>
+        ) : (
+          <CircularProgress color="secondary" />
+        )}
+      </StyledContent>
     </Content>
   );
 }
