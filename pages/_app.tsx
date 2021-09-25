@@ -45,7 +45,6 @@ function MyApp({
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-
         <Body>
           {<Heater />}
           <Main>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -7,16 +7,11 @@ import Toolbar from "@mui/material/Toolbar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 
-import firebase from "../components/firebase.ts";
+import firebase from "../src/firebase";
 
-// @deno-types="@client_js/api_client.d.ts"
-import ApiClient from "@client_js/api_client.js";
-const apiClient = new ApiClient("");
+import { apiClient } from "../src/apiClient";
 
-type Props = { firebase: typeof firebase };
-
-export default function (props: Props) {
-  const location = useLocation();
+export default function Header() {
   const [user, setUser] = useState<firebase.User | undefined | null>(undefined);
   const [verified, setVerified] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -31,14 +26,14 @@ export default function (props: Props) {
 
   const logOut = async () => {
     try {
-      await props.firebase.auth().signOut();
+      await firebase.auth().signOut();
     } catch (error) {
       console.log(`ログアウト時にエラーが発生しました (${error})`);
     }
   };
 
   useEffect(() => {
-    props.firebase.auth().onAuthStateChanged(async (user) => {
+    firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
         const idToken = await user.getIdToken();
         const res = await apiClient.usersVerify(idToken);
@@ -58,7 +53,7 @@ export default function (props: Props) {
     <AppBar position="sticky">
       <Toolbar style={{ color: "black" }}>
         <div style={{ flexGrow: 1 }}>
-          <Link to="/index">
+          <Link href="/">
             <img
               height={36}
               src="/img/kakomimasu-logo.png"
@@ -66,52 +61,41 @@ export default function (props: Props) {
             />
           </Link>
         </div>
-        {user !== undefined &&
-          (
-            <>
-              {user && verified
-                ? (
-                  <>
-                    <Button variant="text" color="inherit" onClick={logOut}>
-                      ログアウト
-                    </Button>
-                    <div
-                      aria-controls="user-icon"
-                      onClick={handleClick}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <Avatar src={user.photoURL ? user.photoURL : ""} />
-                    </div>
-                    <Menu
-                      id="user-icon"
-                      anchorEl={anchorEl}
-                      keepMounted
-                      open={Boolean(anchorEl)}
-                      onClose={handleClose}
-                    >
-                      <MenuItem onClick={handleClose}>
-                        <Link
-                          to="/user/detail"
-                          style={{ textDecoration: "none" }}
-                        >
-                          マイページ
-                        </Link>
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )
-                : (
-                  <Button
-                    variant="text"
-                    color="inherit"
-                    component={Link}
-                    to="/user/login"
-                  >
-                    ログイン・新規登録
-                  </Button>
-                )}
-            </>
-          )}
+        {user !== undefined && (
+          <>
+            {user && verified ? (
+              <>
+                <Button variant="text" color="inherit" onClick={logOut}>
+                  ログアウト
+                </Button>
+                <div
+                  aria-controls="user-icon"
+                  onClick={handleClick}
+                  style={{ cursor: "pointer" }}
+                >
+                  <Avatar src={user.photoURL ? user.photoURL : ""} />
+                </div>
+                <Menu
+                  id="user-icon"
+                  anchorEl={anchorEl}
+                  keepMounted
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                >
+                  <MenuItem onClick={handleClose}>
+                    <Link href="/user/detail">マイページ</Link>
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Link href="/user/login" passHref>
+                <Button variant="text" color="inherit">
+                  ログイン・新規登録
+                </Button>
+              </Link>
+            )}
+          </>
+        )}
       </Toolbar>
     </AppBar>
   );
