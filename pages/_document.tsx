@@ -1,6 +1,7 @@
 import * as React from "react";
 import Document, { Html, Head, Main, NextScript } from "next/document";
 import createEmotionServer from "@emotion/server/create-instance";
+import { CacheProvider } from "@emotion/react";
 import theme from "../src/theme";
 import createEmotionCache from "../src/createEmotionCache";
 
@@ -72,7 +73,14 @@ MyDocument.getInitialProps = async (ctx) => {
 
   ctx.renderPage = () =>
     originalRenderPage({
-      enhanceApp: (App) => (props) => <App emotionCache={cache} {...props} />,
+      enhanceApp: (App) =>
+        function EnhanceApp(props) {
+          return (
+            <CacheProvider value={cache}>
+              <App {...props} />
+            </CacheProvider>
+          );
+        },
     });
 
   const initialProps = await Document.getInitialProps(ctx);
