@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-export default function () {
+export default function Clock() {
   const [nowTime, setNowTime] = useState(new Date().toLocaleString("ja-JP"));
 
   useEffect(() => {

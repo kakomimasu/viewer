@@ -1,48 +1,43 @@
-/// <reference lib="dom"/>
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
-import { Theme, useTheme } from "@mui/material/styles";
-import { makeStyles } from "@mui/styles";
+import Link from "next/link";
+import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Autocomplete from "@mui/material/Autocomplete";
 
-// @deno-types=@client_js/api_client.d.ts
-import ApiClient from "@client_js/api_client.js";
-const apiClient = new ApiClient("");
-
 import {
+  apiClient,
   Tournament,
   TournamentCreateReq,
   TournamentType,
   User,
-} from "../../api/types.ts";
+} from "../../src/apiClient";
 
-import Content from "../../components/content.tsx";
-import TournamentCard from "../../components/tournament_card.tsx";
+import Content from "../../components/content";
+import TournamentCard from "../../components/tournament_card";
 
-const useStyles = makeStyles({
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "0 20",
-  },
-  textField: {
-    marginTop: 20,
-    width: "100%",
-  },
-  button: {
-    width: "20em",
-    marginTop: 20,
-  },
+const Form = styled("form")({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  padding: "0 20",
+});
+const StyledTextField = styled(TextField)({
+  marginTop: 20,
+  width: "100%",
+});
+const StyledAutocomplete = styled(Autocomplete)({
+  marginTop: 20,
+  width: "100%",
 });
 
-export default function () {
-  const theme = useTheme();
-  const classes = useStyles(theme);
+const StyledButton = styled(Button)({
+  width: "20em",
+  marginTop: 20,
+});
 
+export default function Create() {
   const [data, setData] = useState<TournamentCreateReq>({
     name: "",
     organizer: "",
@@ -53,9 +48,11 @@ export default function () {
 
   const [tournament, setTournament] = useState<Tournament>();
 
-  const [addUserInput, setAddUserInput] = useState<
-    { value: string; helperText: string; q: User[] }
-  >({ value: "", helperText: "", q: [] });
+  const [addUserInput, setAddUserInput] = useState<{
+    value: string;
+    helperText: string;
+    q: User[];
+  }>({ value: "", helperText: "", q: [] });
 
   const validate = () => {
     if (!data) return false;
@@ -73,7 +70,7 @@ export default function () {
   };
 
   const addHandleChange = async (
-    event: React.ChangeEvent<{ value: string }>,
+    event: React.ChangeEvent<{ value: string }>
   ) => {
     const value = event.target.value;
     const req = await apiClient.usersSearch(value);
@@ -88,19 +85,14 @@ export default function () {
     <>
       <Content title="大会作成">
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <Button
-            component={Link}
-            to={"/tournament/index"}
-            style={{ margin: "auto" }}
-          >
-            大会一覧に戻る
-          </Button>
-          <form autoComplete="off" className={classes.form}>
-            <TextField
+          <Link href="/tournament" passHref>
+            <Button style={{ margin: "auto" }}>大会一覧に戻る</Button>
+          </Link>
+          <Form autoComplete="off">
+            <StyledTextField
               required
               label="大会名"
               placeholder="〇〇大会"
-              className={classes.textField}
               value={data.name}
               onChange={({ target: { value } }) => {
                 setData({ ...data, name: value });
@@ -108,20 +100,18 @@ export default function () {
               error={!data.name}
               helperText={data.name ? "" : "入力必須項目です"}
             />
-            <TextField
+            <StyledTextField
               label="主催"
               placeholder="Code for KOSEN"
-              className={classes.textField}
               value={data.organizer}
               onChange={({ target: { value } }) => {
                 setData({ ...data, organizer: value });
               }}
             />
-            <TextField
+            <StyledTextField
               required
               select
               label="試合形式"
-              className={classes.textField}
               value={data.type}
               onChange={({ target: { value } }) => {
                 setData({ ...data, type: value as TournamentType });
@@ -131,8 +121,8 @@ export default function () {
             >
               <MenuItem value="round-robin">総当たり戦</MenuItem>
               {/*<MenuItem value="knockout">勝ち残り戦</MenuItem>;*/}
-            </TextField>
-            <Autocomplete
+            </StyledTextField>
+            <StyledAutocomplete
               multiple
               id="tags-standard"
               options={addUserInput.q}
@@ -142,9 +132,8 @@ export default function () {
                 setAddUserInput({ ...addUserInput, q: [] });
                 setData({ ...data, participants: newValue.map((e) => e.id) });
               }}
-              className={classes.textField}
               renderInput={(params) => (
-                <TextField
+                <StyledTextField
                   {...params}
                   label="参加ユーザ"
                   placeholder="name"
@@ -152,22 +141,17 @@ export default function () {
                 />
               )}
             />
-            <TextField
+            <StyledTextField
               label="備考"
-              className={classes.textField}
               value={data.remarks}
               onChange={({ target: { value } }) => {
                 setData({ ...data, remarks: value });
               }}
             />
-            <Button
-              className={classes.button}
-              onClick={submit}
-              disabled={!validate()}
-            >
+            <StyledButton onClick={submit} disabled={!validate()}>
               ゲーム作成！
-            </Button>
-          </form>
+            </StyledButton>
+          </Form>
           {tournament && <TournamentCard tournament={tournament} />}
         </div>
       </Content>

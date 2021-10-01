@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { makeStyles } from "@mui/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { Link, useHistory } from "react-router-dom";
 
-import { Game, User } from "../api/types.ts";
+import { apiClient, Game, User } from "../src/apiClient";
 
-// @deno-types=@client_js/api_client.d.ts
-import ApiClient from "@client_js/api_client.js";
-const apiClient = new ApiClient("");
-
-import datas from "./player_datas.ts";
+import datas from "./player_datas";
 
 type Props = {
   game: Pick<
@@ -35,7 +31,8 @@ const useStyles = makeStyles({
       justifyContent: "center",
     },
   },
-  table: { // table全体のcss
+  table: {
+    // table全体のcss
     borderCollapse: "collapse",
     userSelect: "none",
     margin: "auto",
@@ -54,15 +51,18 @@ const useStyles = makeStyles({
       position: "relative",
     },
   },
-  agent: { // agentがいるマスのcss
+  agent: {
+    // agentがいるマスのcss
     backgroundSize: "80%",
     backgroundPosition: "0% 50%",
     backgroundRepeat: "no-repeat",
   },
-  conflict: { // conflictしているマスのcss
+  conflict: {
+    // conflictしているマスのcss
     animation: "$flash 1s linear infinite",
   },
-  "@keyframes flash": { // conflictのアニメーション
+  "@keyframes flash": {
+    // conflictのアニメーション
     "0%,100%": {},
     "50%": { backgroundColor: "#00ff00" },
   },
@@ -71,7 +71,8 @@ const useStyles = makeStyles({
     color: "red",
     fontSize: "80%",
   },
-  detail: { // agentの詳細を表示するcss
+  detail: {
+    // agentの詳細を表示するcss
     display: "none",
     position: "absolute",
     backgroundColor: "rgba(0, 0, 0, .7)",
@@ -88,7 +89,8 @@ const useStyles = makeStyles({
       display: "block",
     },
   },
-  detailHistory: { // agent詳細内の履歴のスクロールcss
+  detailHistory: {
+    // agent詳細内の履歴のスクロールcss
     width: "13em",
     height: "10em",
     overflowY: "scroll",
@@ -107,7 +109,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function (props: Props) {
+export default function GameBoard(props: Props) {
   const classes = useStyles();
   const media = useMediaQuery("(max-width:1000px)");
   const game = props.game;
@@ -132,7 +134,7 @@ export default function (props: Props) {
       if (!game.nextTurnUnixTime) return;
       const nextTime = new Date(game.nextTurnUnixTime * 1000).getTime();
       const nowTime = new Date().getTime();
-      const diffTime = ((nextTime - nowTime) / 1000);
+      const diffTime = (nextTime - nowTime) / 1000;
       if (diffTime > 0) {
         status = "次のターンまで" + diffTime.toFixed(1) + "秒";
         setTimeout(setStatusT, 100);
@@ -179,11 +181,14 @@ export default function (props: Props) {
   };
   const isAgent = (x: number, y: number) => {
     if (game.players) {
-      const agent = game.players.map((e, i) =>
-        e.agents.map((e_, j) => {
-          return { agent: e_, player: i, n: j };
-        })
-      ).flat().find((e) => e.agent.x === x && e.agent.y === y);
+      const agent = game.players
+        .map((e, i) =>
+          e.agents.map((e_, j) => {
+            return { agent: e_, player: i, n: j };
+          })
+        )
+        .flat()
+        .find((e) => e.agent.x === x && e.agent.y === y);
       return agent;
     } else return undefined;
   };
@@ -191,13 +196,14 @@ export default function (props: Props) {
     if (!agent) return [];
     const log = game.log;
     if (!log) return [];
-    const pid = agent.player, aid = agent.n;
+    const pid = agent.player,
+      aid = agent.n;
 
     const history = [];
     for (let i = 0; i < log.length; i++) {
       const act = Object.assign(
         {},
-        log[i][pid].actions.find((e) => e.agentId === aid),
+        log[i][pid].actions.find((e) => e.agentId === aid)
       );
       let type = "";
       if (act) {
@@ -221,10 +227,7 @@ export default function (props: Props) {
     if (i === undefined) return;
     return {
       point: game.board ? game.board.points[i] : 0,
-      tiled: (game.tiled ? game.tiled[i] : [0, -1]) as [
-        number,
-        number,
-      ],
+      tiled: (game.tiled ? game.tiled[i] : [0, -1]) as [number, number],
     };
   };
   useEffect(() => {
@@ -251,7 +254,7 @@ export default function (props: Props) {
       style={{ gridTemplateColumns: media ? "1fr 1fr" : "1fr auto 1fr" }}
     >
       {users.map((user, i) => (
-        <div>
+        <div key={user.name}>
           <table
             className={classes.playerTable}
             style={{ color: datas[i].colors[1] }}
@@ -259,9 +262,11 @@ export default function (props: Props) {
             <tr>
               <th>プレイヤー名</th>
               <td>
-                <Link to={"/user/detail/" + user.name}>
-                  {user.screenName}
-                </Link>
+                {user.name && (
+                  <Link href={"/user/detail/" + user.name}>
+                    {user.screenName}
+                  </Link>
+                )}
               </td>
             </tr>
             <tr>
@@ -285,8 +290,7 @@ export default function (props: Props) {
           overflow: "auto",
         }}
       >
-        {
-          /* GameListが同じ内容を兼ねているため削除。見にくかったら戻します。
+        {/* GameListが同じ内容を兼ねているため削除。見にくかったら戻します。
           <div
           style={{
             position: "relative",
@@ -306,84 +310,77 @@ export default function (props: Props) {
             )
             : <h4>{getStatusT()}</h4>}
           {turnT && <h4>{getStatusT()}</h4>}
-          </div>*/
-        }
-        <div>
-          {status}
-        </div>
+          </div>*/}
+        <div>{status}</div>
         {game.board && (
           <table id="field" className={classes.table}>
-            <tr>
-              <th></th>
-              {[...Array(game.board.width)].map((_, x) => {
-                return <th>{x + 1}</th>;
-              })}
-              <th></th>
-            </tr>
-            {[...Array(game.board.height)].map((_, y) => {
-              return (
-                <tr>
-                  <th>
-                    {y + 1}
-                  </th>
-                  {[...Array(game.board?.width)].map((_, x) => {
-                    const cell = getCell(x, y);
-                    if (!cell) return;
-                    const agent = isAgent(x, y);
-                    const isAbs = cell.point < 0 && cell.tiled[1] !== -1 &&
-                      cell.tiled[0] === 0;
-                    const isConflict = game.log
-                      ? (() => {
-                        const lastActLog = game.log[game.log.length - 1]?.map((
-                          e,
-                        ) => e.actions).flat();
-                        const isConflict = lastActLog?.some(
-                          (a) => ((a.res > 0 && a.res < 3) && a.x === x &&
-                            a.y === y),
-                        );
-                        return isConflict;
-                      })()
-                      : false;
+            <tbody>
+              <tr>
+                <th></th>
+                {[...Array(game.board.width)].map((_, x) => {
+                  return <th key={x}>{x + 1}</th>;
+                })}
+                <th></th>
+              </tr>
+              {[...Array(game.board.height)].map((_, y) => {
+                return (
+                  <tr key={y}>
+                    <th>{y + 1}</th>
+                    {[...Array(game.board?.width)].map((_, x) => {
+                      const cell = getCell(x, y);
+                      if (!cell) return;
+                      const agent = isAgent(x, y);
+                      const isAbs =
+                        cell.point < 0 &&
+                        cell.tiled[1] !== -1 &&
+                        cell.tiled[0] === 0;
+                      const isConflict = game.log
+                        ? (() => {
+                            const lastActLog = game.log[game.log.length - 1]
+                              ?.map((e) => e.actions)
+                              .flat();
+                            const isConflict = lastActLog?.some(
+                              (a) =>
+                                a.res > 0 && a.res < 3 && a.x === x && a.y === y
+                            );
+                            return isConflict;
+                          })()
+                        : false;
 
-                    const bgColor = () => {
-                      if (cell.tiled[1] !== -1) {
-                        return datas[cell.tiled[1]].colors[cell.tiled[0]];
-                      } else if (cell.point < 0) {
-                        const l = 100 - (Math.abs(cell.point) * 50 / 16);
-                        return `hsl(0,0%,${l}%)`;
-                      } else if (cell.point > 0) {
-                        const l = 100 - (Math.abs(cell.point) * 50 / 16);
-                        return `hsl(60,100%,${l}%)`;
-                      }
-                    };
+                      const bgColor = () => {
+                        if (cell.tiled[1] !== -1) {
+                          return datas[cell.tiled[1]].colors[cell.tiled[0]];
+                        } else if (cell.point < 0) {
+                          const l = 100 - (Math.abs(cell.point) * 50) / 16;
+                          return `hsl(0,0%,${l}%)`;
+                        } else if (cell.point > 0) {
+                          const l = 100 - (Math.abs(cell.point) * 50) / 16;
+                          return `hsl(60,100%,${l}%)`;
+                        }
+                      };
 
-                    return (
-                      <td
-                        className={`${agent && classes.agent} ${isConflict &&
-                          classes.conflict}`}
-                        style={{
-                          backgroundImage: agent &&
-                            `url(${datas[agent.player].agentUrl})`,
-                          backgroundColor: bgColor(),
-                        }}
-                      >
-                        <span
-                          className={isAbs
-                            ? classes.striket
-                            : ""}
+                      return (
+                        <td
+                          key={x}
+                          className={`${agent && classes.agent} ${
+                            isConflict && classes.conflict
+                          }`}
+                          style={{
+                            backgroundImage:
+                              agent && `url(${datas[agent.player].agentUrl})`,
+                            backgroundColor: bgColor(),
+                          }}
                         >
-                          {cell.point}
-                        </span>
-                        {isAbs && (
-                          <>
-                            <br />
-                            <span>
-                              {Math.abs(cell.point)}
-                            </span>
-                          </>
-                        )}
-                        {agent && users[agent.player] &&
-                          (
+                          <span className={isAbs ? classes.striket : ""}>
+                            {cell.point}
+                          </span>
+                          {isAbs && (
+                            <>
+                              <br />
+                              <span>{Math.abs(cell.point)}</span>
+                            </>
+                          )}
+                          {agent && users[agent.player] && (
                             <div
                               className={classes.detail}
                               style={{
@@ -398,19 +395,18 @@ export default function (props: Props) {
                               </span>
                               <br />
                               <span>行動履歴</span>
-                              <div
-                                className={classes.detailHistory}
-                              >
-                                {agentHistory(agent).map((e) => {
+                              <div className={classes.detailHistory}>
+                                {agentHistory(agent).map((e, i) => {
                                   return (
                                     <div
+                                      key={i}
                                       style={{
-                                        textDecoration: e.res > 0
-                                          ? "line-through"
-                                          : "none",
+                                        textDecoration:
+                                          e.res > 0 ? "line-through" : "none",
                                       }}
                                     >
-                                      T{e.turn}：{e.type !== "停留" &&
+                                      T{e.turn}：
+                                      {e.type !== "停留" &&
                                         `x:${e.x} , y:${e.y}に`}
                                       {e.type}
                                     </div>
@@ -419,20 +415,21 @@ export default function (props: Props) {
                               </div>
                             </div>
                           )}
-                      </td>
-                    );
-                  })}
-                  <th>{y + 1}</th>
-                </tr>
-              );
-            })}
-            <tr>
-              <th></th>
-              {[...Array(game.board.width)].map((_, x) => {
-                return <th>{x + 1}</th>;
+                        </td>
+                      );
+                    })}
+                    <th>{y + 1}</th>
+                  </tr>
+                );
               })}
-              <th></th>
-            </tr>
+              <tr>
+                <th></th>
+                {[...Array(game.board.width)].map((_, x) => {
+                  return <th key={x}>{x + 1}</th>;
+                })}
+                <th></th>
+              </tr>
+            </tbody>
           </table>
         )}
       </div>

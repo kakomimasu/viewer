@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -53,9 +54,10 @@ export default function Header() {
     <AppBar position="sticky">
       <Toolbar style={{ color: "black" }}>
         <div style={{ flexGrow: 1 }}>
-          <Link href="/">
-            <img
+          <Link href="/" passHref>
+            <Image
               height={36}
+              width={101}
               src="/img/kakomimasu-logo.png"
               alt="囲みマスロゴ"
             />

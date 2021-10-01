@@ -1,6 +1,6 @@
-/// <reference lib="dom"/>
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useRouter } from "next/router";
+import Link from "next/link";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
 import {
@@ -14,17 +14,20 @@ import {
   YAxis,
 } from "recharts";
 
-// @deno-types=@client_js/api_client.d.ts
-import ApiClient from "@client_js/api_client.js";
-const apiClient = new ApiClient("");
+import {
+  apiClient,
+  Game,
+  User,
+  WsGameReq,
+  WsGameRes,
+  host,
+} from "../../../src/apiClient";
 
-import datas from "../../components/player_datas.ts";
+import datas from "../../../components/player_datas";
 
-import Content from "../../components/content.tsx";
-import GameList from "../../components/gamelist.tsx";
-import GameBoard from "../../components/gameBoard.tsx";
-
-import { Game, User, WsGameReq, WsGameRes } from "../../api/types.ts";
+import Content from "../../../components/content";
+import GameList from "../../../components/gamelist";
+import GameBoard from "../../../components/gameBoard";
 
 function PointsGraph(props: { game: Game }) {
   const game = props.game;
@@ -78,6 +81,7 @@ function PointsGraph(props: { game: Game }) {
           {game.players.map((_, i) => {
             return (
               <Line
+                key={users[i]?.screenName}
                 type="monotone"
                 dataKey={`points[${i}]`}
                 stroke={datas[i].colors[1]}
@@ -91,8 +95,14 @@ function PointsGraph(props: { game: Game }) {
   );
 }
 
-export default function () {
-  const { id } = useParams<{ id?: string }>();
+export default function Page() {
+  const router = useRouter();
+  const { id: id_ } = router.query;
+  const id = (() => {
+    if (Array.isArray(id_)) {
+      return id_[0];
+    } else return id_;
+  })();
 
   const [game, setGame] = useState<Game | null>();
   const refGame = useRef(game);
@@ -101,17 +111,16 @@ export default function () {
 
   const connect = () => {
     socket = new WebSocket(
-      ((window.location.protocol === "https:") ? "wss://" : "ws://") +
-        window.location.host + "/api/ws/game",
+      (window.location.protocol === "https:" ? "wss://" : "ws://") +
+        host +
+        "/api/ws/game"
     );
     socket.onopen = () => {
-      const q =
-        (id
+      const q = (
+        id
           ? [`id:${id}`]
-          : ["sort:startAtUnixTime-desc", "is:newGame", `is:normal`])
-          .join(
-            " ",
-          );
+          : ["sort:startAtUnixTime-desc", "is:newGame", `is:normal`]
+      ).join(" ");
       console.log(q);
       const req: WsGameReq = {
         q,
@@ -134,7 +143,7 @@ export default function () {
           setGame(res.game);
         } else if (
           (res.game.startedAtUnixTime ?? 10000000000) >
-            (refGame.current?.startedAtUnixTime ?? 10000000000)
+          (refGame.current?.startedAtUnixTime ?? 10000000000)
         ) {
           connect();
         }
@@ -157,23 +166,21 @@ export default function () {
   return (
     <Content title="ゲーム詳細">
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {game
-          ? (
-            <>
-              <Button
-                component={Link}
-                to={id ? `/vr/index?id=${id}` : "/vr/latest"}
-                target="_blank"
-                style={{ margin: "auto" }}
-              >
-                VR版はこちら
-              </Button>
-              <GameList games={[game]} pagenation={false} hover={false} />
-              <GameBoard game={game} />
-              <PointsGraph game={game} />
-            </>
-          )
-          : <CircularProgress color="secondary" />}
+        {game ? (
+          <>
+            <Link
+              href={id ? `/vr/index.html?id=${id}` : "/vr/latest.html"}
+              passHref
+            >
+              <Button style={{ margin: "auto" }}>VR版はこちら</Button>
+            </Link>
+            <GameList games={[game]} pagenation={false} hover={false} />
+            <GameBoard game={game} />
+            <PointsGraph game={game} />
+          </>
+        ) : (
+          <CircularProgress color="secondary" />
+        )}
       </div>
     </Content>
   );

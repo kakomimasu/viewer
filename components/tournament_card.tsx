@@ -1,12 +1,12 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { useRouter } from "next/router";
 import { Theme, useTheme } from "@mui/material/styles";
 import { makeStyles } from "@mui/styles";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 
-import { Tournament } from "../api/types.ts";
+import { Tournament } from "../src/apiClient";
 
 const useStyles = makeStyles({
   tournament: (theme: Theme) => ({
@@ -40,10 +40,10 @@ const useStyles = makeStyles({
   },
 });
 
-export default function (props: { tournament: Tournament }) {
+export default function TournamentCard(props: { tournament: Tournament }) {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const history = useHistory();
+  const router = useRouter();
 
   const tournament = props.tournament;
 
@@ -57,7 +57,7 @@ export default function (props: { tournament: Tournament }) {
     <Card
       className={classes.tournament}
       onClick={() => {
-        history.push("/tournament/detail/" + tournament.id);
+        router.push("/tournament/detail/" + tournament.id);
       }}
     >
       <CardActionArea style={{ height: "100%" }}>
@@ -69,9 +69,7 @@ export default function (props: { tournament: Tournament }) {
           <div className={classes.tournamentType}>
             大会形式：{getType(tournament.type)}
           </div>
-          <div className={classes.tournamentRemarks}>
-            {tournament.remarks}
-          </div>
+          <div className={classes.tournamentRemarks}>{tournament.remarks}</div>
         </CardContent>
       </CardActionArea>
     </Card>

@@ -1,2 +1,6 @@
 import ApiClient from "client-js";
-export const apiClient = new ApiClient("http://localhost:8880");
+export * from "client-js";
+
+export const host = "localhost:8880";
+
+export const apiClient = new ApiClient("http://" + host);

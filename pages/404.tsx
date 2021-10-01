@@ -1,9 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
-import Content from "./content.tsx";
+import Content from "../components/content";
 
-export default function () {
+export default function Page() {
   return (
     <Content title="404 NotFound">
       <div
@@ -14,7 +14,7 @@ export default function () {
         }}
       >
         <div>このページは存在しません</div>
-        <Link to="/">囲みマス トップページへ</Link>
+        <Link href="/">囲みマス トップページへ</Link>
       </div>
     </Content>
   );

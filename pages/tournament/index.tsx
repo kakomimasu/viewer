@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { makeStyles } from "@mui/styles";
 import Button from "@mui/material/Button";
 
-import Content from "../../components/content.tsx";
-import TournamentCard from "../../components/tournament_card.tsx";
+import Content from "../../components/content";
+import TournamentCard from "../../components/tournament_card";
 
-// @deno-types="@client_js/api_client.d.ts"
-import ApiClient from "@client_js/api_client.js";
-const apiClient = new ApiClient("");
-
-import { Tournament } from "../../api/types.ts";
+import { apiClient, Tournament } from "../../src/apiClient";
 
 const useStyles = makeStyles({
   content: {
@@ -26,7 +22,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function () {
+export default function Index() {
   const classes = useStyles();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
@@ -42,12 +38,9 @@ export default function () {
   return (
     <Content title="大会一覧">
       <div className={classes.content}>
-        <Button
-          component={Link}
-          to="/tournament/create"
-        >
-          大会作成はこちらから
-        </Button>
+        <Link href="/tournament/create" passHref>
+          <Button>大会作成はこちらから</Button>
+        </Link>
         <div
           style={{
             display: "flex",
@@ -57,7 +50,9 @@ export default function () {
             marginTop: "20px",
           }}
         >
-          {tournaments.map((t) => <TournamentCard tournament={t} />)}
+          {tournaments.map((t, i) => (
+            <TournamentCard key={i} tournament={t} />
+          ))}
         </div>
       </div>
     </Content>

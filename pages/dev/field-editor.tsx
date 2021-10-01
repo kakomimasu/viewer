@@ -1,18 +1,12 @@
-/// <reference lib="dom"/>
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
-import { Link, Redirect, RouteComponentProps } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 
-import Content from "../../components/content.tsx";
-import GameBoard from "../../components/gameBoard.tsx";
+import Content from "../../components/content";
+import GameBoard from "../../components/gameBoard";
 
-// @deno-types=@client_js/api_client.d.ts
-import ApiClient from "@client_js/api_client.js";
-const apiClient = new ApiClient("");
-
-import { Board, Game } from "../../api/types.ts";
+import { apiClient, Board, Game } from "../../src/apiClient";
 
 const useStyles = makeStyles({
   content: {
@@ -26,26 +20,28 @@ const useStyles = makeStyles({
 });
 
 type NestedPartial<T> = {
-  [K in keyof T]?: T[K] extends Array<infer R> ? Array<NestedPartial<R>>
+  [K in keyof T]?: T[K] extends Array<infer R>
+    ? Array<NestedPartial<R>>
     : NestedPartial<T[K]>;
 };
 
-export default function () {
+export default function FieldEditor() {
   const classes = useStyles();
   const [boards, setBoards] = useState<Board[]>();
-  const [game, setGame] = useState<
-    Pick<
-      Game,
-      | "board"
-      | "tiled"
-      | "players"
-      | "log"
-      | "startedAtUnixTime"
-      | "gaming"
-      | "ending"
-      | "nextTurnUnixTime"
-    >
-  >();
+  const [game, setGame] =
+    useState<
+      Pick<
+        Game,
+        | "board"
+        | "tiled"
+        | "players"
+        | "log"
+        | "startedAtUnixTime"
+        | "gaming"
+        | "ending"
+        | "nextTurnUnixTime"
+      >
+    >();
 
   useEffect(() => {
     getBoards();
@@ -57,9 +53,7 @@ export default function () {
     if (res.success) setBoards(res.data);
   }
 
-  const handleChange = (
-    event: React.ChangeEvent<{ value: unknown }>,
-  ) => {
+  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value;
     if (!boards) return;
     const board = boards.find((b) => b.name === value);
@@ -81,11 +75,14 @@ export default function () {
     > = {
       board,
       tiled,
-      players: [{ id: "", agents: [], point: { basepoint: 0, wallpoint: 0 } }, {
-        id: "",
-        agents: [],
-        point: { basepoint: 0, wallpoint: 0 },
-      }],
+      players: [
+        { id: "", agents: [], point: { basepoint: 0, wallpoint: 0 } },
+        {
+          id: "",
+          agents: [],
+          point: { basepoint: 0, wallpoint: 0 },
+        },
+      ],
       log: [],
       startedAtUnixTime: null,
       nextTurnUnixTime: null,
@@ -114,11 +111,14 @@ export default function () {
 
         const isAgent = (x: number, y: number) => {
           if (game.players) {
-            const agent = game.players.map((e, i) =>
-              e.agents.map((e_, j) => {
-                return { agent: e_, player: i, n: j };
-              })
-            ).flat().find((e) => e.agent.x === x && e.agent.y === y);
+            const agent = game.players
+              .map((e, i) =>
+                e.agents.map((e_, j) => {
+                  return { agent: e_, player: i, n: j };
+                })
+              )
+              .flat()
+              .find((e) => e.agent.x === x && e.agent.y === y);
             return agent;
           } else return undefined;
         };
@@ -126,7 +126,7 @@ export default function () {
         switch (e.button) {
           case 0: {
             let t = tiled[i];
-            let a = (t[0] * 2 + t[1]) + 1;
+            let a = t[0] * 2 + t[1] + 1;
             a = (a + 1) % 5;
             t = [Math.trunc((a - 1) / 2) as 0 | 1, (a - 1) % 2];
             tiled[i] = t;
@@ -158,14 +158,17 @@ export default function () {
         <TextField
           select
           label="使用ボード"
-          variant="standard"
           color="secondary"
           autoComplete="off"
           style={{ width: "20em" }}
           onChange={handleChange}
         >
           {boards?.map((board) => {
-            return <MenuItem value={board.name}>{board.name}</MenuItem>;
+            return (
+              <MenuItem key={board.name} value={board.name}>
+                {board.name}
+              </MenuItem>
+            );
           })}
         </TextField>
         {game && (

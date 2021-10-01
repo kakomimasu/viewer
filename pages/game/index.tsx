@@ -2,13 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 
-import Content from "../../components/content.tsx";
-import GameList from "../../components/gamelist.tsx";
-import Clock from "../../components/clock.tsx";
+import Content from "../../components/content";
+import GameList from "../../components/gamelist";
+import Clock from "../../components/clock";
 
-import { Game, WsGameReq, WsGameRes } from "../../api/types.ts";
+import { Game, WsGameReq, WsGameRes, host } from "../../src/apiClient";
 
-export default function () {
+export default function Index() {
   const [games, setGames] = useState<Game[]>([]);
   const [socket, setSocket] = useState<WebSocket>();
   const [gameType, setGameType] = React.useState<"normal" | "self">();
@@ -16,8 +16,9 @@ export default function () {
 
   useEffect(() => {
     const sock = new WebSocket(
-      ((window.location.protocol === "https:") ? "wss://" : "ws://") +
-        window.location.host + "/api/ws/game",
+      (window.location.protocol === "https:" ? "wss://" : "ws://") +
+        host +
+        "/api/ws/game"
     );
     sock.onopen = () => {
       setSocket(sock);
@@ -29,8 +30,8 @@ export default function () {
         setGames(res.games);
       } else {
         const gs = refGames.current;
-        const updateGameIndex = gs.findIndex((g) =>
-          g.gameId === res.game.gameId
+        const updateGameIndex = gs.findIndex(
+          (g) => g.gameId === res.game.gameId
         );
         if (updateGameIndex >= 0) gs[updateGameIndex] = res.game;
         else gs.push(res.game);
@@ -55,8 +56,11 @@ export default function () {
 
   useEffect(() => {
     if (socket && gameType) {
-      const q = ["sort:startAtUnixTime-desc", "is:newGame", `is:${gameType}`]
-        .join(" ");
+      const q = [
+        "sort:startAtUnixTime-desc",
+        "is:newGame",
+        `is:${gameType}`,
+      ].join(" ");
       console.log(q);
       const req: WsGameReq = {
         q,

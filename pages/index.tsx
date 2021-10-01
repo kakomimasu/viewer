@@ -1,6 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { styled } from "@mui/material/styles";
 
 import Section, { SubSection } from "../components/section";
@@ -13,6 +14,7 @@ const Main = styled("main")({
     color: "#5C4C40",
   },
 });
+const Logo = styled("div")({ width: "60vw", maxWidth: 546, margin: "2em" });
 
 export default function Index() {
   return (
@@ -20,21 +22,21 @@ export default function Index() {
       <Head>
         <title>囲みマス</title>
       </Head>
-      <img
-        style={{
-          width: "60vw",
-          maxWidth: 546,
-          margin: "2em",
-        }}
-        id="title"
-        src="/img/kakomimasu-logo.png"
-      />
-      {/*<Section title="Webコンテンツ">
+      <Logo id="title">
+        <Image
+          alt="logo"
+          src="/img/kakomimasu-logo.png"
+          width={546}
+          height={195}
+        />
+      </Logo>
+
+      <Section title="Webコンテンツ">
         オンラインで対戦中のゲームをリアルタイムで見ることができます。
         <br />
         <SubSection title="ゲーム">
           <div>
-            <Link href="/game/index">ゲーム一覧はこちらから</Link>
+            <Link href="/game">ゲーム一覧はこちらから</Link>
             <br />
             <Link href="/game/detail">最新のゲームビューアはこちらから</Link>
             <br />
@@ -45,13 +47,13 @@ export default function Index() {
         </SubSection>
         <SubSection title="大会">
           <div>
-            <Link href="tournament/index">大会一覧はこちらから</Link>
+            <Link href="/tournament">大会一覧はこちらから</Link>
             <br />
-            <Link href="tournament/create">大会作成はこちらから</Link>
+            <Link href="/tournament/create">大会作成はこちらから</Link>
             <br />
           </div>
         </SubSection>
-      </Section>*/}
+      </Section>
 
       <Section title="囲みマスとは">
         囲碁と将棋とリアルタイムストラテジーゲームが混ざったような陣取りゲームです。

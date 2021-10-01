@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useTheme } from "@mui/material/styles";
-import { makeStyles } from "@mui/styles";
-import { Link, useHistory } from "react-router-dom";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { useTheme, styled } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableContainer from "@mui/material/TableContainer";
 import TableBody from "@mui/material/TableBody";
@@ -18,44 +18,30 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPage from "@mui/icons-material/LastPage";
 
-import { Game, Player, User } from "../api/types.ts";
+import { Game, Player, User, apiClient } from "../src/apiClient";
 
-// @deno-types=@client_js/api_client.d.ts
-import ApiClient from "@client_js/api_client.js";
-const apiClient = new ApiClient("");
+const StatusCircle = ({ className }: { className?: string }) => {
+  return <span className={className}>●</span>;
+};
 
-const useStyles = makeStyles({
-  un: {
-    color: "gray",
-  },
-  waiting: {
-    color: "yellow",
-  },
-  gaming: {
-    color: "green",
-  },
-  ending: {
-    color: "red",
-  },
-  playerDiv: {
-    margin: "0 0.5em",
-  },
-  player: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  gameName: {
-    maxWidth: "30em",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  gameId: {
-    fontSize: "0.8em",
-  },
+const UnSpan = styled("span")({ color: "gray" });
+const Waiting = styled(StatusCircle)({ color: "yellow" });
+const Gaming = styled(StatusCircle)({ color: "green" });
+const Ending = styled(StatusCircle)({ color: "red" });
+const PlayerDiv = styled("div")({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  flexDirection: "row",
 });
+const GameName = styled("div")({
+  maxWidth: "30em",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
+const UnGameName = styled(GameName)({ color: "gray" });
+const GameId = styled("div")({ fontSize: "0.8em" });
 
 const GameList = (props: {
   games: Game[];
@@ -66,13 +52,14 @@ const GameList = (props: {
   const hover = props.hover ?? true;
   const games = props.games;
 
-  const classes = useStyles();
-  const history = useHistory();
+  const router = useRouter();
 
-  type IUser = {
-    u: User;
-    exists: true;
-  } | { u: { id: string }; exists: false };
+  type IUser =
+    | {
+        u: User;
+        exists: true;
+      }
+    | { u: { id: string }; exists: false };
   const [users, setUsers] = useState<IUser[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -103,9 +90,9 @@ const GameList = (props: {
   }, [games]);
 
   const getStatusClass = (game: Game) => {
-    if (game.ending) return classes.ending;
-    else if (game.gaming) return classes.gaming;
-    else return classes.waiting;
+    if (game.ending) return <Ending />;
+    else if (game.gaming) return <Gaming />;
+    else return <Waiting />;
   };
 
   const getStartTime = (startedAtUnixTime: number | null) => {
@@ -126,14 +113,17 @@ const GameList = (props: {
   };
 
   const toGameDetail = (id: string) => {
-    history.push("/game/detail/" + id);
+    router.push("/game/detail/" + id);
   };
   return (
     <div>
       <div>
-        <span className={classes.waiting}>●</span>：ユーザ参加待ち
-        <span className={classes.gaming}>●</span>：ゲーム中
-        <span className={classes.ending}>●</span>：終了
+        <Waiting />
+        ：ユーザ参加待ち
+        <Gaming />
+        ：ゲーム中
+        <Ending />
+        ：終了
       </div>
       <TableContainer component={Paper}>
         <Table>
@@ -148,8 +138,8 @@ const GameList = (props: {
                 <div>ポイント</div>
               </TableCell>
               <TableCell>
-                <div className={classes.gameName}>ゲーム名</div>
-                <div className={classes.gameId}>ゲームID</div>
+                <GameName>ゲーム名</GameName>
+                <GameId>ゲームID</GameId>
               </TableCell>
               <TableCell>開始時間</TableCell>
             </TableRow>
@@ -157,74 +147,76 @@ const GameList = (props: {
           <TableBody>
             {(rowsPerPage > 0
               ? games.slice(
-                page * rowsPerPage,
-                page * rowsPerPage + rowsPerPage,
-              )
-              : games).map((game) => (
-                <TableRow
-                  hover={hover}
-                  onClick={() => hover && toGameDetail(game.gameId)}
-                >
-                  <TableCell align="center">
-                    <div className={getStatusClass(game)}>●</div>
-                    <div>{game.turn}/{game.totalTurn}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className={classes.player}>
-                      {game.players.map((player, i) => {
-                        return (
-                          <div
-                            className={classes.player + " " + classes.playerDiv}
-                            style={{ width: "max-content" }}
-                          >
-                            {i !== 0 &&
-                              <div className={classes.playerDiv}>vs</div>}
-                            <div>
-                              {(() => {
-                                const user = getUser(player.id);
-                                return user
-                                  ? (
-                                    <span>
-                                      <Link
-                                        to={`/user/detail/${user.name}`}
-                                      >
-                                        {user.screenName}
-                                      </Link>
-                                    </span>
-                                  )
-                                  : (
-                                    <span className={classes.un}>
-                                      No player
-                                    </span>
-                                  );
-                              })()}
-                              <br />
-                              {getPoint(player)}
-                            </div>
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
+              : games
+            ).map((game) => (
+              <TableRow
+                key={game.gameId}
+                hover={hover}
+                onClick={() => hover && toGameDetail(game.gameId)}
+              >
+                <TableCell align="center">
+                  {getStatusClass(game)}
+                  <div>
+                    {game.turn}/{game.totalTurn}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <PlayerDiv>
+                    {game.players.map((player, i) => {
+                      return (
+                        <PlayerDiv
+                          key={player.id}
+                          style={{ margin: "0 0.5em", width: "max-content" }}
+                        >
+                          {i !== 0 && (
+                            <div style={{ margin: "0 0.5em" }}>vs</div>
+                          )}
+                          <div>
+                            {(() => {
+                              const user = getUser(player.id);
+                              return user ? (
+                                <span>
+                                  <Link href={`/user/detail/${user.name}`}>
+                                    {user.screenName}
+                                  </Link>
+                                </span>
+                              ) : (
+                                <UnSpan>No player</UnSpan>
+                              );
+                            })()}
+                            <br />
+                            {getPoint(player)}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {game.gameName
-                      ? <div className={classes.gameName}>{game.gameName}</div>
-                      : (
-                        <div className={`${classes.un} ${classes.gameName}`}>
-                          Untitle
-                        </div>
-                      )}
-                    <div className={classes.gameId}>{game.gameId}</div>
-                  </TableCell>
-                  <TableCell>{getStartTime(game.startedAtUnixTime)}</TableCell>
-                </TableRow>
-              ))}
+                        </PlayerDiv>
+                      );
+                    })}
+                  </PlayerDiv>
+                </TableCell>
+                <TableCell>
+                  {game.gameName ? (
+                    <GameName>{game.gameName}</GameName>
+                  ) : (
+                    <UnGameName>Untitle</UnGameName>
+                  )}
+                  <GameId>{game.gameId}</GameId>
+                </TableCell>
+                <TableCell>{getStartTime(game.startedAtUnixTime)}</TableCell>
+              </TableRow>
+            ))}
           </TableBody>
           {pagenation && (
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  rowsPerPageOptions={[10, 20, 30, { label: "すべて", value: -1 }]}
+                  rowsPerPageOptions={[
+                    10,
+                    20,
+                    30,
+                    { label: "すべて", value: -1 },
+                  ]}
                   colSpan={4}
                   count={games.length}
                   rowsPerPage={rowsPerPage}
@@ -237,7 +229,7 @@ const GameList = (props: {
                   }}
                   onPageChange={(_, newPage) => setPage(newPage)}
                   onRowsPerPageChange={(
-                    event: React.ChangeEvent<{ value: string }>,
+                    event: React.ChangeEvent<{ value: string }>
                   ) => {
                     setRowsPerPage(parseInt(event.target.value, 10));
                     setPage(0);
@@ -259,32 +251,32 @@ function TablePaginationActions(props: {
   rowsPerPage: number;
   onPageChange: (
     event: React.MouseEvent<HTMLButtonElement>,
-    newPage: number,
+    newPage: number
   ) => void;
 }) {
   const theme = useTheme();
   const { count, page, rowsPerPage, onPageChange } = props;
 
   const handleFirstPageButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
+    event: React.MouseEvent<HTMLButtonElement>
   ) => {
     onPageChange(event, 0);
   };
 
   const handleBackButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
+    event: React.MouseEvent<HTMLButtonElement>
   ) => {
     onPageChange(event, page - 1);
   };
 
   const handleNextButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
+    event: React.MouseEvent<HTMLButtonElement>
   ) => {
     onPageChange(event, page + 1);
   };
 
   const handleLastPageButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
+    event: React.MouseEvent<HTMLButtonElement>
   ) => {
     onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
   };
@@ -303,17 +295,22 @@ function TablePaginationActions(props: {
         disabled={page === 0}
         aria-label="previous page"
       >
-        {theme.direction === "rtl"
-          ? <KeyboardArrowRight />
-          : <KeyboardArrowLeft />}
+        {theme.direction === "rtl" ? (
+          <KeyboardArrowRight />
+        ) : (
+          <KeyboardArrowLeft />
+        )}
       </IconButton>
       <IconButton
         onClick={handleNextButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="next page"
       >
-        {theme.direction === "rtl" ? <KeyboardArrowLeft />
-        : <KeyboardArrowRight />}
+        {theme.direction === "rtl" ? (
+          <KeyboardArrowLeft />
+        ) : (
+          <KeyboardArrowRight />
+        )}
       </IconButton>
       <IconButton
         onClick={handleLastPageButtonClick}
