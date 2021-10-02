@@ -119,7 +119,7 @@ export default function Create() {
               {/*<MenuItem value="knockout">勝ち残り戦</MenuItem>;*/}
             </StyledTextField>
             <Autocomplete
-              sx={{ marginTop: 20, width: "100%" }}
+              sx={{ width: "100%" }}
               multiple
               id="tags-standard"
               options={addUserInput.q}
