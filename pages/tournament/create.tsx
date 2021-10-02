@@ -27,10 +27,6 @@ const StyledTextField = styled(TextField)({
   marginTop: 20,
   width: "100%",
 });
-const StyledAutocomplete = styled(Autocomplete)({
-  marginTop: 20,
-  width: "100%",
-});
 
 const StyledButton = styled(Button)({
   width: "20em",
@@ -122,7 +118,8 @@ export default function Create() {
               <MenuItem value="round-robin">総当たり戦</MenuItem>
               {/*<MenuItem value="knockout">勝ち残り戦</MenuItem>;*/}
             </StyledTextField>
-            <StyledAutocomplete
+            <Autocomplete
+              sx={{ marginTop: 20, width: "100%" }}
               multiple
               id="tags-standard"
               options={addUserInput.q}
