@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { makeStyles } from "@mui/styles";
@@ -44,16 +45,16 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Page() {
+const Page: NextPage<{ id: string }> = ({ id }) => {
   const classes = useStyles();
   const router = useRouter();
-  const { id: id_ } = router.query;
+  /*const { id: id_ } = router.query;
   const id = (() => {
     if (Array.isArray(id_)) {
       return id_[0];
     } else return id_;
   })();
-
+*/
   const [tournament, setTournament] = useState<Tournament | null | undefined>(
     undefined
   );
@@ -426,4 +427,12 @@ export default function Page() {
       </div>
     </Content>
   );
-}
+};
+
+Page.getInitialProps = async (ctx) => {
+  let id = ctx.query.id;
+  if (id === undefined || Array.isArray(id)) id = "";
+  return { id };
+};
+
+export default Page;
