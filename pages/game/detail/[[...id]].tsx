@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/router";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { NextPage } from "next";
 import Link from "next/link";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
@@ -29,8 +29,7 @@ import Content from "../../../components/content";
 import GameList from "../../../components/gamelist";
 import GameBoard from "../../../components/gameBoard";
 
-function PointsGraph(props: { game: Game }) {
-  const game = props.game;
+const PointsGraph: NextPage<{ game: Game }> = ({ game }) => {
   const data: { turn: number; points: number[] }[] = [];
 
   game.log.forEach((turn, i) => {
@@ -41,20 +40,23 @@ function PointsGraph(props: { game: Game }) {
   });
 
   const [users, setUsers] = useState<User[]>([]);
-
-  const getUsers = async () => {
-    const users_: typeof users = [];
-    for (const player of game.players) {
-      if (users.some((user) => user.id === player.id)) continue;
-      const res = await apiClient.usersShow(player.id);
-      if (res.success) users_.push(res.data);
-    }
-    setUsers([...users, ...users_]);
-  };
+  const [playerIds, setPlayerIds] = useState<string[]>([]);
 
   useEffect(() => {
+    const getUsers = async () => {
+      const users_: typeof users = [];
+      for (const id of playerIds) {
+        const res = await apiClient.usersShow(id);
+        if (res.success) users_.push(res.data);
+      }
+      setUsers([...users_]);
+    };
     getUsers();
-  }, [game.gameId]);
+  }, [playerIds]);
+
+  useEffect(() => {
+    setPlayerIds(game.players.map((player) => player.id));
+  }, [game.players]);
 
   return (
     <div style={{ width: "100%", height: "300px" }}>
@@ -93,24 +95,14 @@ function PointsGraph(props: { game: Game }) {
       </ResponsiveContainer>
     </div>
   );
-}
+};
 
-export default function Page() {
-  const router = useRouter();
-  const { id: id_ } = router.query;
-  const id = (() => {
-    if (Array.isArray(id_)) {
-      return id_[0];
-    } else return id_;
-  })();
-
+const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [game, setGame] = useState<Game | null>();
   const refGame = useRef(game);
 
-  let socket: WebSocket;
-
-  const connect = () => {
-    socket = new WebSocket(
+  const connect = useCallback(() => {
+    const socket = new WebSocket(
       (window.location.protocol === "https:" ? "wss://" : "ws://") +
         host +
         "/api/ws/game"
@@ -153,11 +145,11 @@ export default function Page() {
       socket.close();
       console.log("websocket close");
     };
-  };
+  }, [id]);
 
   useEffect(() => {
     return connect();
-  }, [id]);
+  }, [connect]);
 
   useEffect(() => {
     refGame.current = game;
@@ -184,4 +176,14 @@ export default function Page() {
       </div>
     </Content>
   );
-}
+};
+Page.getInitialProps = async (ctx) => {
+  const id = ctx.query.id;
+  if (Array.isArray(id)) {
+    return { id: undefined };
+  } else {
+    return { id };
+  }
+};
+
+export default Page;
