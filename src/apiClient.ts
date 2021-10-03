@@ -3,4 +3,4 @@ export * from "client-js";
 
 export const host = "practice.kakomimasu.website";
 
-export const apiClient = new ApiClient("http://" + host);
+export const apiClient = new ApiClient("https://" + host);
