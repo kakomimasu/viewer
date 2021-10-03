@@ -126,11 +126,11 @@ export default function Create() {
               multiple
               id="tags-standard"
               options={addUserInput.q}
-              getOptionLabel={(option) => option.name}
-              onChange={(_, newValue) => {
+              getOptionLabel={(option: any) => option.name}
+              onChange={(_, newValue: any) => {
                 console.log("onInputChange", newValue);
                 setAddUserInput({ ...addUserInput, q: [] });
-                setData({ ...data, participants: newValue.map((e) => e.id) });
+                setData({ ...data, participants: newValue.map((e: any) => e.id) });
               }}
               renderInput={(params) => (
                 <StyledTextField

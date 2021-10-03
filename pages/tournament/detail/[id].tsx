@@ -64,7 +64,7 @@ export default function Page() {
   const [addUserHelperText, setAddUserHelperText] = useState<string>("");
 
   const getTournament = async () => {
-    const res = await apiClient.tournamentsGet(id);
+    const res = await apiClient.tournamentsGet(id!);
     if (res.success) setTournament(res.data);
     else setTournament(null);
   };
@@ -302,7 +302,7 @@ export default function Page() {
                 <Button
                   onClick={async () => {
                     if (!addUser) return;
-                    const req = await apiClient.tournamentsAddUser(id, {
+                    const req = await apiClient.tournamentsAddUser(id!, {
                       user: addUser.id,
                     });
                     console.log(req);
