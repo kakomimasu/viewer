@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useTheme, styled } from "@mui/material/styles";
@@ -60,34 +60,39 @@ const GameList = (props: {
         exists: true;
       }
     | { u: { id: string }; exists: false };
-  const [users, setUsers] = useState<IUser[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [users, addUser] = useReducer((users: IUser[], action: IUser[]) => {
+    return [...users, ...action];
+  }, []);
 
-  const getUsers = async () => {
-    const u: typeof users = [];
-    //console.log("getUsers", games);
-    for (const game of games) {
-      //console.log("game", game);
-      for (const player of game.players) {
-        //console.log("player", player);
-        if ([...users, ...u].some((user) => user.u.id === player.id)) continue;
-        //console.log("player2", player);
-        const res = await apiClient.usersShow(player.id);
-        if (res.success) {
-          const user = res.data;
-          //console.log("user", user);
-          u.push({ u: user, exists: true });
-        } else u.push({ exists: false, u: { id: player.id } });
-      }
-    }
-    //console.log("u", u);
-    setUsers([...users, ...u]);
-  };
+  const unacquiredPlayerIds = useMemo(() => {
+    const ids = new Set<string>();
+    games.forEach((game) => {
+      game.players.forEach((player) => {
+        if (users.some((user) => user.u.id === player.id)) return;
+        ids.add(player.id);
+      });
+    });
+    return ids;
+  }, [games, users]);
 
   useEffect(() => {
+    console.log("UnacquiredPlayerIds", unacquiredPlayerIds);
+    const getUsers = async () => {
+      if (unacquiredPlayerIds.size === 0) return;
+      const us: IUser[] = [];
+      for (const id of Array.from(unacquiredPlayerIds)) {
+        const res = await apiClient.usersShow(id);
+        const u: IUser = res.success
+          ? { exists: true, u: res.data }
+          : { exists: false, u: { id } };
+        us.push(u);
+      }
+      addUser(us);
+    };
     getUsers();
-  }, [games]);
+  }, [unacquiredPlayerIds]);
 
   const getStatusClass = (game: Game) => {
     if (game.ending) return <Ending />;
