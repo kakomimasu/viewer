@@ -168,7 +168,7 @@ const GameList = (props: {
                     {game.players.map((player, i) => {
                       return (
                         <PlayerDiv
-                          key={player.id}
+                          key={i}
                           style={{ margin: "0 0.5em", width: "max-content" }}
                         >
                           {i !== 0 && (
