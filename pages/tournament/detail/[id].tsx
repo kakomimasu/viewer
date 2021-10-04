@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { styled } from "@mui/material/styles";
 import { makeStyles } from "@mui/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
@@ -25,8 +26,27 @@ import {
 import Content from "../../../components/content";
 import Section, { SubSection } from "../../../components/section";
 
+const StyledTable = styled("table")({
+  margin: "0 auto",
+  width: "max-content",
+  border: "1px solid",
+  borderCollapse: "collapse",
+  textAlign: "center",
+  "& td,& th": {
+    border: "1px solid",
+    padding: "5px",
+  },
+});
+
+const Oblique = styled("td")({
+  backgroundImage: `linear-gradient(to top right,
+  transparent, transparent 49%,
+  black 49%, black 51%,
+  transparent 51%, transparent)`,
+});
+
 const useStyles = makeStyles({
-  table: {
+  /*table: {
     margin: "0 auto",
     width: "max-content",
     border: "1px solid",
@@ -36,7 +56,7 @@ const useStyles = makeStyles({
       border: "1px solid",
       padding: "5px",
     },
-  },
+  },*/
   oblique: {
     backgroundImage: `linear-gradient(to top right,
         transparent, transparent 49%,
@@ -45,47 +65,18 @@ const useStyles = makeStyles({
   },
 });
 
-const Page: NextPage<{ id: string }> = ({ id }) => {
+const Page: NextPage<{
+  id: string;
+  tournament?: Tournament;
+  games: Game[];
+  users: (User | undefined)[];
+}> = ({ id, tournament, games, users }) => {
   const classes = useStyles();
   const router = useRouter();
-  /*const { id: id_ } = router.query;
-  const id = (() => {
-    if (Array.isArray(id_)) {
-      return id_[0];
-    } else return id_;
-  })();
-*/
-  const [tournament, setTournament] = useState<Tournament | null | undefined>(
-    undefined
-  );
-  const [games, setGames] = useState<Game[] | null>(null);
-  const [users, setUsers] = useState<(User | undefined)[] | null>(null);
+
   const [addUser, setAddUser] = useState<User | null>(null);
   const [addUserList, setAddUserList] = useState<User[]>([]);
   const [addUserHelperText, setAddUserHelperText] = useState<string>("");
-
-  const getTournament = async () => {
-    const res = await apiClient.tournamentsGet(id);
-    if (res.success) setTournament(res.data);
-    else setTournament(null);
-  };
-
-  const updateTournament = async () => {
-    if (!tournament) return;
-    const games_: typeof games = [];
-    for await (const gameId of tournament.gameIds) {
-      const res = await apiClient.getMatch(gameId);
-      if (res.success) games_.push(res.data);
-    }
-    const users_: typeof users = [];
-    for await (const userId of tournament.users) {
-      const res = await apiClient.usersShow(userId);
-      if (res.success) users_.push(res.data);
-      else users_.push(undefined);
-    }
-    setGames(games_);
-    setUsers(users_);
-  };
 
   const getType = (type: string) => {
     if (type === "round-robin") return "総当たり戦";
@@ -220,18 +211,10 @@ const Page: NextPage<{ id: string }> = ({ id }) => {
     return a;
   }
 
-  useEffect(() => {
-    getTournament();
-  }, []);
-
-  useEffect(() => {
-    updateTournament();
-  }, [tournament]);
-
   return (
     <Content title="大会詳細">
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <Link href="/tournament">
+        <Link href="/tournament" passHref>
           <Button style={{ margin: "auto" }}>大会一覧に戻る</Button>
         </Link>
         {tournament ? (
@@ -307,7 +290,7 @@ const Page: NextPage<{ id: string }> = ({ id }) => {
                       user: addUser.id,
                     });
                     console.log(req);
-                    if (req.success) setTournament(req.data);
+                    if (req.success) router.reload();
                   }}
                   disabled={!addUser || Boolean(addUserHelperText)}
                 >
@@ -316,60 +299,60 @@ const Page: NextPage<{ id: string }> = ({ id }) => {
 
                 {users && (
                   <div style={{ width: "100%", overflow: "auto" }}>
-                    <table className={classes.table}>
-                      <tr>
-                        <th className={classes.oblique}></th>
-                        {users.map((user) => {
+                    <StyledTable>
+                      <tbody>
+                        <tr>
+                          <Oblique />
+                          {users.map((user) => {
+                            return (
+                              <th key={user?.name}>
+                                {user ? user.name : "no player"}
+                              </th>
+                            );
+                          })}
+                        </tr>
+                        {users.map((user, y) => {
                           return (
-                            <th key={user?.name}>
-                              {user ? user.name : "no player"}
-                            </th>
+                            <tr key={y}>
+                              <th>{user ? user.name : "no player"}</th>
+                              {users.map((_, x) => {
+                                if (x === y) return <Oblique key={x} />;
+                                else
+                                  return (
+                                    <td key={x}>
+                                      {(() => {
+                                        const result = getResult(y, x);
+                                        if (result) {
+                                          return (
+                                            <div>
+                                              <div>{result.resultText}</div>
+                                              <div>{result.pointText}</div>
+                                              <Link href={result.url}>
+                                                ゲーム詳細へ
+                                              </Link>
+                                            </div>
+                                          );
+                                        } else {
+                                          return (
+                                            <Link
+                                              href={gameCreateUrl(y, x)}
+                                              passHref
+                                            >
+                                              <Button variant="outlined">
+                                                ゲーム作成
+                                              </Button>
+                                            </Link>
+                                          );
+                                        }
+                                      })()}
+                                    </td>
+                                  );
+                              })}
+                            </tr>
                           );
                         })}
-                      </tr>
-                      {users.map((user, y) => {
-                        return (
-                          <tr key={y}>
-                            <th>{user ? user.name : "no player"}</th>
-                            {users.map((_, x) => {
-                              return (
-                                <td
-                                  key={x}
-                                  className={x === y ? classes.oblique : ""}
-                                >
-                                  {x !== y &&
-                                    (() => {
-                                      const result = getResult(y, x);
-                                      if (result) {
-                                        return (
-                                          <div>
-                                            <div>{result.resultText}</div>
-                                            <div>{result.pointText}</div>
-                                            <Link href={result.url}>
-                                              ゲーム詳細へ
-                                            </Link>
-                                          </div>
-                                        );
-                                      } else {
-                                        return (
-                                          <Link
-                                            href={gameCreateUrl(y, x)}
-                                            passHref
-                                          >
-                                            <Button variant="outlined">
-                                              ゲーム作成
-                                            </Button>
-                                          </Link>
-                                        );
-                                      }
-                                    })()}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      })}
-                    </table>
+                      </tbody>
+                    </StyledTable>
                   </div>
                 )}
               </div>
@@ -422,7 +405,7 @@ const Page: NextPage<{ id: string }> = ({ id }) => {
             </Section>
           </>
         ) : (
-          <CircularProgress color="secondary" />
+          <>大会が見つかりません</>
         )}
       </div>
     </Content>
@@ -432,7 +415,31 @@ const Page: NextPage<{ id: string }> = ({ id }) => {
 Page.getInitialProps = async (ctx) => {
   let id = ctx.query.id;
   if (id === undefined || Array.isArray(id)) id = "";
-  return { id };
+
+  const res = await apiClient.tournamentsGet(id);
+  console.log("getInitialProps", res);
+  const tournament = res.success ? res.data : undefined;
+  const games: Game[] = [];
+  const users: (User | undefined)[] = [];
+  if (tournament) {
+    //const games_: typeof games = [];
+    for await (const gameId of tournament.gameIds) {
+      const res = await apiClient.getMatch(gameId);
+      if (res.success) games.push(res.data);
+    }
+    //const users_: typeof users = [];
+    for await (const userId of tournament.users) {
+      const res = await apiClient.usersShow(userId);
+      if (res.success) users.push(res.data);
+      else users.push(undefined);
+    }
+    //setGames(games_);
+    //setUsers(users_);
+  }
+  // if (res.success) setTournament(res.data);
+  // else setTournament(null);
+
+  return { id, tournament, games, users };
 };
 
 export default Page;
