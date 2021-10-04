@@ -180,7 +180,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
 Page.getInitialProps = async (ctx) => {
   const id = ctx.query.id;
   if (Array.isArray(id)) {
-    return { id: undefined };
+    return { id: id[0] };
   } else {
     return { id };
   }

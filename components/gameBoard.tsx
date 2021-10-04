@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { makeStyles } from "@mui/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -113,10 +113,13 @@ export default function GameBoard(props: Props) {
   const classes = useStyles();
   const media = useMediaQuery("(max-width:1000px)");
   const game = props.game;
-  //console.log("gameBoard", game);
 
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<(User | undefined)[]>([]);
   const [status, setStatus] = useState<string>();
+  const playerIds = useMemo(
+    () => game.players.map((p) => p.id),
+    [game.players]
+  );
 
   /*const turnT = (game.gaming || game.ending)
     ? `${game.turn}/${game.totalTurn}`
@@ -126,7 +129,7 @@ export default function GameBoard(props: Props) {
     (player) => (player.point.basepoint + player.point.wallpoint),
   );
   */
-  const setStatusT = () => {
+  const setStatusT = useCallback(() => {
     let status = "";
     if (game.startedAtUnixTime === null) status = "プレイヤー入室待ち";
     else if (game.ending) status = "ゲーム終了";
@@ -141,25 +144,11 @@ export default function GameBoard(props: Props) {
       } else status = "競合確認中…";
     } else status = "ゲームスタート待ち";
     setStatus(status);
-  };
+  }, [game.ending, game.gaming, game.nextTurnUnixTime, game.startedAtUnixTime]);
 
   useEffect(() => {
     setStatusT();
-  }, [game.nextTurnUnixTime]);
-
-  const getUsers = async () => {
-    const users_ = [];
-    for (const player of game.players) {
-      if (users.some((user) => user.id === player.id)) continue;
-      const res = await apiClient.usersShow(player.id);
-      if (res.success) {
-        const user = res.data;
-
-        users_.push(user);
-      }
-    }
-    setUsers([...users, ...users_]);
-  };
+  }, [setStatusT]);
 
   const getPlacedAgentNum = (i: number) => {
     let num = 0;
@@ -232,12 +221,20 @@ export default function GameBoard(props: Props) {
   };
   useEffect(() => {
     console.log("useEffect gameBoard");
-    getUsers();
-  }, []);
+    const UpdateUsers = async () => {
+      const users_ = [];
+      for (const id of playerIds) {
+        const res = await apiClient.usersShow(id);
+        if (res.success) {
+          const user = res.data;
 
-  /*useEffect(() => {
-    console.log("update gameBoard", game.tiled[0]);
-  });*/
+          users_.push(user);
+        } else users_.push(undefined);
+      }
+      setUsers(users_);
+    };
+    UpdateUsers();
+  }, [playerIds]);
 
   const getAgentTransform = (x: number, y: number) => {
     if (!game.board) return;
@@ -254,7 +251,7 @@ export default function GameBoard(props: Props) {
       style={{ gridTemplateColumns: media ? "1fr 1fr" : "1fr auto 1fr" }}
     >
       {users.map((user, i) => (
-        <div key={user.name}>
+        <div key={i}>
           <table
             className={classes.playerTable}
             style={{ color: datas[i].colors[1] }}
@@ -262,10 +259,12 @@ export default function GameBoard(props: Props) {
             <tr>
               <th>プレイヤー名</th>
               <td>
-                {user.name && (
+                {user?.name ? (
                   <Link href={"/user/detail/" + user.name}>
                     {user.screenName}
                   </Link>
+                ) : (
+                  "No Player"
                 )}
               </td>
             </tr>
@@ -380,7 +379,7 @@ export default function GameBoard(props: Props) {
                               <span>{Math.abs(cell.point)}</span>
                             </>
                           )}
-                          {agent && users[agent.player] && (
+                          {agent && (
                             <div
                               className={classes.detail}
                               style={{
@@ -391,7 +390,8 @@ export default function GameBoard(props: Props) {
                               }}
                             >
                               <span>
-                                {users[agent.player].screenName}:{agent.n + 1}
+                                {users[agent.player]?.screenName || "No player"}
+                                :{agent.n + 1}
                               </span>
                               <br />
                               <span>行動履歴</span>
