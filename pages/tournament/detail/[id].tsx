@@ -3,8 +3,6 @@ import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { styled } from "@mui/material/styles";
-import { makeStyles } from "@mui/styles";
-import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -45,33 +43,11 @@ const Oblique = styled("td")({
   transparent 51%, transparent)`,
 });
 
-const useStyles = makeStyles({
-  /*table: {
-    margin: "0 auto",
-    width: "max-content",
-    border: "1px solid",
-    borderCollapse: "collapse",
-    textAlign: "center",
-    "& td,& th": {
-      border: "1px solid",
-      padding: "5px",
-    },
-  },*/
-  oblique: {
-    backgroundImage: `linear-gradient(to top right,
-        transparent, transparent 49%,
-        black 49%, black 51%,
-        transparent 51%, transparent)`,
-  },
-});
-
 const Page: NextPage<{
-  id: string;
   tournament?: Tournament;
   games: Game[];
   users: (User | undefined)[];
-}> = ({ id, tournament, games, users }) => {
-  const classes = useStyles();
+}> = ({ tournament, games, users }) => {
   const router = useRouter();
 
   const [addUser, setAddUser] = useState<User | null>(null);
@@ -286,9 +262,12 @@ const Page: NextPage<{
                 <Button
                   onClick={async () => {
                     if (!addUser) return;
-                    const req = await apiClient.tournamentsAddUser(id, {
-                      user: addUser.id,
-                    });
+                    const req = await apiClient.tournamentsAddUser(
+                      tournament.id,
+                      {
+                        user: addUser.id,
+                      }
+                    );
                     console.log(req);
                     if (req.success) router.reload();
                   }}
@@ -417,29 +396,22 @@ Page.getInitialProps = async (ctx) => {
   if (id === undefined || Array.isArray(id)) id = "";
 
   const res = await apiClient.tournamentsGet(id);
-  console.log("getInitialProps", res);
   const tournament = res.success ? res.data : undefined;
   const games: Game[] = [];
   const users: (User | undefined)[] = [];
   if (tournament) {
-    //const games_: typeof games = [];
     for await (const gameId of tournament.gameIds) {
       const res = await apiClient.getMatch(gameId);
       if (res.success) games.push(res.data);
     }
-    //const users_: typeof users = [];
     for await (const userId of tournament.users) {
       const res = await apiClient.usersShow(userId);
       if (res.success) users.push(res.data);
       else users.push(undefined);
     }
-    //setGames(games_);
-    //setUsers(users_);
   }
-  // if (res.success) setTournament(res.data);
-  // else setTournament(null);
 
-  return { id, tournament, games, users };
+  return { tournament, games, users };
 };
 
 export default Page;
