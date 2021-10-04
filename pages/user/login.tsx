@@ -143,7 +143,7 @@ export default function Login() {
       }
       setUser(user);
     });
-  }, []);
+  }, [router]);
 
   return (
     <Content title="ログイン">
