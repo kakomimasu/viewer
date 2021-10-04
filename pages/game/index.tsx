@@ -11,7 +11,7 @@ import { Game, WsGameReq, WsGameRes, host } from "../../src/apiClient";
 export default function Index() {
   const [games, setGames] = useState<Game[]>([]);
   const [socket, setSocket] = useState<WebSocket>();
-  const [gameType, setGameType] = React.useState<"normal" | "self">();
+  const [gameType, setGameType] = React.useState<"normal" | "self">("normal");
   const refGames = useRef(games);
 
   useEffect(() => {
@@ -51,10 +51,6 @@ export default function Index() {
   }, [games]);
 
   useEffect(() => {
-    if (socket) setGameType("normal");
-  }, [socket]);
-
-  useEffect(() => {
     if (socket && gameType) {
       const q = [
         "sort:startAtUnixTime-desc",
@@ -68,7 +64,7 @@ export default function Index() {
       };
       socket.send(JSON.stringify(req));
     }
-  }, [gameType]);
+  }, [gameType, socket]);
 
   const getGames = () => {
     const games_ = games.sort((a, b) => {
