@@ -1,6 +1,6 @@
 import ApiClient from "client-js";
 export * from "client-js";
 
-export const host = "localhost:8880";
+export const host = "api.kakomimasu.website";
 
-export const apiClient = new ApiClient("http://" + host);
+export const apiClient = new ApiClient("https://" + host);
