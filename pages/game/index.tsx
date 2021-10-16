@@ -15,11 +15,7 @@ export default function Index() {
   const refGames = useRef(games);
 
   useEffect(() => {
-    const sock = new WebSocket(
-      (window.location.protocol === "https:" ? "wss://" : "ws://") +
-        host +
-        "/api/ws/game"
-    );
+    const sock = new WebSocket("wss://" + host + "/v1/ws/game");
     sock.onopen = () => {
       setSocket(sock);
     };
