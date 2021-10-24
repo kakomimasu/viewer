@@ -102,7 +102,11 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   const refGame = useRef(game);
 
   const connect = useCallback(() => {
-    const socket = new WebSocket("wss://" + host + "/v1/ws/game");
+    const socket = new WebSocket(
+      (host.protocol === "https:" ? "wss://" : "ws://") +
+        host.host +
+        "/v1/ws/game"
+    );
     socket.onopen = () => {
       const q = (
         id
