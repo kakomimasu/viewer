@@ -131,21 +131,28 @@ const Detail: NextPage<{}> = () => {
                         cy="50%"
                         fill="#8884d8"
                         label={({
-                          cx,
-                          cy,
-                          midAngle,
-                          innerRadius,
-                          outerRadius,
-                          percent,
-                        }: {
-                          cx: number;
-                          cy: number;
-                          midAngle: number;
-                          innerRadius: number;
-                          outerRadius: number;
-                          percent?: number;
+                          cx: cx_,
+                          cy: cy_,
+                          midAngle: midAngle_,
+                          innerRadius: innerRadius_,
+                          outerRadius: outerRadius_,
+                          percent: percent_,
                         }) => {
-                          if (!percent) return <></>;
+                          const [
+                            cx,
+                            cy,
+                            midAngle,
+                            innerRadius,
+                            outerRadius,
+                            percent,
+                          ] = [
+                            cx_,
+                            cy_,
+                            midAngle_,
+                            innerRadius_,
+                            outerRadius_,
+                            percent_,
+                          ].map(Number);
                           const RADIAN = Math.PI / 180;
                           const radius =
                             innerRadius + (outerRadius - innerRadius) * 0.5;
