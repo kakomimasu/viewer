@@ -76,7 +76,7 @@ const PointsGraph: NextPage<{ game: Game }> = ({ game }) => {
           />
           <YAxis />
           <Tooltip
-            labelFormatter={(props: number) => "Turn : " + (props + 1)}
+            labelFormatter={(props) => "Turn : " + (Number(props) + 1)}
           />
           <Legend />
 
