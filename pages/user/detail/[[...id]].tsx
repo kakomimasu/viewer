@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -10,7 +10,14 @@ import Content from "../../../components/content";
 import GameList from "../../../components/gamelist";
 import firebase from "../../../src/firebase";
 
-import { apiClient, Game, User } from "../../../src/apiClient";
+import {
+  apiClient,
+  Game,
+  User,
+  host,
+  WsGameRes,
+  WsGameReq,
+} from "../../../src/apiClient";
 
 const StyledContent = styled(Content)({
   display: "flex",
@@ -28,6 +35,12 @@ const Detail: NextPage<{}> = () => {
       return id_[0];
     } else return id_;
   })();
+
+  const [games, setGames] = useState<Game[]>([]);
+  const [socket, setSocket] = useState<WebSocket>();
+  const refGames = useRef(games);
+  //const [isSelf, setIsSelf] = useState(false);
+  const [firebaseUser, setFirebaseUser] = useState<firebase.User>();
 
   const [user, setUser] = useState<
     | ({
@@ -83,15 +96,62 @@ const Detail: NextPage<{}> = () => {
     }
   };
 
+  const isSelf = useMemo(
+    () => typeof user?.bearerToken === "string",
+    [user?.bearerToken]
+  );
+
   useEffect(() => {
-    console.log("id", id);
+    //console.log("id", id);
     firebase.auth().onAuthStateChanged(async (user) => {
+      if (user) setFirebaseUser(user);
       const idToken = await user?.getIdToken(true);
       const userId = id || user?.uid;
       if (!userId) setUser(null);
       else getUser(userId, idToken);
     });
   }, [id]);
+
+  useEffect(() => {
+    if (isSelf && user?.bearerToken) {
+      const sock = new WebSocket(
+        (host.protocol === "https:" ? "wss://" : "ws://") +
+          host.host +
+          "/v1/ws/game",
+        `${user.bearerToken}`
+      );
+      sock.onopen = () => {
+        setSocket(sock);
+        const q = ["sort:startAtUnixTime-desc", `is:personal`].join(" ");
+        console.log(q);
+        const req: WsGameReq = {
+          q,
+        };
+        sock.send(JSON.stringify(req));
+      };
+      sock.onmessage = (event) => {
+        const res = JSON.parse(event.data) as WsGameRes;
+        console.log(res);
+        if (res.type === "initial") {
+          setGames(res.games);
+        } else {
+          const gs = refGames.current;
+          const updateGameIndex = gs.findIndex(
+            (g) => g.gameId === res.game.gameId
+          );
+          if (updateGameIndex >= 0) gs[updateGameIndex] = res.game;
+          else gs.push(res.game);
+          console.log(gs);
+          setGames([...gs]);
+        }
+      };
+
+      return () => {
+        sock.close();
+        console.log("websocket close");
+      };
+    } else return;
+  }, [isSelf, user?.bearerToken]);
 
   return (
     <StyledContent title="ユーザ詳細">
@@ -184,6 +244,11 @@ const Detail: NextPage<{}> = () => {
               <Section title="参加ゲーム一覧">
                 <GameList games={user.games} />
               </Section>
+              {isSelf && (
+                <Section title="マイゲーム一覧">
+                  <GameList games={games} />
+                </Section>
+              )}
             </>
           ) : (
             <div
