@@ -9,6 +9,7 @@ import MenuItem from "@mui/material/MenuItem";
 import AutoComplete from "@mui/material/Autocomplete";
 
 import { apiClient, Board, Game, User } from "../../src/apiClient";
+import firebase from "../../src/firebase";
 
 import Content from "../../components/content";
 import GameList from "../../components/gamelist";
@@ -56,6 +57,7 @@ const Page: NextPage<{ boards: Board[] }> = ({ boards }) => {
     q: string[];
   }>({ value: "", q: fixedUsers });
   const [usersHelperText, setUsersHelperText] = useState("");
+  const [authedUser, setAuthedUser] = useState<User>();
 
   const submit = async () => {
     const sendData = { ...data };
@@ -71,6 +73,35 @@ const Page: NextPage<{ boards: Board[] }> = ({ boards }) => {
       setGame(res.data);
     }
   };
+
+  const submitPersonal = async () => {
+    console.log("submitPersonal", authedUser);
+    const sendData = { ...data, isMySelf: true };
+    sendData.playerIdentifiers = sendData.playerIdentifiers.filter((e) =>
+      Boolean(e)
+    );
+    if (!authedUser?.bearerToken) return;
+    const idToken = authedUser.bearerToken;
+
+    const res = await apiClient.gameCreate(sendData, `Bearer ${idToken}`);
+    console.log(res);
+    if (!res.success) return;
+    setGame(res.data);
+  };
+
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (user) {
+        const userRes = await apiClient.usersShow(
+          user.uid,
+          await user.getIdToken()
+        );
+        if (userRes.success) {
+          setAuthedUser(userRes.data);
+        }
+      } else setAuthedUser(undefined);
+    });
+  }, []);
 
   // 参加ユーザのHeplerTextを更新
   useEffect(() => {
@@ -197,6 +228,14 @@ const Page: NextPage<{ boards: Board[] }> = ({ boards }) => {
         <StyledButton onClick={submit} disabled={!btnStatus}>
           ゲーム作成！
         </StyledButton>
+        {!data.tournamentId && (
+          <StyledButton
+            onClick={submitPersonal}
+            disabled={!(btnStatus && authedUser)}
+          >
+            マイゲーム作成！
+          </StyledButton>
+        )}
       </Form>
       {game && <GameList games={[game]} />}
       {data.boardName &&
