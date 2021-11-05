@@ -25,7 +25,7 @@ export default function Index() {
       <Logo id="title">
         <Image
           alt="logo"
-          src="/img/kakomimasu-logo.png"
+          src="/img/kakomimasu-logo.svg"
           width={546}
           height={195}
         />

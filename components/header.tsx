@@ -53,12 +53,12 @@ export default function Header() {
   return (
     <AppBar position="sticky">
       <Toolbar style={{ color: "black" }}>
-        <div style={{ flexGrow: 1 }}>
+        <div style={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
           <Link href="/" passHref>
             <Image
               height={36}
               width={101}
-              src="/img/kakomimasu-logo.png"
+              src="/img/kakomimasu-logo.svg"
               alt="囲みマスロゴ"
             />
           </Link>
