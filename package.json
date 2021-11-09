@@ -15,7 +15,7 @@
     "@emotion/styled": "^11.3.0",
     "@kakomimasu/client-js": "git+https://github.com/kakomimasu/client-js.git#v1.0.0-beta.4",
     "@mui/icons-material": "^5.0.5",
-    "@mui/material": "^5.0.6",
+    "@mui/material": "^5.1.0",
     "@mui/styles": "^5.0.2",
     "firebase": "^8.10.0",
     "next": "12.0.3",
