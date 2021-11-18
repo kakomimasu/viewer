@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { makeStyles } from "@mui/styles";
+import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 
@@ -8,15 +8,10 @@ import GameBoard from "../../components/gameBoard";
 
 import { apiClient, Board, Game } from "../../src/apiClient";
 
-const useStyles = makeStyles({
-  content: {
-    display: "flex",
-    alignItems: "center",
-    flexDirection: "column",
-  },
-  pieGraph: {
-    height: 300,
-  },
+const StyledDiv = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  flexDirection: "column",
 });
 
 type NestedPartial<T> = {
@@ -26,7 +21,6 @@ type NestedPartial<T> = {
 };
 
 export default function FieldEditor() {
-  const classes = useStyles();
   const [boards, setBoards] = useState<Board[]>();
   const [game, setGame] =
     useState<
@@ -160,7 +154,7 @@ export default function FieldEditor() {
 
   return (
     <Content title="フィールド説明用エディタ">
-      <div className={classes.content}>
+      <StyledDiv>
         <TextField
           select
           label="使用ボード"
@@ -182,7 +176,7 @@ export default function FieldEditor() {
             <GameBoard game={game} />
           </div>
         )}
-      </div>
+      </StyledDiv>
     </Content>
   );
 }
