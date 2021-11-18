@@ -192,7 +192,7 @@ export default function GameBoard(props: Props) {
     for (let i = 0; i < log.length; i++) {
       const act = Object.assign(
         {},
-        log[i][pid].actions.find((e) => e.agentId === aid)
+        log[i].players[pid].actions.find((e) => e.agentId === aid)
       );
       let type = "";
       if (act) {
@@ -216,7 +216,7 @@ export default function GameBoard(props: Props) {
     if (i === undefined) return;
     return {
       point: game.board ? game.board.points[i] : 0,
-      tiled: (game.tiled ? game.tiled[i] : [0, -1]) as [number, number],
+      tiled: game.tiled ? game.tiled[i] : { type: 0, player: -1 },
     };
   };
   useEffect(() => {
@@ -331,12 +331,14 @@ export default function GameBoard(props: Props) {
                       const agent = isAgent(x, y);
                       const isAbs =
                         cell.point < 0 &&
-                        cell.tiled[1] !== -1 &&
-                        cell.tiled[0] === 0;
+                        cell.tiled.player !== null &&
+                        cell.tiled.type === 0;
                       const isConflict = game.log
                         ? (() => {
-                            const lastActLog = game.log[game.log.length - 1]
-                              ?.map((e) => e.actions)
+                            const lastActLog = game.log[
+                              game.log.length - 1
+                            ]?.players
+                              .map((e) => e.actions)
                               .flat();
                             const isConflict = lastActLog?.some(
                               (a) =>
@@ -347,8 +349,10 @@ export default function GameBoard(props: Props) {
                         : false;
 
                       const bgColor = () => {
-                        if (cell.tiled[1] !== -1) {
-                          return datas[cell.tiled[1]].colors[cell.tiled[0]];
+                        if (cell.tiled.player !== null) {
+                          return datas[cell.tiled.player].colors[
+                            cell.tiled.type
+                          ];
                         } else if (cell.point < 0) {
                           const l = 100 - (Math.abs(cell.point) * 50) / 16;
                           return `hsl(0,0%,${l}%)`;

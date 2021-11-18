@@ -60,7 +60,7 @@ export default function FieldEditor() {
     if (!board) return;
     const tiled = new Array(board.height * board.width);
     for (let i = 0; i < tiled.length; i++) {
-      tiled[i] = [0, -1];
+      tiled[i] = { type: 0, player: null };
     }
     const game: Pick<
       Game,
@@ -125,10 +125,16 @@ export default function FieldEditor() {
 
         switch (e.button) {
           case 0: {
+            // a = [no,p1base,p2base,p1wall,p2wall]
             let t = tiled[i];
-            let a = t[0] * 2 + t[1] + 1;
+            const tPlayer = t.player === null ? -1 : t.player;
+            let a = t.type * 2 + tPlayer + 1;
+            console.log(a, t);
             a = (a + 1) % 5;
-            t = [Math.trunc((a - 1) / 2) as 0 | 1, (a - 1) % 2];
+            let tPlayer_: number | null = (a - 1) % 2;
+            tPlayer_ = tPlayer_ === -1 ? null : tPlayer_;
+            t = { type: Math.trunc((a - 1) / 2) as 0 | 1, player: tPlayer_ };
+            console.log(a, t);
             tiled[i] = t;
 
             const agent = isAgent(x, y);
@@ -139,10 +145,10 @@ export default function FieldEditor() {
           }
           case 2: {
             const t = tiled[i];
-            if (t[0] === 1) {
+            if (t.type === 1) {
               const a = isAgent(x, y);
               if (a) players[a.player].agents.splice(a.n, 1);
-              else players[t[1]].agents.push({ x, y });
+              else players[t.type].agents.push({ x, y });
             }
             break;
           }
