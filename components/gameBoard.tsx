@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { makeStyles } from "@mui/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { styled, keyframes } from "@mui/material/styles";
 
 import { apiClient, Game, User } from "../src/apiClient";
 
@@ -21,96 +21,121 @@ type Props = {
   >;
 };
 
-const useStyles = makeStyles({
-  content: {
-    display: "grid",
-    height: "auto",
-    "&>div": {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
+const Content = styled("div")({
+  display: "grid",
+  height: "auto",
+  "&>div": {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  table: {
-    // table全体のcss
-    borderCollapse: "collapse",
-    userSelect: "none",
-    margin: "auto",
-    "& td,& th": {
-      padding: 5,
-      fontSize: "min(1em,2.5vw)",
-      "--size": "min(10vw,50px)",
-      width: "var(--size)",
-      height: "var(--size)",
-    },
-    "& td": {
-      border: "1px solid",
-      textAlign: "right",
-      verticalAlign: "bottom",
-      whiteSpace: "pre-line",
-      position: "relative",
-    },
+});
+
+const BoardTable = styled("table")({
+  // table全体のcss
+  borderCollapse: "collapse",
+  userSelect: "none",
+  margin: "auto",
+  "& td,& th": {
+    padding: 5,
+    fontSize: "min(1em,2.5vw)",
+    "--size": "min(10vw,50px)",
+    width: "var(--size)",
+    height: "var(--size)",
   },
-  agent: {
-    // agentがいるマスのcss
-    backgroundSize: "80%",
-    backgroundPosition: "0% 50%",
-    backgroundRepeat: "no-repeat",
+  "& td": {
+    border: "1px solid",
+    textAlign: "right",
+    verticalAlign: "bottom",
+    whiteSpace: "pre-line",
+    position: "relative",
   },
-  conflict: {
-    // conflictしているマスのcss
-    animation: "$flash 1s linear infinite",
-  },
-  "@keyframes flash": {
-    // conflictのアニメーション
-    "0%,100%": {},
-    "50%": { backgroundColor: "#00ff00" },
-  },
-  striket: {
-    textDecoration: "line-through",
-    color: "red",
-    fontSize: "80%",
-  },
-  detail: {
-    // agentの詳細を表示するcss
-    display: "none",
-    position: "absolute",
-    backgroundColor: "rgba(0, 0, 0, .7)",
-    color: "white",
-    zIndex: 1,
-    top: "50%",
-    left: "50%",
-    textAlign: "center",
-    borderRadius: "10px",
-    padding: "1em",
-    filter: "drop-shadow(0 0 5px rgba(0, 0, 0, .7))",
-    width: "max-content",
-    "$td:hover &": {
-      display: "block",
-    },
-  },
-  detailHistory: {
-    // agent詳細内の履歴のスクロールcss
-    width: "13em",
-    height: "10em",
-    overflowY: "scroll",
-  },
-  playerTable: {
+});
+
+// conflictのアニメーション
+const flash = keyframes({
+  "0%,100%": {},
+  "50%": { backgroundColor: "#00ff00" },
+});
+
+const BoardCell = styled("td")<{
+  agent:
+    | {
+        agent: {
+          x: number;
+          y: number;
+        };
+        player: number;
+        n: number;
+      }
+    | undefined;
+  isConflict: boolean;
+}>(({ agent, isConflict }) => {
+  const agentCss = agent
+    ? {
+        // agentがいるマスのcss
+        backgroundSize: "80%",
+        backgroundPosition: "0% 50%",
+        backgroundRepeat: "no-repeat",
+      }
+    : {};
+  // conflictしているマスのcss
+  const isConflictCss = isConflict
+    ? { animation: `${flash} 1s linear infinite` }
+    : {};
+  return { ...agentCss, ...isConflictCss };
+});
+
+const BoardCellPoint = styled("span")<{ isAbs: boolean }>(({ isAbs }) => {
+  return isAbs
+    ? {
+        textDecoration: "line-through",
+        color: "red",
+        fontSize: "80%",
+      }
+    : {};
+});
+
+const AgentDetailHistory = styled("div")({
+  // agent詳細内の履歴のスクロールcss
+  width: "13em",
+  height: "10em",
+  overflowY: "scroll",
+});
+
+const PlayerTable = styled("table")({
+  border: "1px solid black",
+  textAlign: "center",
+  borderCollapse: "collapse",
+  "& td,& th": {
     border: "1px solid black",
-    textAlign: "center",
-    borderCollapse: "collapse",
-    "& td,& th": {
-      border: "1px solid black",
-      padding: 5,
-    },
-    "& td": {
-      color: "black",
-    },
+    padding: 5,
+  },
+  "& td": {
+    color: "black",
+  },
+});
+
+const AgentDetail = styled("div")({
+  // agentの詳細を表示するcss
+  display: "none",
+  position: "absolute",
+  backgroundColor: "rgba(0, 0, 0, .7)",
+  color: "white",
+  zIndex: 1,
+  top: "50%",
+  left: "50%",
+  textAlign: "center",
+  borderRadius: "10px",
+  padding: "1em",
+  filter: "drop-shadow(0 0 5px rgba(0, 0, 0, .7))",
+  width: "max-content",
+  "td:hover &": {
+    display: "block",
   },
 });
 
 export default function GameBoard(props: Props) {
-  const classes = useStyles();
   const media = useMediaQuery("(max-width:1000px)");
   const game = props.game;
 
@@ -246,16 +271,12 @@ export default function GameBoard(props: Props) {
   };
 
   return (
-    <div
-      className={classes.content}
+    <Content
       style={{ gridTemplateColumns: media ? "1fr 1fr" : "1fr auto 1fr" }}
     >
       {users.map((user, i) => (
         <div key={i}>
-          <table
-            className={classes.playerTable}
-            style={{ color: datas[i].colors[1] }}
-          >
+          <PlayerTable style={{ color: datas[i].colors[1] }}>
             <tr>
               <th>プレイヤー名</th>
               <td>
@@ -276,7 +297,7 @@ export default function GameBoard(props: Props) {
               <th>未配置Agent数</th>
               <td>{getNotPlacedAgentNum(i)}</td>
             </tr>
-          </table>
+          </PlayerTable>
         </div>
       ))}
       <div
@@ -312,7 +333,7 @@ export default function GameBoard(props: Props) {
           </div>*/}
         <div>{status}</div>
         {game.board && (
-          <table id="field" className={classes.table}>
+          <BoardTable id="field">
             <tbody>
               <tr>
                 <th></th>
@@ -363,20 +384,19 @@ export default function GameBoard(props: Props) {
                       };
 
                       return (
-                        <td
+                        <BoardCell
+                          agent={agent}
+                          isConflict={isConflict}
                           key={x}
-                          className={`${agent && classes.agent} ${
-                            isConflict && classes.conflict
-                          }`}
                           style={{
                             backgroundImage:
                               agent && `url(${datas[agent.player].agentUrl})`,
                             backgroundColor: bgColor(),
                           }}
                         >
-                          <span className={isAbs ? classes.striket : ""}>
+                          <BoardCellPoint isAbs={isAbs}>
                             {cell.point}
-                          </span>
+                          </BoardCellPoint>
                           {isAbs && (
                             <>
                               <br />
@@ -384,8 +404,7 @@ export default function GameBoard(props: Props) {
                             </>
                           )}
                           {agent && (
-                            <div
-                              className={classes.detail}
+                            <AgentDetail
                               style={{
                                 border: `solid 4px ${
                                   datas[agent.player].colors[1]
@@ -399,7 +418,7 @@ export default function GameBoard(props: Props) {
                               </span>
                               <br />
                               <span>行動履歴</span>
-                              <div className={classes.detailHistory}>
+                              <AgentDetailHistory>
                                 {agentHistory(agent).map((e, i) => {
                                   return (
                                     <div
@@ -416,10 +435,10 @@ export default function GameBoard(props: Props) {
                                     </div>
                                   );
                                 })}
-                              </div>
-                            </div>
+                              </AgentDetailHistory>
+                            </AgentDetail>
                           )}
-                        </td>
+                        </BoardCell>
                       );
                     })}
                     <th>{y + 1}</th>
@@ -434,9 +453,9 @@ export default function GameBoard(props: Props) {
                 <th></th>
               </tr>
             </tbody>
-          </table>
+          </BoardTable>
         )}
       </div>
-    </div>
+    </Content>
   );
 }
