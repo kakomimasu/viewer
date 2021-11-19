@@ -1,15 +1,14 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { Theme, useTheme } from "@mui/material/styles";
-import { makeStyles } from "@mui/styles";
+import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 
 import { Tournament } from "../src/apiClient";
 
-const useStyles = makeStyles({
-  tournament: (theme: Theme) => ({
+const StyledCard = styled(Card)(({ theme }) => {
+  return {
     border: "solid 3px",
     borderColor: theme.palette.secondary.main,
     borderRadius: 10,
@@ -20,29 +19,29 @@ const useStyles = makeStyles({
     "&:hover": {
       borderColor: theme.palette.primary.main,
     },
-  }),
-  tournamentName: {
-    fontWeight: "bold",
-    fontSize: "1.5em",
-  },
-  tournamentOrganizer: {
-    textAlign: "left",
-  },
-  tournamentType: {
-    textAlign: "left",
-  },
-  tournamentRemarks: {
-    fontSize: "0.8em",
-    textAlign: "left",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-  },
+  };
+});
+
+const TournamentName = styled("div")({
+  fontWeight: "bold",
+  fontSize: "1.5em",
+});
+
+const TournamentOrganizer = styled("div")({
+  textAlign: "left",
+});
+const TournamentType = styled("div")({
+  textAlign: "left",
+});
+const TournamentRemarks = styled("div")({
+  fontSize: "0.8em",
+  textAlign: "left",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
 });
 
 export default function TournamentCard(props: { tournament: Tournament }) {
-  const theme = useTheme();
-  const classes = useStyles(theme);
   const router = useRouter();
 
   const tournament = props.tournament;
@@ -54,24 +53,21 @@ export default function TournamentCard(props: { tournament: Tournament }) {
   };
 
   return (
-    <Card
-      className={classes.tournament}
+    <StyledCard
       onClick={() => {
         router.push("/tournament/detail/" + tournament.id);
       }}
     >
       <CardActionArea style={{ height: "100%" }}>
         <CardContent>
-          <div className={classes.tournamentName}>{tournament.name}</div>
-          <div className={classes.tournamentOrganizer}>
+          <TournamentName>{tournament.name}</TournamentName>
+          <TournamentOrganizer>
             主催：{tournament.organizer}
-          </div>
-          <div className={classes.tournamentType}>
-            大会形式：{getType(tournament.type)}
-          </div>
-          <div className={classes.tournamentRemarks}>{tournament.remarks}</div>
+          </TournamentOrganizer>
+          <TournamentType>大会形式：{getType(tournament.type)}</TournamentType>
+          <TournamentRemarks>{tournament.remarks}</TournamentRemarks>
         </CardContent>
       </CardActionArea>
-    </Card>
+    </StyledCard>
   );
 }

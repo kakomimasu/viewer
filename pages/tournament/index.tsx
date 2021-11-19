@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { makeStyles } from "@mui/styles";
+import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 
 import Content from "../../components/content";
@@ -8,22 +8,13 @@ import TournamentCard from "../../components/tournament_card";
 
 import { apiClient, Tournament } from "../../src/apiClient";
 
-const useStyles = makeStyles({
-  content: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  list: {
-    display: "flex",
-    width: "100%",
-    flexFlow: "row wrap",
-    justifyContent: "center",
-  },
+const StyledDiv = styled("div")({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
 });
 
 export default function Index() {
-  const classes = useStyles();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
   const getTournament = async () => {
@@ -37,7 +28,7 @@ export default function Index() {
 
   return (
     <Content title="大会一覧">
-      <div className={classes.content}>
+      <StyledDiv>
         <Link href="/tournament/create" passHref>
           <Button>大会作成はこちらから</Button>
         </Link>
@@ -54,7 +45,7 @@ export default function Index() {
             <TournamentCard key={i} tournament={t} />
           ))}
         </div>
-      </div>
+      </StyledDiv>
     </Content>
   );
 }
