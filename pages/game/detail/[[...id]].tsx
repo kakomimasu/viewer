@@ -33,7 +33,7 @@ const PointsGraph: NextPage<{ game: Game }> = ({ game }) => {
   const data: { turn: number; points: number[] }[] = [];
 
   game.log.forEach((turn, i) => {
-    const points = turn.map((player) => {
+    const points = turn.players.map((player) => {
       return player.point.basepoint + player.point.wallpoint;
     });
     data.push({ turn: i, points });
