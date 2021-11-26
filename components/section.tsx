@@ -4,12 +4,13 @@ import { styled } from "@mui/material/styles";
 type Props = {
   children?: React.ReactNode;
   title?: string;
+  id?: string;
 };
 
 const Section = styled("section")(({ theme }) => ({
   border: "solid 3px",
   borderColor: theme.palette.primary.main,
-  marginTop: "50px",
+  marginTop: "40px",
   position: "relative",
   padding: "30px 30px 20px 30px",
   width: "100%",
@@ -30,26 +31,27 @@ const SubTitle = styled("h3")(({ theme }) => ({
   fontSize: "0.8em",
   borderBottom: "solid 2px",
   borderBottomColor: theme.palette.secondary.main,
-  margin: "0 auto",
+  margin: " 10px 0px 5px 0px",
   padding: "0 5px",
-  display: "inline-block",
+  display: "block",
+  width: "fit-content",
   color: "#5C4C40",
 }));
 
-export default function StyledSection(props: Props) {
+export default function StyledSection({ title, children, ...props }: Props) {
   return (
-    <Section>
-      {props.title && <Title>{props.title}</Title>}
-      {props.children}
+    <Section {...props}>
+      {title && <Title>{title}</Title>}
+      {children}
     </Section>
   );
 }
 
-export function SubSection(props: Props) {
+export function SubSection({ title, children, ...props }: Props) {
   return (
     <>
-      <SubTitle>{props.title}</SubTitle>
-      {props.children}
+      <SubTitle {...props}>{title}</SubTitle>
+      <div>{children}</div>
     </>
   );
 }
