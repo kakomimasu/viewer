@@ -1,5 +1,14 @@
 import { createTheme } from "@mui/material/styles";
 
+declare module "@mui/material/styles" {
+  interface Palette {
+    discord: Palette["primary"];
+  }
+  interface PaletteOptions {
+    discord: PaletteOptions["primary"];
+  }
+}
+
 export default createTheme({
   palette: {
     // Material Design Color(https://material.io/resources/color/#!/?view.left=1&view.right=1&primary.color=FBD5A8&secondary.color=58AFDA)
@@ -14,6 +23,9 @@ export default createTheme({
       light: "#8ee1ff",
       dark: "#1280a8",
       contrastText: "#000000",
+    },
+    discord: {
+      main: "#5865F2",
     },
   },
   components: {
