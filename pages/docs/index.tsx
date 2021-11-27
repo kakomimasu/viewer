@@ -1,29 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import ReactMarkdown from "react-markdown";
 
 import Content from "../../components/content";
-import Section, { SubSection } from "../../components/section";
 
 const StyledDiv = styled("div")({
   display: "flex",
   flexDirection: "row",
   fiex: "1 1 auto",
   width: "100%",
-});
-
-const StyledMarkdown = styled(ReactMarkdown)({
-  "& img": {
-    maxWidth: "90%",
-    maxHeight: "400px",
-    display: "block",
-    margin: "0 auto",
-  },
 });
 
 function DocCard({
@@ -71,7 +59,6 @@ export default function Index() {
           explain="囲みマス API v1を利用すると、任意のクライアントからゲーム作成・参加、大会作成、ユーザ取得などを行うことが出来ます。"
         />
       </StyledDiv>
-      {/*<StyledMarkdown>{markdown}</StyledMarkdown>*/}
     </Content>
   );
 }
