@@ -113,10 +113,12 @@ export default function Index() {
           またAPIドキュメントを公開していますので異なる言語でもゲームへの参加が可能です。
         </SubSection>
         <SubSection title="APIドキュメント">
-          <a href="https://github.com/kakomimasu/server/blob/main/v1/docs/index.md">
-            Github上のドキュメント
-          </a>
-          をご覧ください。（今後サイト内でも閲覧できるように移行する予定です。）
+          現在APIのバージョンはv1です。以下のリンクからご覧ください。
+          <ul>
+            <li>
+              <Link href="docs/apiv1">囲みマス API v1</Link>
+            </li>
+          </ul>
         </SubSection>
       </Section>
 
