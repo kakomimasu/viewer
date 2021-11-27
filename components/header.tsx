@@ -53,7 +53,7 @@ export default function Header() {
   return (
     <AppBar position="sticky">
       <Toolbar style={{ color: "black" }}>
-        <div style={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
+        <div style={{ flexGrow: 0, display: "flex", alignItems: "center" }}>
           <Link href="/" passHref>
             <Image
               height={36}
@@ -61,6 +61,20 @@ export default function Header() {
               src="/img/kakomimasu-logo.svg"
               alt="囲みマスロゴ"
             />
+          </Link>
+        </div>
+        <div
+          style={{
+            flexGrow: 1,
+            display: "flex",
+            alignItems: "center",
+            margin: "0 20px",
+          }}
+        >
+          <Link href="/docs" passHref>
+            <Button variant="text" color="inherit" onClick={logOut}>
+              ドキュメント
+            </Button>
           </Link>
         </div>
         {user !== undefined && (
