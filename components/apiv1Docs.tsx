@@ -6,8 +6,8 @@ import highlightjs from "highlight.js";
 
 const renderer = new marked.Renderer();
 renderer.link = (href, title, text) => {
-  console.log(href, title, text);
-  let h = href?.split("/").at(-1)?.replace(".md", "") || "";
+  //console.log(href, title, text);
+  let h = href?.split("/").slice(-1)[0]?.replace(".md", "") || "";
   const hSplit = h.split("#");
   hSplit[1] = hSplit[1]?.toLowerCase();
   h = hSplit.join("#");
