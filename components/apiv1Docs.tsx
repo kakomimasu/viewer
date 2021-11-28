@@ -37,7 +37,7 @@ const StyledDiv = styled("div")(({ theme }) => {
     "table th": {
       backgroundColor: theme.palette.secondary.light,
     },
-    "table tr:nth-child(odd)": {
+    "table tr:nth-of-type(2n)": {
       backgroundColor: "#eee",
     },
     code: {
