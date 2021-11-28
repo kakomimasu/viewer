@@ -13,7 +13,7 @@ const Index: NextPage<{ text: string }> = ({ text }) => {
 };
 Index.getInitialProps = async () => {
   const res = await fetch(
-    "https://raw.githubusercontent.com/kakomimasu/server/v1.0.0-beta.4/v1/docs/data.md"
+    "https://raw.githubusercontent.com/kakomimasu/server/main/v1/docs/data.md"
   );
   const text = await res.text();
   //console.log(text);
