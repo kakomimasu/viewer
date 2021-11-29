@@ -1,7 +1,11 @@
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import type { AppProps } from "next/app";
 
 import CssBaseline from "@mui/material/CssBaseline";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 import { ThemeProvider, styled } from "@mui/material/styles";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 
@@ -10,6 +14,7 @@ import Heater from "../components/header";
 
 import theme from "../src/theme";
 import createEmotionCache from "../src/createEmotionCache";
+import { host } from "../src/apiClient";
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -34,6 +39,22 @@ function MyApp({
 }: AppProps & {
   emotionCache?: EmotionCache;
 }) {
+  const [apiFailBar, setApiFailBar] = useState(false);
+
+  useEffect(() => {
+    apiCheck();
+    async function apiCheck() {
+      try {
+        const res = await fetch(`${host}v1/tournament/get`);
+        //console.log("apiCheck", res);
+        setApiFailBar(false);
+      } catch (e) {
+        //console.log(e);
+        setApiFailBar(true);
+      }
+    }
+  }, []);
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>
@@ -52,6 +73,19 @@ function MyApp({
           </Main>
           <Footer />
         </Body>
+        <Snackbar open={apiFailBar} autoHideDuration={6000}>
+          <Alert
+            variant="filled"
+            severity="error"
+            sx={{ width: "100%" }}
+            onClose={() => {
+              setApiFailBar(false);
+            }}
+          >
+            <AlertTitle>APIサーバに接続できません</AlertTitle>
+            しばらくしてからリロードし、それでも直らない場合は管理者までご連絡ください。
+          </Alert>
+        </Snackbar>
       </ThemeProvider>
     </CacheProvider>
   );
