@@ -5,7 +5,7 @@ import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 
-import Content from "../../components/content";
+import Content from "../../../components/content";
 
 const StyledDiv = styled("div")({
   display: "flex",
@@ -27,8 +27,8 @@ function DocCard({
     <Card
       elevation={4}
       sx={{
-        width: "370px",
-        height: "200px",
+        minWidth: "400px",
+        minHeight: "200px",
         margin: "1em",
       }}
     >
@@ -46,22 +46,12 @@ function DocCard({
 
 export default function Index() {
   return (
-    <Content title="ドキュメント">
+    <Content title="チュートリアル">
       <StyledDiv>
         <DocCard
-          href="/rule"
-          title="公式ルール"
-          explain="囲みマス公式のルールです。"
-        />
-        <DocCard
-          href="/docs/apiv1"
-          title="囲みマス API v1"
-          explain="囲みマス API v1を利用すると、任意のクライアントからゲーム作成・参加、大会作成、ユーザ取得などを行うことが出来ます。"
-        />
-        <DocCard
-          href="/docs/tutorial"
-          title="チュートリアル"
-          explain="ローカルサーバの立て方などを紹介します。"
+          href="tutorial/docker-compose"
+          title="docker-composeを用いたローカルサーバ構築"
+          explain="docker-composeを用いてローカルで対戦可能なサーバを構築します。"
         />
       </StyledDiv>
     </Content>
