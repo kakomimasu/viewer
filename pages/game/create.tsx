@@ -243,7 +243,8 @@ const Page: NextPage<{ boards: Board[] }> = ({ boards }) => {
           const board = boards?.find((b) => b.name === data.boardName);
           if (!board) return;
           const tiled = new Array(board.height * board.width);
-          for (let i = 0; i < tiled.length; i++) tiled[i] = [0, -1];
+          for (let i = 0; i < tiled.length; i++)
+            tiled[i] = { type: 0, player: null };
           const game: Pick<
             Game,
             | "board"
