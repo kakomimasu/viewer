@@ -64,7 +64,7 @@ const ManualAgent = ({
         p: 1,
       }}
     >
-      <Box components="h5" sx={{ mb: 1 }}>
+      <Box component="h5" sx={{ mb: 1 }}>
         Agent {agentData.index + 1}
       </Box>
       <Box
