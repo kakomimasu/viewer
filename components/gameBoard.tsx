@@ -1,6 +1,4 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import Link from "next/link";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import { styled, keyframes } from "@mui/material/styles";
 
 import { apiClient, Game, User } from "../src/apiClient";
@@ -136,7 +134,6 @@ const AgentDetail = styled("div")({
 });
 
 export default function GameBoard(props: Props) {
-  const media = useMediaQuery("(max-width:1000px)");
   const game = props.game;
 
   const [users, setUsers] = useState<(User | undefined)[]>([]);
@@ -175,20 +172,6 @@ export default function GameBoard(props: Props) {
     setStatusT();
   }, [setStatusT]);
 
-  const getPlacedAgentNum = (i: number) => {
-    let num = 0;
-    game.players[i].agents.forEach((agent) => {
-      if (agent.x !== -1) num++;
-    });
-    return num;
-  };
-  const getNotPlacedAgentNum = (i: number) => {
-    let num = 0;
-    game.players[i].agents.forEach((agent) => {
-      if (agent.x === -1) num++;
-    });
-    return num;
-  };
   const index = (x: number, y: number) => {
     if (!game.board) return;
     return x + y * game.board.width;
@@ -271,66 +254,14 @@ export default function GameBoard(props: Props) {
   };
 
   return (
-    <Content
-      style={{ gridTemplateColumns: media ? "1fr 1fr" : "1fr auto 1fr" }}
-    >
-      {users.map((user, i) => (
-        <div key={i}>
-          <PlayerTable style={{ color: datas[i].colors[1] }}>
-            <tr>
-              <th>プレイヤー名</th>
-              <td>
-                {user?.name ? (
-                  <Link href={"/user/detail/" + user.name}>
-                    {user.screenName}
-                  </Link>
-                ) : (
-                  "No Player"
-                )}
-              </td>
-            </tr>
-            <tr>
-              <th>配置済みAgent数</th>
-              <td>{getPlacedAgentNum(i)}</td>
-            </tr>
-            <tr>
-              <th>未配置Agent数</th>
-              <td>{getNotPlacedAgentNum(i)}</td>
-            </tr>
-          </PlayerTable>
-        </div>
-      ))}
+    <Content>
       <div
         style={{
-          ...(media
-            ? { order: -1, gridRow: "1", gridColumn: "1/3" }
-            : { gridRow: "1/-1", gridColumn: "2" }),
           display: "flex",
           flexDirection: "column",
           overflow: "auto",
         }}
       >
-        {/* GameListが同じ内容を兼ねているため削除。見にくかったら戻します。
-          <div
-          style={{
-            position: "relative",
-            height: 30,
-            minWidth: "16em",
-            display: "grid",
-            gridTemplateColumns: "1fr auto afr",
-          }}
-        >
-          <h4>{turnT ? turnT : "-"}</h4>
-          {turnT
-            ? points.map((point, i) =>
-              <>
-                <h4>{point}</h4>
-                {i < (points.length - 1) && <h4>:</h4>}
-              </>
-            )
-            : <h4>{getStatusT()}</h4>}
-          {turnT && <h4>{getStatusT()}</h4>}
-          </div>*/}
         <div>{status}</div>
         {game.board && (
           <BoardTable id="field">
