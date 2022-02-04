@@ -14,12 +14,6 @@ const StyledDiv = styled("div")({
   flexDirection: "column",
 });
 
-type NestedPartial<T> = {
-  [K in keyof T]?: T[K] extends Array<infer R>
-    ? Array<NestedPartial<R>>
-    : NestedPartial<T[K]>;
-};
-
 export default function FieldEditor() {
   const [boards, setBoards] = useState<Board[]>();
   const [game, setGame] =
@@ -43,7 +37,6 @@ export default function FieldEditor() {
 
   async function getBoards() {
     const res = await apiClient.getBoards();
-    console.log();
     if (res.success) setBoards(res.data);
   }
 
@@ -88,17 +81,17 @@ export default function FieldEditor() {
 
   useEffect(() => {
     if (!game) return;
-    const table = document.querySelector("#game-board #field");
-    if (!table) return;
-    const board = game.board;
-    if (!board) return;
-    const tds = table.getElementsByTagName("td");
+    const divs = document.querySelectorAll("#game-board #field>.tile");
+    if (!divs) return;
 
-    for (let i = 0; i < tds.length; i++) {
-      const [x, y] = [i % board.height, Math.floor(i / board.width)];
-      const td = tds[i];
-      td.oncontextmenu = () => false;
-      td.onmousedown = (e) => {
+    for (let i = 0; i < divs.length; i++) {
+      const tile = divs[i] as HTMLElement;
+      const style = getComputedStyle(tile);
+      const x = parseInt(style.gridColumnStart) - 2;
+      const y = parseInt(style.gridRowStart) - 2;
+
+      tile.oncontextmenu = () => false;
+      tile.onmousedown = (e) => {
         if (!game.tiled) return;
         const tiled = [...game.tiled];
         const players = [...game.players];
@@ -142,7 +135,8 @@ export default function FieldEditor() {
             if (t.type === 1) {
               const a = isAgent(x, y);
               if (a) players[a.player].agents.splice(a.n, 1);
-              else players[t.type].agents.push({ x, y });
+              else if (t.player !== null)
+                players[t.player].agents.push({ x, y });
             }
             break;
           }
