@@ -120,6 +120,16 @@ const GameList = (props: {
   const toGameDetail = (id: string) => {
     router.push("/game/detail/" + id);
   };
+
+  const getPlacedAgentStr = (game: Game, i: number) => {
+    let num = 0;
+    const total = game.players[i].agents.length;
+    game.players[i].agents.forEach((agent) => {
+      if (agent.x !== -1) num++;
+    });
+    return `(${num} / ${total})`;
+  };
+
   return (
     <div>
       <div>
@@ -139,7 +149,7 @@ const GameList = (props: {
                 <div>ターン</div>
               </TableCell>
               <TableCell>
-                <div>プレイヤー名</div>
+                <div>プレイヤー名(配置済みAgent数)</div>
                 <div>ポイント</div>
               </TableCell>
               <TableCell>
@@ -192,6 +202,7 @@ const GameList = (props: {
                                 <UnSpan>No player</UnSpan>
                               );
                             })()}
+                            {getPlacedAgentStr(game, i)}
                             <br />
                             {getPoint(player)}
                           </div>

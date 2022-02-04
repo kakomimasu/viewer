@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import Link from "next/link";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import { styled, keyframes } from "@mui/material/styles";
+import { Box } from "@mui/material";
 
 import { apiClient, Game, User } from "../src/apiClient";
 
@@ -21,72 +20,13 @@ type Props = {
   >;
 };
 
-const Content = styled("div")({
-  display: "grid",
-  height: "auto",
-  "&>div": {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
-
-const BoardTable = styled("table")({
-  // table全体のcss
-  borderCollapse: "collapse",
-  userSelect: "none",
-  margin: "auto",
-  "& td,& th": {
-    padding: 5,
-    fontSize: "min(1em,2.5vw)",
-    "--size": "min(10vw,50px)",
-    width: "var(--size)",
-    height: "var(--size)",
-  },
-  "& td": {
-    border: "1px solid",
-    textAlign: "right",
-    verticalAlign: "bottom",
-    whiteSpace: "pre-line",
-    position: "relative",
-  },
-});
-
 // conflictのアニメーション
 const flash = keyframes({
   "0%,100%": {},
   "50%": { backgroundColor: "#00ff00" },
 });
 
-const BoardCell = styled("td")<{
-  agent:
-    | {
-        agent: {
-          x: number;
-          y: number;
-        };
-        player: number;
-        n: number;
-      }
-    | undefined;
-  isConflict: boolean;
-}>(({ agent, isConflict }) => {
-  const agentCss = agent
-    ? {
-        // agentがいるマスのcss
-        backgroundSize: "80%",
-        backgroundPosition: "0% 50%",
-        backgroundRepeat: "no-repeat",
-      }
-    : {};
-  // conflictしているマスのcss
-  const isConflictCss = isConflict
-    ? { animation: `${flash} 1s linear infinite` }
-    : {};
-  return { ...agentCss, ...isConflictCss };
-});
-
-const BoardCellPoint = styled("span")<{ isAbs: boolean }>(({ isAbs }) => {
+const BoardCellPoint = styled("div")<{ isAbs: boolean }>(({ isAbs }) => {
   return isAbs
     ? {
         textDecoration: "line-through",
@@ -103,19 +43,6 @@ const AgentDetailHistory = styled("div")({
   overflowY: "scroll",
 });
 
-const PlayerTable = styled("table")({
-  border: "1px solid black",
-  textAlign: "center",
-  borderCollapse: "collapse",
-  "& td,& th": {
-    border: "1px solid black",
-    padding: 5,
-  },
-  "& td": {
-    color: "black",
-  },
-});
-
 const AgentDetail = styled("div")({
   // agentの詳細を表示するcss
   display: "none",
@@ -130,15 +57,13 @@ const AgentDetail = styled("div")({
   padding: "1em",
   filter: "drop-shadow(0 0 5px rgba(0, 0, 0, .7))",
   width: "max-content",
-  "td:hover &": {
+  lineHeight: "1.2",
+  ".tile:hover &": {
     display: "block",
   },
 });
 
-export default function GameBoard(props: Props) {
-  const media = useMediaQuery("(max-width:1000px)");
-  const game = props.game;
-
+export default function GameBoard({ game }: Props) {
   const [users, setUsers] = useState<(User | undefined)[]>([]);
   const [status, setStatus] = useState<string>();
   const playerIds = useMemo(
@@ -146,14 +71,6 @@ export default function GameBoard(props: Props) {
     [game.players]
   );
 
-  /*const turnT = (game.gaming || game.ending)
-    ? `${game.turn}/${game.totalTurn}`
-    : "-";
-
-  const points = (game.players as any[]).map(
-    (player) => (player.point.basepoint + player.point.wallpoint),
-  );
-  */
   const setStatusT = useCallback(() => {
     let status = "";
     if (game.startedAtUnixTime === null) status = "プレイヤー入室待ち";
@@ -175,24 +92,6 @@ export default function GameBoard(props: Props) {
     setStatusT();
   }, [setStatusT]);
 
-  const getPlacedAgentNum = (i: number) => {
-    let num = 0;
-    game.players[i].agents.forEach((agent) => {
-      if (agent.x !== -1) num++;
-    });
-    return num;
-  };
-  const getNotPlacedAgentNum = (i: number) => {
-    let num = 0;
-    game.players[i].agents.forEach((agent) => {
-      if (agent.x === -1) num++;
-    });
-    return num;
-  };
-  const index = (x: number, y: number) => {
-    if (!game.board) return;
-    return x + y * game.board.width;
-  };
   const isAgent = (x: number, y: number) => {
     if (game.players) {
       const agent = game.players
@@ -217,7 +116,7 @@ export default function GameBoard(props: Props) {
     for (let i = 0; i < log.length; i++) {
       const act = Object.assign(
         {},
-        log[i].players[pid].actions.find((e) => e.agentId === aid)
+        log[i].players[pid].actions?.find((e) => e.agentId === aid)
       );
       let type = "";
       if (act) {
@@ -236,14 +135,7 @@ export default function GameBoard(props: Props) {
     }
     return history.reverse();
   };
-  const getCell = (x: number, y: number) => {
-    const i = index(x, y);
-    if (i === undefined) return;
-    return {
-      point: game.board ? game.board.points[i] : 0,
-      tiled: game.tiled ? game.tiled[i] : { type: 0, player: -1 },
-    };
-  };
+
   useEffect(() => {
     console.log("useEffect gameBoard");
     const UpdateUsers = async () => {
@@ -271,191 +163,195 @@ export default function GameBoard(props: Props) {
   };
 
   return (
-    <Content
-      style={{ gridTemplateColumns: media ? "1fr 1fr" : "1fr auto 1fr" }}
+    <Box
+      sx={{
+        my: 2,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
     >
-      {users.map((user, i) => (
-        <div key={i}>
-          <PlayerTable style={{ color: datas[i].colors[1] }}>
-            <tr>
-              <th>プレイヤー名</th>
-              <td>
-                {user?.name ? (
-                  <Link href={"/user/detail/" + user.name}>
-                    {user.screenName}
-                  </Link>
-                ) : (
-                  "No Player"
-                )}
-              </td>
-            </tr>
-            <tr>
-              <th>配置済みAgent数</th>
-              <td>{getPlacedAgentNum(i)}</td>
-            </tr>
-            <tr>
-              <th>未配置Agent数</th>
-              <td>{getNotPlacedAgentNum(i)}</td>
-            </tr>
-          </PlayerTable>
-        </div>
-      ))}
-      <div
-        style={{
-          ...(media
-            ? { order: -1, gridRow: "1", gridColumn: "1/3" }
-            : { gridRow: "1/-1", gridColumn: "2" }),
-          display: "flex",
-          flexDirection: "column",
-          overflow: "auto",
-        }}
-      >
-        {/* GameListが同じ内容を兼ねているため削除。見にくかったら戻します。
-          <div
-          style={{
-            position: "relative",
-            height: 30,
-            minWidth: "16em",
-            display: "grid",
-            gridTemplateColumns: "1fr auto afr",
-          }}
-        >
-          <h4>{turnT ? turnT : "-"}</h4>
-          {turnT
-            ? points.map((point, i) =>
-              <>
-                <h4>{point}</h4>
-                {i < (points.length - 1) && <h4>:</h4>}
-              </>
-            )
-            : <h4>{getStatusT()}</h4>}
-          {turnT && <h4>{getStatusT()}</h4>}
-          </div>*/}
-        <div>{status}</div>
-        {game.board && (
-          <BoardTable id="field">
-            <tbody>
-              <tr>
-                <th></th>
-                {[...Array(game.board.width)].map((_, x) => {
-                  return <th key={x}>{x + 1}</th>;
-                })}
-                <th></th>
-              </tr>
-              {[...Array(game.board.height)].map((_, y) => {
+      <div>{status}</div>
+      {(() => {
+        const board = game.board;
+        const tiled = game.tiled;
+        if (!board || !tiled) return;
+
+        return (
+          <Box
+            id="field"
+            sx={{
+              userSelect: "none",
+              display: "grid",
+              gridTemplateColumns: `min-content repeat(${board.width}, 1fr) min-content`,
+              gridTemplateRows: `min-content repeat(${board.height}, 1fr) min-content`,
+              gap: "1px",
+              width: "100%",
+              lineHeight: "1",
+              fontSize: `clamp(1px, calc(25vw/${board.width}), 15px)`,
+            }}
+          >
+            {[1, board.height + 2].map((y) => {
+              return new Array(board.width).fill(0).map((_, i) => {
+                const x = i + 1;
                 return (
-                  <tr key={y}>
-                    <th>{y + 1}</th>
-                    {[...Array(game.board?.width)].map((_, x) => {
-                      const cell = getCell(x, y);
-                      if (!cell) return;
-                      const agent = isAgent(x, y);
-                      const isAbs =
-                        cell.point < 0 &&
-                        cell.tiled.player !== null &&
-                        cell.tiled.type === 0;
-                      const isConflict = game.log
-                        ? (() => {
-                            const lastActLog = game.log[
-                              game.log.length - 1
-                            ]?.players
-                              .map((e) => e.actions)
-                              .flat();
-                            const isConflict = lastActLog?.some(
-                              (a) =>
-                                a.res > 0 && a.res < 3 && a.x === x && a.y === y
-                            );
-                            return isConflict;
-                          })()
-                        : false;
+                  <Box
+                    key={`index-${x}-${y}`}
+                    sx={{
+                      gridColumn: x + 1,
+                      gridRow: y,
+                      p: "0.5em",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {x}
+                  </Box>
+                );
+              });
+            })}
+            {[1, board.width + 2].map((x) => {
+              return new Array(board.width).fill(0).map((_, i) => {
+                const y = i + 1;
+                return (
+                  <Box
+                    key={`index-${x}-${y}`}
+                    sx={{
+                      gridColumn: x,
+                      gridRow: y + 1,
+                      p: "0.5em",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {y}
+                  </Box>
+                );
+              });
+            })}
+            {(() => {
+              return tiled.map((tile, i) => {
+                const y = Math.floor(i / board.width);
+                const x = i % board.width;
+                const point = board.points[i];
+                const isAbs =
+                  point < 0 && tile.player !== null && tile.type === 0;
+                const agent = (() => {
+                  if (game.players) {
+                    const agent = game.players
+                      .map((e, i) =>
+                        e.agents.map((e_, j) => {
+                          return { agent: e_, player: i, n: j };
+                        })
+                      )
+                      .flat()
+                      .find((e) => e.agent.x === x && e.agent.y === y);
+                    return agent;
+                  } else return undefined;
+                })();
+                const bgColor = () => {
+                  if (tile.player !== null) {
+                    //console.log(tile);
+                    //console.log("tile player", tile.player);
+                    return datas[tile.player].colors[tile.type];
+                  } else if (point < 0) {
+                    const l = 100 - (Math.abs(point) * 50) / 16;
+                    return `hsl(0,0%,${l}%)`;
+                  } else if (point > 0) {
+                    const l = 100 - (Math.abs(point) * 50) / 16;
+                    return `hsl(60,100%,${l}%)`;
+                  }
+                };
+                const isConflict = game.log
+                  ? (() => {
+                      const lastActLog = game.log
+                        .at(-1)
+                        ?.players.flatMap((e) => {
+                          if (e.actions) return [...e.actions];
+                          else return [];
+                        });
+                      const isConflict = lastActLog?.some(
+                        (a) => a.res > 0 && a.res < 3 && a.x === x && a.y === y
+                      );
+                      return isConflict;
+                    })()
+                  : false;
 
-                      const bgColor = () => {
-                        if (cell.tiled.player !== null) {
-                          return datas[cell.tiled.player].colors[
-                            cell.tiled.type
-                          ];
-                        } else if (cell.point < 0) {
-                          const l = 100 - (Math.abs(cell.point) * 50) / 16;
-                          return `hsl(0,0%,${l}%)`;
-                        } else if (cell.point > 0) {
-                          const l = 100 - (Math.abs(cell.point) * 50) / 16;
-                          return `hsl(60,100%,${l}%)`;
-                        }
-                      };
-
-                      return (
-                        <BoardCell
-                          agent={agent}
-                          isConflict={isConflict}
-                          key={x}
+                return (
+                  <Box
+                    key={i}
+                    sx={{
+                      position: "relative",
+                      gridColumn: x + 2,
+                      gridRow: y + 2,
+                      aspectRatio: "1",
+                      backgroundColor: bgColor(),
+                      backgroundImage:
+                        agent && `url(${datas[agent.player].agentUrl})`,
+                      backgroundSize: "80%",
+                      backgroundPosition: "0% 50%",
+                      backgroundRepeat: "no-repeat",
+                      outline: "1px solid #555555",
+                      p: "0.2em",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "end",
+                      alignItems: "end",
+                      animation: isConflict
+                        ? `${flash} 1s linear infinite`
+                        : "",
+                    }}
+                    className="tile"
+                  >
+                    <Box sx={{}}>
+                      <BoardCellPoint isAbs={isAbs}>{point}</BoardCellPoint>
+                      {isAbs && <span>{Math.abs(point)}</span>}
+                      {agent && (
+                        <AgentDetail
                           style={{
-                            backgroundImage:
-                              agent && `url(${datas[agent.player].agentUrl})`,
-                            backgroundColor: bgColor(),
+                            border: `solid 4px ${
+                              datas[agent.player].colors[1]
+                            }`,
+                            transform: getAgentTransform(x, y),
                           }}
                         >
-                          <BoardCellPoint isAbs={isAbs}>
-                            {cell.point}
-                          </BoardCellPoint>
-                          {isAbs && (
-                            <>
-                              <br />
-                              <span>{Math.abs(cell.point)}</span>
-                            </>
-                          )}
-                          {agent && (
-                            <AgentDetail
-                              style={{
-                                border: `solid 4px ${
-                                  datas[agent.player].colors[1]
-                                }`,
-                                transform: getAgentTransform(x, y),
-                              }}
-                            >
-                              <span>
-                                {users[agent.player]?.screenName || "No player"}
-                                :{agent.n + 1}
-                              </span>
-                              <br />
-                              <span>行動履歴</span>
-                              <AgentDetailHistory>
-                                {agentHistory(agent).map((e, i) => {
-                                  return (
-                                    <div
-                                      key={i}
-                                      style={{
-                                        textDecoration:
-                                          e.res > 0 ? "line-through" : "none",
-                                      }}
-                                    >
-                                      T{e.turn}：
-                                      {e.type !== "停留" &&
-                                        `x:${e.x} , y:${e.y}に`}
-                                      {e.type}
-                                    </div>
-                                  );
-                                })}
-                              </AgentDetailHistory>
-                            </AgentDetail>
-                          )}
-                        </BoardCell>
-                      );
-                    })}
-                    <th>{y + 1}</th>
-                  </tr>
+                          <span>
+                            {users[agent.player]?.screenName || "No player"}:
+                            {agent.n + 1}
+                          </span>
+                          <br />
+                          <span>行動履歴</span>
+                          <AgentDetailHistory>
+                            {agentHistory(agent).map((e, i) => {
+                              return (
+                                <div
+                                  key={i}
+                                  style={{
+                                    textDecoration:
+                                      e.res > 0 ? "line-through" : "none",
+                                  }}
+                                >
+                                  T{e.turn}：
+                                  {e.type !== "停留" && `x:${e.x} , y:${e.y}に`}
+                                  {e.type}
+                                </div>
+                              );
+                            })}
+                          </AgentDetailHistory>
+                        </AgentDetail>
+                      )}
+                    </Box>
+                  </Box>
                 );
-              })}
-              <tr>
-                <th></th>
-                {[...Array(game.board.width)].map((_, x) => {
-                  return <th key={x}>{x + 1}</th>;
-                })}
-                <th></th>
-              </tr>
-            </tbody>
-          </BoardTable>
-        )}
-      </div>
-    </Content>
+              });
+            })()}
+          </Box>
+        );
+      })()}
+    </Box>
   );
 }
