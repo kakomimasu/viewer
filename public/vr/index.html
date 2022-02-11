@@ -39,7 +39,7 @@
     </a-scene>
 
     <script type="module">
-      import { getUrlQueries, getGameInfo, nowUnixTime, getTurnText } from "../js/util.js";
+      import { getUrlQueries, nowUnixTime, getTurnText } from "../js/util.js";
       import ApiClient from "https://cdn.jsdelivr.net/gh/kakomimasu/client-js@main/esm/mod.js";
       const apiClient = new ApiClient("https://api.kakomimasu.com");
 
@@ -175,9 +175,9 @@
       var socket = new WebSocket("wss://api.kakomimasu.com/v1/ws/game");
       socket.onopen = (event) => {
         const q = (
-        gameId
-          ? [`id:${gameId}`]
-          : ["sort:startAtUnixTime-desc", "is:newGame", `is:normal`]
+          gameId
+            ? [`id:${gameId}`]
+            : ["sort:startAtUnixTime-desc", "is:newGame", `is:normal`]
         ).join(" ");
         console.log(q);
         const req = {

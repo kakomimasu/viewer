@@ -37,10 +37,6 @@ function nowUnixTime() {
   return Math.floor(new Date().getTime() / 1000);
 }
 
-function diffTime(unixTime) {
-  return unixTime - Math.floor(new Date().getTime() / 1000);
-}
-
 function getUrlQueries() {
   const queries = {};
   const params = new URLSearchParams(window.location.search);
@@ -50,50 +46,11 @@ function getUrlQueries() {
   return queries;
 }
 
-//#region API client
-async function userShow(identifier) {
-  const resJson = await (await fetch(
-    `https://api.kakomimasu.com/v1/users/show/${identifier}`,
-  )).json();
-  //console.log(reqJson, "userShow");
-  return resJson;
-}
-
-/*async function getAllGame() {
-  const resJson = await (await fetch(
-    `/api/match/`,
-  )).json();
-  //console.log(reqJson, "getAllRoom");
-  return resJson;
-}*/
-
-async function getGameInfo(roomid) {
-  const resJson = await (await fetch(
-    `/api/match/${roomid}`,
-  )).json();
-  return resJson;
-}
-//#endregion
-
-export const firebaseConfig = {
-  apiKey: "AIzaSyDz0FDikVy97fFfGtnNf3UME7Zi393CXMM",
-  authDomain: "kakomimasu-6a8bb.firebaseapp.com",
-  projectId: "kakomimasu-6a8bb",
-  storageBucket: "kakomimasu-6a8bb.appspot.com",
-  messagingSenderId: "399214483363",
-  appId: "1:399214483363:web:966f0b596472476725ac16",
-  measurementId: "G-9E8LR1LC9W",
-};
-
 export {
-  diffTime,
   Game,
-  //getAllGame,
-  getGameInfo,
   getTurnText,
   getUrlQueries,
   nowUnixTime,
-  userShow,
 };
 
 export const getUserDetailUrl = (a) => `/user/detail.html?id=${a}`;
