@@ -43,7 +43,7 @@ export default function Index() {
             <br />
             <Link href="/game/detail">最新のゲームビューアはこちらから</Link>
             <br />
-            <a href="/vr/latest.html">最新のゲームビューア(VR版)はこちらから</a>
+            <a href="/vr/index.html">最新のゲームビューア(VR版)はこちらから</a>
             <br />
             <Link href="/game/create">カスタムゲーム作成はこちらから</Link>
           </div>

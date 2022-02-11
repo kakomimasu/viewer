@@ -53,7 +53,7 @@ function getUrlQueries() {
 //#region API client
 async function userShow(identifier) {
   const resJson = await (await fetch(
-    `/api/users/show/${identifier}`,
+    `https://api.kakomimasu.com/v1/users/show/${identifier}`,
   )).json();
   //console.log(reqJson, "userShow");
   return resJson;
