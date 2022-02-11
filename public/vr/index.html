@@ -39,7 +39,9 @@
     </a-scene>
 
     <script type="module">
-      import { getUrlQueries, getGameInfo, nowUnixTime, getTurnText } from "../js/util.js";
+      import { getUrlQueries, nowUnixTime, getTurnText } from "../js/util.js";
+      import ApiClient from "https://cdn.jsdelivr.net/gh/kakomimasu/client-js@main/esm/mod.js";
+      const apiClient = new ApiClient("https://api.kakomimasu.com");
 
       let game;
       let tiles;
@@ -87,16 +89,16 @@
               pointColor = "gray";
             } else {
               let gt = game.tiled[n];
-              if (gt[0] === 0 && gt[1] === 0) {
+              if (gt.type === 0 && gt.player === 0) {
                 color = "#80C9FF";
                 pointColor = "gray";
-              } else if (gt[0] === 0 && gt[1] === 1) {
+              } else if (gt.type === 0 && gt.player === 1) {
                 color = "#FE9998";
                 pointColor = "gray";
-              } else if (gt[0] === 1 && gt[1] === 0) {
+              } else if (gt.type === 1 && gt.player === 0) {
                 color = "#0096FF";
                 pointColor = "white";
-              } else if (gt[0] === 1 && gt[1] === 1) {
+              } else if (gt.type === 1 && gt.player === 1) {
                 color = "#FF0200";
                 pointColor = "white";
               } else {
@@ -148,9 +150,7 @@
         }
       }
 
-      async function getRoomInfo() {
-        game = await getGameInfo(gameId);
-
+      async function getRoomInfo(game) {
         // フィールド更新
         if (game.startedAtUnixTime === null) {
         }
@@ -158,8 +158,10 @@
           const lastLog = game.log[game.log.length - 1];
           const lastFlatLog = [];
           if (lastLog !== undefined) {
-            lastLog.forEach(p => {
-              lastFlatLog.push(...p.actions);
+            lastLog.players.forEach(p => {
+              if (p.actions) {
+                lastFlatLog.push(...p.actions);
+              }
             });
           }
           turn.setAttribute("value", getTurnText(game));
@@ -170,8 +172,20 @@
       }
 
       const gameId = getUrlQueries().id;
-      var socket = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/api/ws/game/" + gameId);
+      var socket = new WebSocket("wss://api.kakomimasu.com/v1/ws/game");
       socket.onopen = (event) => {
+        const q = (
+          gameId
+            ? [`id:${gameId}`]
+            : ["sort:startAtUnixTime-desc", "is:newGame", `is:normal`]
+        ).join(" ");
+        console.log(q);
+        const req = {
+          q,
+          endIndex: 1,
+        };
+        socket.send(JSON.stringify(req));
+
         setInterval(function updateStatus() {
           if (game) {
             if (game.startedAtUnixTime === null) statusText.setAttribute("value", "WAIT");
@@ -184,8 +198,9 @@
         }(), 100);
       }
       socket.onmessage = (event) => {
-        const game = JSON.parse(event.data);
-        getRoomInfo();
+        const game = JSON.parse(event.data).games[0];
+        console.log(game);
+        getRoomInfo(game);
       }
       socket.onerror = (event) => {
         //console.log('ws wrror', event);
