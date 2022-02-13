@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import next, { NextPage } from "next";
 import Link from "next/link";
 import Button from "@mui/material/Button";
-import { TextField, Box } from "@mui/material";
+import { TextField, Box, MenuItem } from "@mui/material";
 
 import {
   apiClient,
@@ -45,6 +45,14 @@ const NextActions: Record<
 };
 
 type AgentData = { index: number; nextAction: NextActionType };
+
+type Gamepads = ReturnType<typeof navigator["getGamepads"]>;
+type Controller = {
+  label: string;
+  helperText?: string;
+  agentIndex: number;
+  axis: NextActionType;
+};
 
 const ManualAgent = ({
   playerIndex,
@@ -182,11 +190,13 @@ function useKeyDirection(useKey: {
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [matchRes, setMatchRes] = useState<MatchRes>();
   const [game, setGame] = useState<Game>();
-  const [nextActions, setNextActions] = useState<NextActionType[]>([
-    NextActions.NONE,
-    NextActions.NONE,
-    NextActions.NONE,
-    NextActions.NONE,
+  const [controllerList, setControllerList] = useState<Controller[]>([
+    { label: "WSADキー", agentIndex: 0, axis: [0, 0] },
+    { label: "Arrowキー", agentIndex: 1, axis: [0, 0] },
+    { label: "GamePad 1", agentIndex: 2, axis: [0, 0] },
+    { label: "GamePad 2", agentIndex: 3, axis: [0, 0] },
+    { label: "GamePad 3", agentIndex: 4, axis: [0, 0] },
+    { label: "GamePad 4", agentIndex: 5, axis: [0, 0] },
   ]);
   const dirWSAD = useKeyDirection({
     up: "w",
@@ -200,8 +210,19 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     left: "ArrowLeft",
     right: "ArrowRight",
   });
-  // const [isShowNextAction, setIsShowNextAction] = useState(false);
-  // const refGame = useRef(game);
+
+  const [gamepads, setGamepads] = useState<Gamepads>([null, null, null, null]);
+  const [requestId, setRequestId] = useState<number>();
+  const updateGamepads = useCallback(() => {
+    const gps = navigator.getGamepads();
+    setGamepads(gps);
+    const reqId = requestAnimationFrame(updateGamepads);
+    setRequestId(reqId);
+  }, []);
+
+  useEffect(() => {
+    updateGamepads();
+  }, []);
 
   const connect = useCallback(() => {
     if (!matchRes) return;
@@ -241,18 +262,33 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   }, [connect]);
 
   useEffect(() => {
-    if (nextActions[0] === dirWSAD) return;
-    const nas = [...nextActions];
-    nas[0] = dirWSAD;
-    setNextActions(nas);
-  }, [dirWSAD, nextActions]);
+    if (controllerList[0].axis === dirWSAD) return;
+    const list = [...controllerList];
+    list[0].axis = dirWSAD;
+    setControllerList(list);
+  }, [dirWSAD, controllerList]);
 
   useEffect(() => {
-    if (nextActions[1] === dirArrow) return;
-    const nas = [...nextActions];
-    nas[1] = dirArrow;
-    setNextActions(nas);
-  }, [dirArrow, nextActions]);
+    if (controllerList[1].axis === dirArrow) return;
+    const list = [...controllerList];
+    list[1].axis = dirArrow;
+    setControllerList(list);
+  }, [dirArrow, controllerList]);
+
+  useEffect(() => {
+    console.log("gamepads", gamepads);
+    const list = [...controllerList];
+    for (let i = 0; i < gamepads.length; i++) {
+      const gp = gamepads[i];
+      list[i + 2].helperText = gp?.id || "未接続";
+      list[i + 2].axis =
+        (gp?.axes.map((a) => Math.round(a)) as NextActionType) ||
+        NextActions.NONE;
+    }
+
+    console.log(list[2]);
+    setControllerList(list);
+  }, [gamepads]);
 
   useEffect(() => {
     if (!matchRes || !game || !game.gaming || !game.board || !game.tiled)
@@ -260,12 +296,15 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     const board = game.board;
     const tiled = game.tiled;
     if (!board || !tiled) return;
-    const actions: ActionPost[] = nextActions.flatMap((nextAction, i) => {
-      if (nextAction[0] === 0 && nextAction[1] === 0) return [];
-      const agent = game.players[matchRes.index].agents[i];
+    const actions: ActionPost[] = controllerList.flatMap((controller, i) => {
+      const agentIndex = controller.agentIndex;
+      const agent = game.players[matchRes.index].agents[agentIndex] || {
+        x: -1,
+        y: -1,
+      };
       if (agent.x < 0) return [];
-      const x = agent.x + nextAction[0];
-      const y = agent.y + nextAction[1];
+      const x = agent.x + controller.axis[0];
+      const y = agent.y + controller.axis[1];
       const nextTile = tiled[y * board.width + x];
       if (!nextTile) return [];
       const type =
@@ -274,7 +313,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
           : "MOVE";
       return [
         {
-          agentId: i,
+          agentId: agentIndex,
           x,
           y,
           type,
@@ -284,7 +323,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     console.log("update actions", game);
     console.log(actions);
     apiClient.setAction(game.gameId, { actions }, matchRes.pic);
-  }, [nextActions, game, matchRes]);
+  }, [controllerList, game, matchRes]);
 
   useEffect(() => {
     if (!game || !matchRes || !game.gaming || !game.board) return;
@@ -329,6 +368,29 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     }
   }
 
+  const AgentMenuItem = useCallback(() => {
+    const agentItem = new Array(6)
+      .fill(0)
+      .map((_, i) => <MenuItem value={i}>Agent {i + 1}</MenuItem>);
+    return agentItem;
+  }, []);
+
+  const changeControllerSetting = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      controllerIndex: number
+    ) => {
+      const agentIndex = parseInt(e.target.value);
+      const list = [...controllerList];
+      const oldAgentIndex = list[controllerIndex].agentIndex;
+      const exchangeController = list.find((c) => c.agentIndex === agentIndex);
+      if (exchangeController) exchangeController.agentIndex = oldAgentIndex;
+      list[controllerIndex].agentIndex = agentIndex;
+      setControllerList(list);
+    },
+    []
+  );
+
   return (
     <Content title="手動ゲーム参加">
       <div style={{ display: "flex", flexDirection: "column" }}>
@@ -356,6 +418,45 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         </Box>
         <Box
           sx={{
+            border: "3px solid",
+            borderColor: "#BBB",
+            borderRadius: "0.5em",
+            p: 1.5,
+          }}
+        >
+          <Box component="h4" sx={{ m: 0 }}>
+            コントローラ設定
+          </Box>
+          <Box sx={{ mx: 1, display: "flex" }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "space-evenly",
+                m: 1,
+                width: "100%",
+                "& > *": {
+                  minWidth: "15em",
+                },
+              }}
+            >
+              {controllerList.map((c, i) => (
+                <TextField
+                  select
+                  value={c.agentIndex}
+                  label={c.label}
+                  helperText={c.helperText}
+                  size="small"
+                  onChange={(e) => changeControllerSetting(e, i)}
+                >
+                  {AgentMenuItem()}
+                </TextField>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+        <Box
+          sx={{
             display: "flex",
             flexDirection: "row",
             justifyContent: "center",
@@ -363,13 +464,18 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
             my: 1,
           }}
         >
-          {nextActions.map((action, i) => (
-            <ManualAgent
-              key={i}
-              playerIndex={matchRes?.index || 0}
-              agentData={{ index: i, nextAction: action }}
-            />
-          ))}
+          {[...controllerList]
+            .sort((a, b) => a.agentIndex - b.agentIndex)
+            .map((c, i) => (
+              <ManualAgent
+                key={i}
+                playerIndex={matchRes?.index || 0}
+                agentData={{
+                  index: i,
+                  nextAction: c.axis,
+                }}
+              />
+            ))}
         </Box>
         {game && (
           <>
