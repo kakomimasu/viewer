@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
-import next, { NextPage } from "next";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { NextPage } from "next";
 import Link from "next/link";
 import Button from "@mui/material/Button";
 import { TextField, Box, MenuItem } from "@mui/material";
@@ -57,9 +57,11 @@ type Controller = {
 const ManualAgent = ({
   playerIndex,
   agentData,
+  enable,
 }: {
   playerIndex: number;
   agentData: AgentData;
+  enable: boolean;
 }) => {
   const playerData = datas[playerIndex];
   const na = agentData.nextAction;
@@ -68,11 +70,12 @@ const ManualAgent = ({
       sx={{
         border: "3px solid",
         borderColor: playerData.colors[1],
-        borderRadius: "1em",
+        borderRadius: 2,
+        backgroundColor: enable ? "" : "#eee",
         p: 1,
       }}
     >
-      <Box component="h5" sx={{ mb: 1 }}>
+      <Box component="h5" sx={{ my: 0 }}>
         Agent {agentData.index + 1}
       </Box>
       <Box
@@ -135,7 +138,6 @@ function useKeyDirection(useKey: {
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      // console.log(e.key);
       let dir: NextActionType = [...direction];
       if (e.key === useKey.up) dir[1] = -1;
       else if (e.key === useKey.down) dir[1] = 1;
@@ -156,7 +158,6 @@ function useKeyDirection(useKey: {
 
   const onKeyUp = useCallback(
     (e: KeyboardEvent) => {
-      // console.log(e.key);
       let dir: NextActionType = [...direction];
       if (e.key === useKey.up && dir[1] === -1) dir[1] = 0;
       else if (e.key === useKey.down && dir[1] === 1) dir[1] = 0;
@@ -212,17 +213,21 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   });
 
   const [gamepads, setGamepads] = useState<Gamepads>([null, null, null, null]);
-  const [requestId, setRequestId] = useState<number>();
+  const requestId = useRef<number>();
   const updateGamepads = useCallback(() => {
     const gps = navigator.getGamepads();
     setGamepads(gps);
-    const reqId = requestAnimationFrame(updateGamepads);
-    setRequestId(reqId);
+    requestId.current = requestAnimationFrame(updateGamepads);
   }, []);
 
   useEffect(() => {
     updateGamepads();
-  }, []);
+    return () => {
+      if (requestId.current) {
+        cancelAnimationFrame(requestId.current);
+      }
+    };
+  }, [updateGamepads]);
 
   const connect = useCallback(() => {
     if (!matchRes) return;
@@ -276,19 +281,27 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   }, [dirArrow, controllerList]);
 
   useEffect(() => {
-    console.log("gamepads", gamepads);
     const list = [...controllerList];
+    let isUpdate = false;
     for (let i = 0; i < gamepads.length; i++) {
       const gp = gamepads[i];
-      list[i + 2].helperText = gp?.id || "未接続";
-      list[i + 2].axis =
+      const c = list[i + 2];
+      const helperText = gp?.id || "未接続";
+      if (c.helperText !== helperText) {
+        c.helperText = helperText;
+        isUpdate = true;
+      }
+      const axis =
         (gp?.axes.map((a) => Math.round(a)) as NextActionType) ||
         NextActions.NONE;
+      if (c.axis[0] !== axis[0] || c.axis[1] !== axis[1]) {
+        c.axis = axis;
+        isUpdate = true;
+      }
     }
 
-    console.log(list[2]);
-    setControllerList(list);
-  }, [gamepads]);
+    if (isUpdate) setControllerList(list);
+  }, [gamepads, controllerList]);
 
   useEffect(() => {
     if (!matchRes || !game || !game.gaming || !game.board || !game.tiled)
@@ -320,8 +333,8 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         },
       ];
     });
-    console.log("update actions", game);
-    console.log(actions);
+    // console.log("update actions", game);
+    // console.log(actions);
     apiClient.setAction(game.gameId, { actions }, matchRes.pic);
   }, [controllerList, game, matchRes]);
 
@@ -330,21 +343,21 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     const board = game.board;
     if (game.turn === 1) {
       const playerIndex = matchRes.index;
-      let x: number;
-      if (playerIndex === 0) x = 1;
-      else x = board.width - 2;
-      const actions: ActionPost[] = new Array(4).fill(0).map((_, i) => {
-        const y = Math.floor(((board.height - 1) / 3) * i);
-        console.log(board.height, y);
-        return { agentId: i, x, y, type: "PUT" };
-      });
-      console.log("actions", actions);
+      let x = playerIndex === 0 ? 1 : board.width - 2;
+      const actions: ActionPost[] = controllerList
+        .filter((c) => c.agentIndex >= 0)
+        .map((c, i, array) => {
+          const y = Math.floor(((board.height - 1) / (array.length - 1)) * i);
+          // console.log(board.height, y);
+          return { agentId: c.agentIndex, x, y, type: "PUT" };
+        });
+      // console.log("actions", actions);
       const res = apiClient.setAction(
         matchRes.gameId,
         { actions },
         matchRes.pic
       );
-      console.log(res);
+      // console.log(res);
     }
     /*if (game.turn >= 3) {
       setNextActions([
@@ -354,7 +367,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         NextActions.NONE,
       ]);
     }*/
-  }, [game, matchRes]);
+  }, [game, matchRes, controllerList]);
 
   async function joinGame(gameId?: string) {
     const matchRes = await apiClient.match({
@@ -368,35 +381,34 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     }
   }
 
-  const AgentMenuItem = useCallback(() => {
-    const agentItem = new Array(6)
-      .fill(0)
-      .map((_, i) => <MenuItem value={i}>Agent {i + 1}</MenuItem>);
-    return agentItem;
-  }, []);
-
-  const changeControllerSetting = useCallback(
+  const changeAgentController = useCallback(
     (
       e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-      controllerIndex: number
+      agentIndex: number
     ) => {
-      const agentIndex = parseInt(e.target.value);
       const list = [...controllerList];
-      const oldAgentIndex = list[controllerIndex].agentIndex;
-      const exchangeController = list.find((c) => c.agentIndex === agentIndex);
-      if (exchangeController) exchangeController.agentIndex = oldAgentIndex;
-      list[controllerIndex].agentIndex = agentIndex;
+
+      const oldController = list.find((c) => c.agentIndex === agentIndex);
+      const newControllerIndex = parseInt(e.target.value);
+
+      if (newControllerIndex >= 0) {
+        const newController = list[newControllerIndex];
+        if (oldController) {
+          oldController.agentIndex = newController.agentIndex;
+        }
+        newController.agentIndex = agentIndex;
+      } else if (oldController) {
+        oldController.agentIndex = -1;
+      }
       setControllerList(list);
     },
-    []
+    [controllerList]
   );
 
   return (
     <Content title="手動ゲーム参加">
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <Box
-          sx={{ display: "flex", flexDirection: "row", gap: "0 1em", my: 1 }}
-        >
+      <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
+        <Box sx={{ display: "flex", flexDirection: "row", gap: "0 1em" }}>
           <Button
             onClick={() => {
               joinGame();
@@ -420,7 +432,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
           sx={{
             border: "3px solid",
             borderColor: "#BBB",
-            borderRadius: "0.5em",
+            borderRadius: 1,
             p: 1.5,
           }}
         >
@@ -434,24 +446,42 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
                 flexWrap: "wrap",
                 justifyContent: "space-evenly",
                 m: 1,
+                gap: 1,
                 width: "100%",
                 "& > *": {
+                  display: "flex",
                   minWidth: "15em",
                 },
               }}
             >
-              {controllerList.map((c, i) => (
-                <TextField
-                  select
-                  value={c.agentIndex}
-                  label={c.label}
-                  helperText={c.helperText}
-                  size="small"
-                  onChange={(e) => changeControllerSetting(e, i)}
-                >
-                  {AgentMenuItem()}
-                </TextField>
-              ))}
+              {new Array(6).fill(0).map((_, i) => {
+                const controllerIndex = controllerList.findIndex(
+                  (c) => c.agentIndex === i
+                );
+
+                return (
+                  <TextField
+                    key={i}
+                    select
+                    value={controllerIndex}
+                    label={`Agent ${i + 1}`}
+                    size="small"
+                    onChange={(e) => changeAgentController(e, i)}
+                  >
+                    <MenuItem key={-1} value={-1}>
+                      None
+                    </MenuItem>
+                    {controllerList.map((c, j) => (
+                      <MenuItem key={j} value={j}>
+                        {c.label}{" "}
+                        <Box sx={{ fontSize: "0.8em", display: "inline" }}>
+                          {c.helperText && `[${c.helperText}]`}
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                );
+              })}
             </Box>
           </Box>
         </Box>
@@ -461,21 +491,22 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
             flexDirection: "row",
             justifyContent: "center",
             gap: "0 1em",
-            my: 1,
           }}
         >
-          {[...controllerList]
-            .sort((a, b) => a.agentIndex - b.agentIndex)
-            .map((c, i) => (
+          {new Array(6).fill(0).map((_, i) => {
+            const c = controllerList.find((c) => c.agentIndex === i);
+            return (
               <ManualAgent
                 key={i}
                 playerIndex={matchRes?.index || 0}
                 agentData={{
                   index: i,
-                  nextAction: c.axis,
+                  nextAction: c?.axis || NextActions.NONE,
                 }}
+                enable={Boolean(c)}
               />
-            ))}
+            );
+          })}
         </Box>
         {game && (
           <>
