@@ -1,29 +1,37 @@
 import React from "react";
-import Head from "next/head";
+import Link from "next/link";
 import { styled } from "@mui/material/styles";
-import { marked } from "marked";
-import highlightjs from "highlight.js";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-const renderer = new marked.Renderer();
-renderer.link = (href, title, text) => {
-  //console.log(href, title, text);
-  let h = href?.split("/").slice(-1)[0]?.replace(".md", "") || "";
-  const hSplit = h.split("#");
-  hSplit[1] = hSplit[1]?.toLowerCase();
-  h = hSplit.join("#");
-  if (h.startsWith("#")) return `<a href=${h}>${text}</a>`;
-  //console.log(h);
-  return `<a href=/docs/apiv1/${h}>${text}</a>`;
-};
-
-marked.setOptions({
-  langPrefix: "",
-  highlight: function (code, lang) {
-    return highlightjs.highlightAuto(code, [lang]).value;
+const components: React.ComponentProps<typeof ReactMarkdown>["components"] = {
+  a: ({ href, children }) => {
+    let h = href?.split("/").at(-1)?.replace(".md", "") || "";
+    const hSplit = h.split("#");
+    if (hSplit[1]) hSplit[1] = hSplit[1].toLowerCase();
+    h = hSplit.join("#");
+    let linkHref;
+    if (h.startsWith("#")) linkHref = h;
+    else linkHref = `/docs/apiv1/${h}`;
+    return <Link href={linkHref}>{children[0]}</Link>;
   },
-  renderer,
-  gfm: true,
-});
+  code({ node, inline, className, children, ...props }) {
+    const match = /language-(\w+)/.exec(className || "");
+    const language = match ? match[1].toLowerCase() : "";
+    return !inline ? (
+      <SyntaxHighlighter style={a11yDark} language={language} PreTag="div">
+        {String(children).replace(/\n$/, "")}
+      </SyntaxHighlighter>
+    ) : (
+      <code>{children}</code>
+    );
+  },
+  td: ({ children }) => (
+    <td>{children.map((child) => (child === "<br>" ? <br /> : child))}</td>
+  ),
+};
 
 const StyledDiv = styled("div")(({ theme }) => {
   return {
@@ -44,9 +52,6 @@ const StyledDiv = styled("div")(({ theme }) => {
       fontFamily: `Consolas, Menlo, Monaco`,
     },
     pre: {
-      backgroundColor: "#353535",
-      padding: "10px",
-      color: "white",
       fontSize: "0.8em",
     },
   };
@@ -54,14 +59,10 @@ const StyledDiv = styled("div")(({ theme }) => {
 
 export default function Page({ text }: { text: string }) {
   return (
-    <>
-      <Head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/monokai-sublime.min.css"
-        />
-      </Head>
-      <StyledDiv dangerouslySetInnerHTML={{ __html: marked(text) }} />
-    </>
+    <StyledDiv>
+      <ReactMarkdown components={components} remarkPlugins={[remarkGfm]}>
+        {text}
+      </ReactMarkdown>
+    </StyledDiv>
   );
 }

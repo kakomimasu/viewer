@@ -75,7 +75,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         {game ? (
           <>
             <Link
-              href={id ? `/vr/index.html?id=${id}` : "/vr/latest.html"}
+              href={id ? `/vr/index.html?id=${id}` : "/vr/index.html"}
               passHref
             >
               <Button style={{ margin: "auto" }}>VR版はこちら</Button>
