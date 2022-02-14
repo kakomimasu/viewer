@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { NextPage } from "next";
 import {
   CartesianGrid,
@@ -11,7 +11,8 @@ import {
   YAxis,
 } from "recharts";
 
-import { apiClient, Game, User } from "../src/apiClient";
+import { type Game } from "../src/apiClient";
+import { useGameUsers } from "../src/useGameUsers";
 import datas from "./player_datas";
 
 const PointsGraph: NextPage<{ game: Game }> = ({ game }) => {
@@ -24,24 +25,11 @@ const PointsGraph: NextPage<{ game: Game }> = ({ game }) => {
     data.push({ turn: i, points });
   });
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [playerIds, setPlayerIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    const getUsers = async () => {
-      const users_: typeof users = [];
-      for (const id of playerIds) {
-        const res = await apiClient.usersShow(id);
-        if (res.success) users_.push(res.data);
-      }
-      setUsers([...users_]);
-    };
-    getUsers();
-  }, [playerIds]);
-
-  useEffect(() => {
-    setPlayerIds(game.players.map((player) => player.id));
-  }, [game.players]);
+  const playerIds = useMemo(
+    () => game.players.map((p) => p.id),
+    [game.players]
+  );
+  const users = useGameUsers(playerIds);
 
   return (
     <div style={{ width: "100%", height: "300px" }}>
@@ -65,14 +53,15 @@ const PointsGraph: NextPage<{ game: Game }> = ({ game }) => {
           />
           <Legend />
 
-          {game.players.map((_, i) => {
+          {game.players.map((player, i) => {
+            const user = users.get(player.id);
             return (
               <Line
-                key={users[i]?.screenName}
+                key={i}
                 type="monotone"
                 dataKey={`points[${i}]`}
                 stroke={datas[i].colors[1]}
-                name={users[i]?.screenName || "loading..."}
+                name={user ? user.screenName : player.id}
               />
             );
           })}
