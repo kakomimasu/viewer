@@ -46,6 +46,8 @@ export default function Index() {
             <a href="/vr/index.html">最新のゲームビューア(VR版)はこちらから</a>
             <br />
             <Link href="/game/create">カスタムゲーム作成はこちらから</Link>
+            <br />
+            <Link href="/game/manual">人力対戦はこちらから</Link>
           </div>
         </SubSection>
         <SubSection title="大会">
