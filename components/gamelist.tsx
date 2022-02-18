@@ -18,7 +18,8 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPage from "@mui/icons-material/LastPage";
 
-import { Game, Player, User, apiClient } from "../src/apiClient";
+import { Game, Player } from "../src/apiClient";
+import { useGameUsers } from "../src/useGameUsers";
 
 const StatusCircle = ({ className }: { className?: string }) => {
   return <span className={className}>●</span>;
@@ -54,45 +55,16 @@ const GameList = (props: {
 
   const router = useRouter();
 
-  type IUser =
-    | {
-        u: User;
-        exists: true;
-      }
-    | { u: { id: string }; exists: false };
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [users, addUser] = useReducer((users: IUser[], action: IUser[]) => {
-    return [...users, ...action];
-  }, []);
-
-  const unacquiredPlayerIds = useMemo(() => {
-    const ids = new Set<string>();
-    games.forEach((game) => {
-      game.players.forEach((player) => {
-        if (users.some((user) => user.u.id === player.id)) return;
-        ids.add(player.id);
-      });
-    });
-    return ids;
-  }, [games, users]);
-
-  useEffect(() => {
-    console.log("UnacquiredPlayerIds", unacquiredPlayerIds);
-    const getUsers = async () => {
-      if (unacquiredPlayerIds.size === 0) return;
-      const us: IUser[] = [];
-      for (const id of Array.from(unacquiredPlayerIds)) {
-        const res = await apiClient.usersShow(id);
-        const u: IUser = res.success
-          ? { exists: true, u: res.data }
-          : { exists: false, u: { id } };
-        us.push(u);
-      }
-      addUser(us);
-    };
-    getUsers();
-  }, [unacquiredPlayerIds]);
+  const playerIds = useMemo(
+    () =>
+      games.flatMap((game) => {
+        return game.players.map((p) => p.id);
+      }),
+    [games]
+  );
+  const users = useGameUsers(playerIds);
 
   const getStatusClass = (game: Game) => {
     if (game.ending) return <Ending />;
@@ -109,12 +81,6 @@ const GameList = (props: {
 
   const getPoint = (player: Player) => {
     return player.point.basepoint + player.point.wallpoint;
-  };
-
-  const getUser = (id: string) => {
-    const user = users.find((user) => user.u.id === id);
-    if (user?.exists) return user.u;
-    else return undefined;
   };
 
   const toGameDetail = (id: string) => {
@@ -191,7 +157,7 @@ const GameList = (props: {
                           )}
                           <div>
                             {(() => {
-                              const user = getUser(player.id);
+                              const user = users.get(player.id);
                               return user ? (
                                 <span>
                                   <Link href={`/user/detail/${user.name}`}>
@@ -199,7 +165,17 @@ const GameList = (props: {
                                   </Link>
                                 </span>
                               ) : (
-                                <UnSpan>No player</UnSpan>
+                                <UnSpan
+                                  style={{
+                                    display: "inline-block",
+                                    maxWidth: "7em",
+                                    overflow: "hidden",
+                                    whiteSpace: "nowrap",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {player.id}
+                                </UnSpan>
                               );
                             })()}
                             {getPlacedAgentStr(game, i)}

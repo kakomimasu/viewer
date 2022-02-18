@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { Box } from "@mui/material";
 
-import { apiClient, Game, User } from "../src/apiClient";
+import { type Game } from "../src/apiClient";
+import { useGameUsers } from "../src/useGameUsers";
 
 import datas from "./player_datas";
 
@@ -64,12 +65,12 @@ const AgentDetail = styled("div")({
 });
 
 export default function GameBoard({ game }: Props) {
-  const [users, setUsers] = useState<(User | undefined)[]>([]);
   const [status, setStatus] = useState<string>();
   const playerIds = useMemo(
     () => game.players.map((p) => p.id),
     [game.players]
   );
+  const users = useGameUsers(playerIds);
 
   const setStatusT = useCallback(() => {
     let status = "";
@@ -135,23 +136,6 @@ export default function GameBoard({ game }: Props) {
     }
     return history.reverse();
   };
-
-  useEffect(() => {
-    console.log("useEffect gameBoard");
-    const UpdateUsers = async () => {
-      const users_ = [];
-      for (const id of playerIds) {
-        const res = await apiClient.usersShow(id);
-        if (res.success) {
-          const user = res.data;
-
-          users_.push(user);
-        } else users_.push(undefined);
-      }
-      setUsers(users_);
-    };
-    UpdateUsers();
-  }, [playerIds]);
 
   const getAgentTransform = (x: number, y: number) => {
     if (!game.board) return;
@@ -310,40 +294,47 @@ export default function GameBoard({ game }: Props) {
                     <Box sx={{}}>
                       <BoardCellPoint isAbs={isAbs}>{point}</BoardCellPoint>
                       {isAbs && <span>{Math.abs(point)}</span>}
-                      {agent && (
-                        <AgentDetail
-                          style={{
-                            border: `solid 4px ${
-                              datas[agent.player].colors[1]
-                            }`,
-                            transform: getAgentTransform(x, y),
-                          }}
-                        >
-                          <span>
-                            {users[agent.player]?.screenName || "No player"}:
-                            {agent.n + 1}
-                          </span>
-                          <br />
-                          <span>行動履歴</span>
-                          <AgentDetailHistory>
-                            {agentHistory(agent).map((e, i) => {
-                              return (
-                                <div
-                                  key={i}
-                                  style={{
-                                    textDecoration:
-                                      e.res > 0 ? "line-through" : "none",
-                                  }}
-                                >
-                                  T{e.turn}：
-                                  {e.type !== "停留" && `x:${e.x} , y:${e.y}に`}
-                                  {e.type}
-                                </div>
-                              );
-                            })}
-                          </AgentDetailHistory>
-                        </AgentDetail>
-                      )}
+                      {agent &&
+                        (() => {
+                          const userId = game.players[agent.player].id;
+                          const user = users.get(userId);
+                          return (
+                            <AgentDetail
+                              style={{
+                                border: `solid 4px ${
+                                  datas[agent.player].colors[1]
+                                }`,
+                                transform: getAgentTransform(x, y),
+                              }}
+                            >
+                              <span>
+                                {user ? user.screenName : userId}
+                                {" : "}
+                                {agent.n + 1}
+                              </span>
+                              <br />
+                              <span>行動履歴</span>
+                              <AgentDetailHistory>
+                                {agentHistory(agent).map((e, i) => {
+                                  return (
+                                    <div
+                                      key={i}
+                                      style={{
+                                        textDecoration:
+                                          e.res > 0 ? "line-through" : "none",
+                                      }}
+                                    >
+                                      T{e.turn}：
+                                      {e.type !== "停留" &&
+                                        `x:${e.x} , y:${e.y}に`}
+                                      {e.type}
+                                    </div>
+                                  );
+                                })}
+                              </AgentDetailHistory>
+                            </AgentDetail>
+                          );
+                        })()}
                     </Box>
                   </Box>
                 );
