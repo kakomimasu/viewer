@@ -12,7 +12,7 @@
     "@emotion/cache": "^11.6.0",
     "@emotion/react": "^11.8.1",
     "@emotion/server": "^11.4.0",
-    "@emotion/styled": "^11.6.0",
+    "@emotion/styled": "^11.8.1",
     "@kakomimasu/client-js": "github:kakomimasu/client-js#v1.0.0-beta.6",
     "@mui/icons-material": "^5.4.2",
     "@mui/material": "^5.4.1",
