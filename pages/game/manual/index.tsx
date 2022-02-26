@@ -135,55 +135,54 @@ function useKeyDirection(useKey: {
   right: string;
 }) {
   const [direction, setDirection] = useState<NextActionType>(NextActions.NONE);
+  const rawDirection = useRef<NextActionType>(NextActions.NONE);
+  const changeTime = useRef<number>();
 
-  const onKeyDown = useCallback(
+  const changeDirection = useCallback((dir: NextActionType) => {
+    rawDirection.current = dir;
+
+    if (changeTime.current === undefined) {
+      changeTime.current = Date.now();
+      setTimeout(() => {
+        changeTime.current = undefined;
+
+        setDirection((prev) => {
+          const curr = rawDirection.current;
+          if (
+            (curr[0] === prev[0] && curr[1] === prev[1]) ||
+            (curr[0] === 0 && curr[1] === 0)
+          )
+            return prev;
+          else return [rawDirection.current[0], rawDirection.current[1]];
+        });
+      }, 50);
+    }
+  }, []);
+
+  const onKeyChange = useCallback(
     (e: KeyboardEvent) => {
-      let dir: NextActionType = [...direction];
-      if (e.key === useKey.up) dir[1] = -1;
-      else if (e.key === useKey.down) dir[1] = 1;
-      else if (e.key === useKey.left) dir[0] = -1;
-      else if (e.key === useKey.right) dir[0] = 1;
+      const dir: NextActionType = [...rawDirection.current];
+      const isKeyDown = e.type === "keydown";
+      if (e.key === useKey.up) dir[1] = isKeyDown ? -1 : 0;
+      else if (e.key === useKey.down) dir[1] = isKeyDown ? 1 : 0;
+      else if (e.key === useKey.left) dir[0] = isKeyDown ? -1 : 0;
+      else if (e.key === useKey.right) dir[0] = isKeyDown ? 1 : 0;
       else return;
-      e.preventDefault();
+      e.preventDefault(); // 該当するキーが押されたらキーイベントをキャンセル
+      if (e.repeat) return;
 
-      const isUpdate = dir.reduce(
-        (acc, cur, i) => acc || cur !== direction[i],
-        false
-      );
-      if (!isUpdate) return;
-      setDirection(dir);
+      changeDirection(dir);
     },
-    [direction, useKey]
+    [changeDirection, useKey]
   );
-
-  const onKeyUp = useCallback(
-    (e: KeyboardEvent) => {
-      let dir: NextActionType = [...direction];
-      if (e.key === useKey.up && dir[1] === -1) dir[1] = 0;
-      else if (e.key === useKey.down && dir[1] === 1) dir[1] = 0;
-      else if (e.key === useKey.left && dir[0] === -1) dir[0] = 0;
-      else if (e.key === useKey.right && dir[0] === 1) dir[0] = 0;
-      else return;
-      e.preventDefault();
-
-      const isUpdate = dir.reduce(
-        (acc, cur, i) => acc || cur !== direction[i],
-        false
-      );
-      if (!isUpdate) return;
-      setDirection(dir);
-    },
-    [direction, useKey]
-  );
-
   useEffect(() => {
-    document.addEventListener("keydown", onKeyDown, false);
-    document.addEventListener("keyup", onKeyUp, false);
+    document.addEventListener("keydown", onKeyChange, false);
+    document.addEventListener("keyup", onKeyChange, false);
     return () => {
-      document.removeEventListener("keydown", onKeyDown, false);
-      document.removeEventListener("keyup", onKeyUp, false);
+      document.removeEventListener("keydown", onKeyChange, false);
+      document.removeEventListener("keyup", onKeyChange, false);
     };
-  }, [onKeyDown, onKeyUp]);
+  }, [onKeyChange]);
 
   return direction;
 }
@@ -213,6 +212,18 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   });
 
   const [gamepads, setGamepads] = useState<Gamepads>([null, null, null, null]);
+  const rawGamepadAxis = useRef<[number, number][]>([
+    [0, 0],
+    [0, 0],
+    [0, 0],
+    [0, 0],
+  ]);
+  const gamepadChangeTime = useRef<(number | undefined)[]>([
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  ]);
   const requestId = useRef<number>();
   const updateGamepads = useCallback(() => {
     const gps = navigator.getGamepads();
@@ -267,41 +278,71 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   }, [connect]);
 
   useEffect(() => {
-    if (controllerList[0].axis === dirWSAD) return;
-    const list = [...controllerList];
-    list[0].axis = dirWSAD;
-    setControllerList(list);
-  }, [dirWSAD, controllerList]);
+    setControllerList((prev) => {
+      if (prev[0].axis === dirWSAD) return prev;
+      const list = [...prev];
+      list[0].axis = dirWSAD;
+      return list;
+    });
+  }, [dirWSAD]);
 
   useEffect(() => {
-    if (controllerList[1].axis === dirArrow) return;
-    const list = [...controllerList];
-    list[1].axis = dirArrow;
-    setControllerList(list);
-  }, [dirArrow, controllerList]);
+    setControllerList((prev) => {
+      if (prev[1].axis === dirArrow) return prev;
+      const list = [...prev];
+      list[1].axis = dirArrow;
+      return list;
+    });
+  }, [dirArrow]);
 
-  useEffect(() => {
-    const list = [...controllerList];
-    let isUpdate = false;
-    for (let i = 0; i < gamepads.length; i++) {
-      const gp = gamepads[i];
-      const c = list[i + 2];
-      const helperText = gp?.id || "未接続";
-      if (c.helperText !== helperText) {
-        c.helperText = helperText;
-        isUpdate = true;
-      }
-      const axis =
-        (gp?.axes.map((a) => Math.round(a)) as NextActionType) ||
-        NextActions.NONE;
-      if (c.axis[0] !== axis[0] || c.axis[1] !== axis[1]) {
-        c.axis = axis;
-        isUpdate = true;
-      }
+  const changeController = useCallback((i: number, dir: NextActionType) => {
+    rawGamepadAxis.current[i] = dir;
+
+    if (gamepadChangeTime.current[i] === undefined) {
+      gamepadChangeTime.current[i] = Date.now();
+      setTimeout(() => {
+        gamepadChangeTime.current[i] = undefined;
+
+        setControllerList((prev) => {
+          const list = [...prev];
+          const c = list[i + 2];
+          const axis = rawGamepadAxis.current[i];
+          if (
+            (axis[0] === c.axis[0] && axis[1] === c.axis[1]) ||
+            (axis[0] === 0 && axis[1] === 0)
+          ) {
+            return prev;
+          } else {
+            c.axis = axis as NextActionType;
+            return list;
+          }
+        });
+      }, 50);
     }
+  }, []);
 
-    if (isUpdate) setControllerList(list);
-  }, [gamepads, controllerList]);
+  useEffect(() => {
+    setControllerList((prev) => {
+      const list = [...prev];
+      let isUpdate = false;
+      for (let i = 0; i < gamepads.length; i++) {
+        const gp = gamepads[i];
+        const c = list[i + 2];
+        const helperText = gp?.id || "未接続";
+        if (c.helperText !== helperText) {
+          c.helperText = helperText;
+          isUpdate = true;
+        }
+
+        const axis =
+          (gp?.axes.map((a) => Math.round(a)) as NextActionType) ||
+          NextActions.NONE;
+        changeController(i, axis);
+      }
+      if (isUpdate) return list;
+      else return prev;
+    });
+  }, [gamepads, changeController]);
 
   useEffect(() => {
     if (!matchRes || !game || !game.gaming || !game.board || !game.tiled)
@@ -357,17 +398,22 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         { actions },
         matchRes.pic
       );
-      // console.log(res);
+      console.log(res);
     }
-    /*if (game.turn >= 3) {
-      setNextActions([
-        NextActions.NONE,
-        NextActions.NONE,
-        NextActions.NONE,
-        NextActions.NONE,
-      ]);
-    }*/
   }, [game, matchRes, controllerList]);
+
+  useEffect(() => {
+    if (!game) return;
+    if (game.turn >= 3) {
+      setControllerList((prev) => {
+        const list = [...prev];
+        list.forEach((c) => {
+          c.axis = NextActions.NONE;
+        });
+        return list;
+      });
+    }
+  }, [game]);
 
   async function joinGame(gameId?: string) {
     const matchRes = await apiClient.match({
@@ -386,23 +432,25 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
       agentIndex: number
     ) => {
-      const list = [...controllerList];
+      setControllerList((prev) => {
+        const list = [...prev];
 
-      const oldController = list.find((c) => c.agentIndex === agentIndex);
-      const newControllerIndex = parseInt(e.target.value);
+        const oldController = list.find((c) => c.agentIndex === agentIndex);
+        const newControllerIndex = parseInt(e.target.value);
 
-      if (newControllerIndex >= 0) {
-        const newController = list[newControllerIndex];
-        if (oldController) {
-          oldController.agentIndex = newController.agentIndex;
+        if (newControllerIndex >= 0) {
+          const newController = list[newControllerIndex];
+          if (oldController) {
+            oldController.agentIndex = newController.agentIndex;
+          }
+          newController.agentIndex = agentIndex;
+        } else if (oldController) {
+          oldController.agentIndex = -1;
         }
-        newController.agentIndex = agentIndex;
-      } else if (oldController) {
-        oldController.agentIndex = -1;
-      }
-      setControllerList(list);
+        return list;
+      });
     },
-    [controllerList]
+    []
   );
 
   return (
