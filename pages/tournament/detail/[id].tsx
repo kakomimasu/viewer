@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { NextPage } from "next";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
@@ -20,6 +19,7 @@ import {
   TournamentRes as Tournament,
   User,
 } from "../../../src/apiClient";
+import Link from "../../../src/link";
 
 import Content from "../../../components/content";
 import Section, { SubSection } from "../../../components/section";
@@ -190,9 +190,9 @@ const Page: NextPage<{
   return (
     <Content title="大会詳細">
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <Link href="/tournament" passHref>
-          <Button style={{ margin: "auto" }}>大会一覧に戻る</Button>
-        </Link>
+        <Button href="/tournament" style={{ margin: "auto" }}>
+          大会一覧に戻る
+        </Button>
         {tournament ? (
           <>
             <Section title="基本情報">
@@ -306,21 +306,22 @@ const Page: NextPage<{
                                             <div>
                                               <div>{result.resultText}</div>
                                               <div>{result.pointText}</div>
-                                              <Link href={result.url}>
+                                              <Link
+                                                href={result.url}
+                                                noLinkStyle
+                                              >
                                                 ゲーム詳細へ
                                               </Link>
                                             </div>
                                           );
                                         } else {
                                           return (
-                                            <Link
+                                            <Button
                                               href={gameCreateUrl(y, x)}
-                                              passHref
+                                              variant="outlined"
                                             >
-                                              <Button variant="outlined">
-                                                ゲーム作成
-                                              </Button>
-                                            </Link>
+                                              ゲーム作成
+                                            </Button>
                                           );
                                         }
                                       })()}

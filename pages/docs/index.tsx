@@ -1,10 +1,10 @@
 import React from "react";
-import Link from "next/link";
 import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 
+import Link from "../../src/link";
 import Content from "../../components/content";
 
 const StyledDiv = styled("div")({
@@ -32,14 +32,17 @@ function DocCard({
         margin: "1em",
       }}
     >
-      <Link href={href} passHref>
-        <CardActionArea sx={{ height: "100%" }}>
-          <CardContent>
-            <h2>{title}</h2>
-            <p style={{ color: "gray" }}>{explain}</p>
-          </CardContent>
-        </CardActionArea>
-      </Link>
+      <CardActionArea
+        component={Link}
+        href={href}
+        noLinkStyle
+        sx={{ height: "100%" }}
+      >
+        <CardContent>
+          <h2>{title}</h2>
+          <p style={{ color: "gray" }}>{explain}</p>
+        </CardContent>
+      </CardActionArea>
     </Card>
   );
 }

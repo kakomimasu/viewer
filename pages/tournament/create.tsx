@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import React, { useState } from "react";
 import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -81,9 +80,9 @@ export default function Create() {
     <>
       <Content title="大会作成">
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <Link href="/tournament" passHref>
-            <Button style={{ margin: "auto" }}>大会一覧に戻る</Button>
-          </Link>
+          <Button href="/tournament" style={{ margin: "auto" }}>
+            大会一覧に戻る
+          </Button>
           <Form autoComplete="off">
             <StyledTextField
               required

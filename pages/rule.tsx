@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import React from "react";
 import { styled } from "@mui/material/styles";
-import Button from "@mui/material/Button";
 import ReactMarkdown from "react-markdown";
 
 import Content from "../components/content";
-import Section, { SubSection } from "../components/section";
 
 const StyledMarkdown = styled(ReactMarkdown)({
   "& img": {

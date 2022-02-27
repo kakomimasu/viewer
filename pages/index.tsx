@@ -1,11 +1,11 @@
 import React from "react";
 import Head from "next/head";
-import Link from "next/link";
 import Image from "next/image";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import ChatIcon from "@mui/icons-material/Chat";
 
+import Link from "../src/link";
 import Section, { SubSection } from "../components/section";
 
 const Main = styled("main")({
@@ -39,22 +39,36 @@ export default function Index() {
         <br />
         <SubSection title="ゲーム">
           <div>
-            <Link href="/game">ゲーム一覧はこちらから</Link>
+            <Link href="/game" color="inherit">
+              ゲーム一覧はこちらから
+            </Link>
             <br />
-            <Link href="/game/detail">最新のゲームビューアはこちらから</Link>
+            <Link href="/game/detail" color="inherit">
+              最新のゲームビューアはこちらから
+            </Link>
             <br />
-            <a href="/vr/index.html">最新のゲームビューア(VR版)はこちらから</a>
+            <a href="/vr/index.html" color="inherit">
+              最新のゲームビューア(VR版)はこちらから
+            </a>
             <br />
-            <Link href="/game/create">カスタムゲーム作成はこちらから</Link>
+            <Link href="/game/create" color="inherit">
+              カスタムゲーム作成はこちらから
+            </Link>
             <br />
-            <Link href="/game/manual">人力対戦はこちらから</Link>
+            <Link href="/game/manual" color="inherit">
+              人力対戦はこちらから
+            </Link>
           </div>
         </SubSection>
         <SubSection title="大会">
           <div>
-            <Link href="/tournament">大会一覧はこちらから</Link>
+            <Link href="/tournament" color="inherit">
+              大会一覧はこちらから
+            </Link>
             <br />
-            <Link href="/tournament/create">大会作成はこちらから</Link>
+            <Link href="/tournament/create" color="inherit">
+              大会作成はこちらから
+            </Link>
             <br />
           </div>
         </SubSection>
@@ -76,13 +90,23 @@ export default function Index() {
             </li>
             <li>
               ルールは中止になった
-              <a href="https://www.procon.gr.jp/?page_id=76771">#procon31</a>
-              のものがベース（実際のルールは<Link href="/rule">こちら</Link>
+              <Link
+                href="https://www.procon.gr.jp/?page_id=76771"
+                color="inherit"
+              >
+                #procon31
+              </Link>
+              のものがベース（実際のルールは
+              <Link href="/rule" color="inherit">
+                こちら
+              </Link>
               をご覧ください。）
             </li>
             <li>
               誰でも開発に参加できる、オープンソース (
-              <a href="https://github.com/kakomimasu">src on GitHub</a>
+              <Link href="https://github.com/kakomimasu" color="inherit">
+                src on GitHub
+              </Link>
               )。
             </li>
           </ul>
@@ -90,7 +114,9 @@ export default function Index() {
         <SubSection title="ルール">
           第31回高専プロコンのルールをベースに公式ルールを作成しました。第30回高専プロコンのルールとは少し異なっていますので、元競技部門参加者の方はご注意ください。
           <p>
-            <Link href="/rule">公式ルール - 囲みマス</Link>
+            <Link href="/rule" color="inherit">
+              公式ルール - 囲みマス
+            </Link>
           </p>
         </SubSection>
         <SubSection title="クライアント">
@@ -98,18 +124,31 @@ export default function Index() {
           <ul>
             <li>
               JavaScript(TypeScript) -{" "}
-              <a href="https://github.com/kakomimasu/client-js">client-js</a>
+              <Link
+                href="https://github.com/kakomimasu/client-js"
+                color="inherit"
+              >
+                client-js
+              </Link>
             </li>
 
             <li>
               Deno -{" "}
-              <a href="https://github.com/kakomimasu/client-deno">
+              <Link
+                href="https://github.com/kakomimasu/client-deno"
+                color="inherit"
+              >
                 client-deno
-              </a>
+              </Link>
             </li>
             <li>
               c++ -{" "}
-              <a href="https://github.com/kakomimasu/client-cpp">client-cpp</a>
+              <Link
+                href="https://github.com/kakomimasu/client-cpp"
+                color="inherit"
+              >
+                client-cpp
+              </Link>
             </li>
           </ul>
           またAPIドキュメントを公開していますので異なる言語でもゲームへの参加が可能です。
@@ -118,7 +157,7 @@ export default function Index() {
           現在APIのバージョンはv1です。以下のリンクからご覧ください。
           <ul>
             <li>
-              <Link href="docs/apiv1">囲みマス API v1</Link>
+              <Link href="/docs/apiv1">囲みマス API v1</Link>
             </li>
           </ul>
         </SubSection>
@@ -156,11 +195,15 @@ export default function Index() {
 
       <Section title="勝手にプロコン実行委員会">
         中止になった第31回高専プロコン競技部門を勝手にやっちゃおうと立ち上がった、
-        <a href="https://codeforkosen.github.io/">Code for KOSEN</a>{" "}
+        <Link href="https://codeforkosen.github.io/" color="inherit">
+          Code for KOSEN
+        </Link>{" "}
         の部門のひとつ。
       </Section>
       <Section title="開発者用ツール">
-        <Link href="/dev/field-editor">フィールド説明用エディタ</Link>
+        <Link href="/dev/field-editor" color="inherit">
+          フィールド説明用エディタ
+        </Link>
         <br />
       </Section>
     </Main>
