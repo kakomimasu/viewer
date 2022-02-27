@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import Link from "next/link";
 import { styled } from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
@@ -18,6 +17,7 @@ import {
   WsGameRes,
   WsGameReq,
 } from "../../../src/apiClient";
+import Link from "../../../src/link";
 
 const StyledContent = styled(Content)({
   display: "flex",
@@ -259,7 +259,9 @@ const Detail: NextPage<{}> = () => {
               }}
             >
               <div>ユーザが存在しません</div>
-              <Link href="/">囲みマス トップページへ</Link>
+              <Link href="/" noLinkStyle>
+                囲みマス トップページへ
+              </Link>
             </div>
           )}
         </>

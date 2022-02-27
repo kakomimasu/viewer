@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 
@@ -29,9 +28,7 @@ export default function Index() {
   return (
     <Content title="大会一覧">
       <StyledDiv>
-        <Link href="/tournament/create" passHref>
-          <Button>大会作成はこちらから</Button>
-        </Link>
+        <Button href="/tournament/create">大会作成はこちらから</Button>
         <div
           style={{
             display: "flex",

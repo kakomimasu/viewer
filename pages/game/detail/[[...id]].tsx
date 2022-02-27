@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { NextPage } from "next";
-import Link from "next/link";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
 
 import { Game, WsGameReq, WsGameRes, host } from "../../../src/apiClient";
+import Link from "../../../src/link";
 
 import Content from "../../../components/content";
 import GameList from "../../../components/gamelist";
@@ -74,12 +74,12 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       <div style={{ display: "flex", flexDirection: "column" }}>
         {game ? (
           <>
-            <Link
+            <Button
               href={id ? `/vr/index.html?id=${id}` : "/vr/index.html"}
-              passHref
+              style={{ margin: "auto" }}
             >
-              <Button style={{ margin: "auto" }}>VR版はこちら</Button>
-            </Link>
+              VR版はこちら
+            </Button>
             <GameList games={[game]} pagenation={false} hover={false} />
             <GameBoard game={game} />
             <PointsGraph game={game} />

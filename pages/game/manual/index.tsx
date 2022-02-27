@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { NextPage } from "next";
-import Link from "next/link";
 import Button from "@mui/material/Button";
 import { TextField, Box, MenuItem } from "@mui/material";
 
@@ -13,6 +12,7 @@ import {
   ActionPost,
   host,
 } from "../../../src/apiClient";
+import Link from "../../../src/link";
 import datas from "../../../components/player_datas";
 
 import Content from "../../../components/content";
@@ -558,12 +558,12 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         </Box>
         {game && (
           <>
-            <Link
+            <Button
               href={id ? `/vr/index.html?id=${id}` : "/vr/latest.html"}
-              passHref
+              style={{ margin: "auto" }}
             >
-              <Button style={{ margin: "auto" }}>VR版はこちら</Button>
-            </Link>
+              VR版はこちら
+            </Button>
             <GameList games={[game]} pagenation={false} hover={false} />
             <GameBoard game={game} />
             <PointsGraph game={game} />

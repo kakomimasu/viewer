@@ -1,6 +1,6 @@
 import React from "react";
-import Link from "next/link";
 
+import Link from "../src/link";
 import Content from "../components/content";
 
 export default function Page() {
@@ -14,7 +14,9 @@ export default function Page() {
         }}
       >
         <div>このページは存在しません</div>
-        <Link href="/">囲みマス トップページへ</Link>
+        <Link href="/" color="inherit">
+          囲みマス トップページへ
+        </Link>
       </div>
     </Content>
   );

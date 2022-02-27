@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
@@ -9,7 +8,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 
 import firebase from "../src/firebase";
-
+import Link from "../src/link";
 import { apiClient } from "../src/apiClient";
 
 export default function Header() {
@@ -53,16 +52,14 @@ export default function Header() {
   return (
     <AppBar position="sticky">
       <Toolbar style={{ color: "black" }}>
-        <div style={{ flexGrow: 0, display: "flex", alignItems: "center" }}>
-          <Link href="/" passHref>
-            <Image
-              height={36}
-              width={101}
-              src="/img/kakomimasu-logo.svg"
-              alt="囲みマスロゴ"
-            />
-          </Link>
-        </div>
+        <Link href="/">
+          <Image
+            height={36}
+            width={101}
+            src="/img/kakomimasu-logo.svg"
+            alt="囲みマスロゴ"
+          />
+        </Link>
         <div
           style={{
             flexGrow: 1,
@@ -71,11 +68,9 @@ export default function Header() {
             margin: "0 20px",
           }}
         >
-          <Link href="/docs" passHref>
-            <Button variant="text" color="inherit" onClick={logOut}>
-              ドキュメント
-            </Button>
-          </Link>
+          <Button href="/docs" variant="text" color="inherit">
+            ドキュメント
+          </Button>
         </div>
         {user !== undefined && (
           <>
@@ -99,16 +94,16 @@ export default function Header() {
                   onClose={handleClose}
                 >
                   <MenuItem onClick={handleClose}>
-                    <Link href="/user/detail">マイページ</Link>
+                    <Link href="/user/detail" color="inherit" underline="none">
+                      マイページ
+                    </Link>
                   </MenuItem>
                 </Menu>
               </>
             ) : (
-              <Link href="/user/login" passHref>
-                <Button variant="text" color="inherit">
-                  ログイン・新規登録
-                </Button>
-              </Link>
+              <Button href="/user/login" variant="text" color="inherit">
+                ログイン・新規登録
+              </Button>
             )}
           </>
         )}

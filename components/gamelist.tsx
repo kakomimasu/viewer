@@ -1,6 +1,4 @@
-import React, { useEffect, useMemo, useReducer, useState } from "react";
-import { useRouter } from "next/router";
-import Link from "next/link";
+import React, { useMemo } from "react";
 import { useTheme, styled } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableContainer from "@mui/material/TableContainer";
@@ -18,6 +16,7 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPage from "@mui/icons-material/LastPage";
 
+import Link, { getGameHref, getUserHref } from "../src/link";
 import { Game, Player } from "../src/apiClient";
 import { useGameUsers } from "../src/useGameUsers";
 
@@ -25,7 +24,6 @@ const StatusCircle = ({ className }: { className?: string }) => {
   return <span className={className}>●</span>;
 };
 
-const UnSpan = styled("span")({ color: "gray" });
 const Waiting = styled(StatusCircle)({ color: "yellow" });
 const Gaming = styled(StatusCircle)({ color: "green" });
 const Ending = styled(StatusCircle)({ color: "red" });
@@ -41,7 +39,6 @@ const GameName = styled("div")({
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
 });
-const UnGameName = styled(GameName)({ color: "gray" });
 const GameId = styled("div")({ fontSize: "0.8em" });
 
 const GameList = (props: {
@@ -52,8 +49,6 @@ const GameList = (props: {
   const pagenation = props.pagenation ?? true;
   const hover = props.hover ?? true;
   const games = props.games;
-
-  const router = useRouter();
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -83,10 +78,6 @@ const GameList = (props: {
     return player.point.basepoint + player.point.wallpoint;
   };
 
-  const toGameDetail = (id: string) => {
-    router.push("/game/detail/" + id);
-  };
-
   const getPlacedAgentStr = (game: Game, i: number) => {
     let num = 0;
     const total = game.players[i].agents.length;
@@ -107,7 +98,7 @@ const GameList = (props: {
         ：終了
       </div>
       <TableContainer component={Paper}>
-        <Table>
+        <Table sx={{ "& td,& th": { p: 1 } }}>
           <TableHead>
             <TableRow>
               <TableCell style={{ minWidth: "8em" }}>
@@ -133,11 +124,7 @@ const GameList = (props: {
                 )
               : games
             ).map((game) => (
-              <TableRow
-                key={game.gameId}
-                hover={hover}
-                onClick={() => hover && toGameDetail(game.gameId)}
-              >
+              <TableRow key={game.gameId} hover={hover}>
                 <TableCell align="center">
                   {getStatusClass(game)}
                   <div>
@@ -158,27 +145,42 @@ const GameList = (props: {
                           <div>
                             {(() => {
                               const user = users.get(player.id);
-                              return user ? (
-                                <span>
-                                  <Link href={`/user/detail/${user.name}`}>
-                                    {user.screenName}
-                                  </Link>
-                                </span>
-                              ) : (
-                                <UnSpan
-                                  style={{
+                              return (
+                                <Box
+                                  component="span"
+                                  sx={{
                                     display: "inline-block",
                                     maxWidth: "7em",
                                     overflow: "hidden",
                                     whiteSpace: "nowrap",
                                     textOverflow: "ellipsis",
+                                    mr: 0.5,
+                                    color: user ? "" : "gray",
                                   }}
                                 >
-                                  {player.id}
-                                </UnSpan>
+                                  {user ? (
+                                    <Link
+                                      href={getUserHref(user.name)}
+                                      underline="none"
+                                      sx={{
+                                        color: "black",
+                                        "&:hover": {
+                                          color: (t) =>
+                                            t.palette.secondary.main,
+                                        },
+                                      }}
+                                    >
+                                      {user.screenName}
+                                    </Link>
+                                  ) : (
+                                    <>{player.id}</>
+                                  )}
+                                </Box>
                               );
                             })()}
-                            {getPlacedAgentStr(game, i)}
+                            <Box component="span">
+                              {getPlacedAgentStr(game, i)}
+                            </Box>
                             <br />
                             {getPoint(player)}
                           </div>
@@ -188,11 +190,17 @@ const GameList = (props: {
                   </PlayerDiv>
                 </TableCell>
                 <TableCell>
-                  {game.gameName ? (
-                    <GameName>{game.gameName}</GameName>
-                  ) : (
-                    <UnGameName>Untitle</UnGameName>
-                  )}
+                  <Link
+                    href={getGameHref(game.gameId)}
+                    underline="none"
+                    sx={{
+                      width: "fit-content",
+                      "&:hover": { color: (t) => t.palette.secondary.main },
+                      color: game.gameName ? "black" : "gray",
+                    }}
+                  >
+                    {game.gameName || "Untitle"}
+                  </Link>
                   <GameId>{game.gameId}</GameId>
                 </TableCell>
                 <TableCell>{getStartTime(game.startedAtUnixTime)}</TableCell>
