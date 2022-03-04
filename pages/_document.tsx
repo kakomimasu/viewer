@@ -33,6 +33,8 @@ export default class MyDocument extends Document {
             height: "100%",
             "& #__next": {
               height: "100%",
+              display: "flex",
+              flexDirection: "column",
             },
           }}
         >
