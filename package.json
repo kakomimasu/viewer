@@ -15,7 +15,7 @@
     "@emotion/styled": "^11.8.1",
     "@kakomimasu/client-js": "github:kakomimasu/client-js#v1.0.0-beta.6",
     "@mui/icons-material": "^5.4.2",
-    "@mui/material": "^5.4.1",
+    "@mui/material": "^5.4.3",
     "@types/react-syntax-highlighter": "^13.5.2",
     "firebase": "^8.10.1",
     "next": "12.1.0",
@@ -31,7 +31,7 @@
   "devDependencies": {
     "@types/react": "17.0.39",
     "@types/recharts": "^1.8.23",
-    "eslint": "8.9.0",
+    "eslint": "8.10.0",
     "eslint-config-next": "12.1.0",
     "typescript": "4.5.5"
   }
