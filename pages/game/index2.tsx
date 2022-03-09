@@ -7,11 +7,12 @@ import React, {
 } from "react";
 import { NextPage } from "next";
 import Head from "next/head";
-import { Box, Paper } from "@mui/material";
+import { Box, Paper, FormControlLabel, Checkbox } from "@mui/material";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
+import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
 import * as dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Countdown from "react-countdown";
@@ -30,22 +31,27 @@ import datas from "../../components/player_datas";
 
 dayjs.extend(relativeTime);
 
+const types = [
+  { type: "normal", label: "フリー" },
+  { type: "self", label: "カスタム" },
+] as const;
+
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [gameListPin, ToggleGameListPin] = useReducer((prev) => !prev, false);
   const [gameType, setGameType] = React.useState<"normal" | "self">("normal");
   const [req, setReq] = useState<WsGameReq>();
+  const query = useMemo(
+    () => ["sort:startAtUnixTime-desc", "is:newGame", `is:${gameType}`],
+    [gameType]
+  );
   const selectedGameReq = useMemo(() => {
-    const q = (
-      id
-        ? [`id:${id}`]
-        : ["sort:startAtUnixTime-desc", "is:newGame", `is:normal`]
-    ).join(" ");
+    const q = (id ? [`id:${id}`] : query).join(" ");
     const req: WsGameReq = {
       q,
       endIndex: 1,
     };
     return req;
-  }, [id]);
+  }, [id, query]);
 
   const games = useWebSocketGame(req);
   const selectedGame = useWebSocketGame(selectedGameReq);
@@ -56,11 +62,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
 
   useEffect(() => {
     if (gameType) {
-      const q = [
-        "sort:startAtUnixTime-desc",
-        "is:newGame",
-        `is:${gameType}`,
-      ].join(" ");
+      const q = query.join(" ");
       console.log(q);
       const req: WsGameReq = {
         q,
@@ -68,7 +70,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       };
       setReq(req);
     }
-  }, [gameType]);
+  }, [gameType, query]);
 
   const turn = useMemo(() => {
     if (game?.board) {
@@ -145,6 +147,76 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
               />
             </Link>
             <Box>ゲーム一覧</Box>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              my: 0.5,
+              gap: 1,
+              alignItems: "center",
+            }}
+          >
+            <Box
+              sx={{
+                position: "relative",
+                "&:hover #list-query-settings": {
+                  display: "block",
+                },
+              }}
+            >
+              <DisplaySettingsIcon sx={{}} />
+              <Box
+                id="list-query-settings"
+                sx={{
+                  display: "none",
+                  position: "absolute",
+                  top: "0%",
+                  left: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "fixed",
+                    backgroundColor: (t) => t.palette.background.paper,
+                    border: "1px solid gray",
+                    borderRadius: "1px",
+                    p: 1,
+                    display: "flex",
+                  }}
+                >
+                  <div>
+                    <Box>タイプ</Box>
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                      {types.map(({ type, label }) => {
+                        return (
+                          <FormControlLabel
+                            key={type}
+                            label={`${label}マッチ`}
+                            control={
+                              <Checkbox
+                                checked={gameType === type}
+                                onChange={(_, checked) => {
+                                  if (checked) setGameType(type);
+                                }}
+                              />
+                            }
+                          />
+                        );
+                      })}
+                    </Box>
+                  </div>
+                </Box>
+              </Box>
+            </Box>
+            <Box
+              sx={{
+                fontSize: "0.5em",
+              }}
+            >
+              {query.map((q) => (
+                <Box key={q}>{q}</Box>
+              ))}
+            </Box>
           </Box>
           <Box
             sx={{
