@@ -279,6 +279,8 @@ export default function GameBoard({ game, users }: Props) {
                       animation: isConflict
                         ? `${flash} 1s linear infinite`
                         : "",
+                      height: "100%",
+                      width: "100%",
                     }}
                     className="tile"
                   >

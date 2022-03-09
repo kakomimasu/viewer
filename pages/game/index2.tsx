@@ -11,6 +11,7 @@ import { Box, Paper } from "@mui/material";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 import PushPinIcon from "@mui/icons-material/PushPin";
+import FiberNewIcon from "@mui/icons-material/FiberNew";
 import * as dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Countdown from "react-countdown";
@@ -87,10 +88,14 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   return (
     <Box
       sx={{
-        display: "flex",
+        display: "grid",
+        gridTemplateColumns: "auto auto 1fr 2fr",
+        gridTemplateRows: "2em 1fr 1fr 1.4fr",
         height: "calc(2em + 50vw)",
         maxHeight: "calc(100vh - 64px)",
         py: 3,
+        pr: 2,
+        gap: 1,
       }}
     >
       <Head>
@@ -98,9 +103,10 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       </Head>
       <Box
         sx={{
-          // my: 3,
           minWidth: "7em",
           position: "relative",
+          gridColumn: "1",
+          gridRow: "1 / -1",
         }}
       >
         <Paper
@@ -115,8 +121,8 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
             overflowX: "hidden",
             whiteSpace: "nowrap",
             p: 1,
+            pr: 0,
             zIndex: 1,
-
             "&:hover": {
               width: "fit-content",
             },
@@ -130,6 +136,14 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
               }}
               onClick={ToggleGameListPin}
             />
+            <Link href={getGameHref()}>
+              <FiberNewIcon
+                sx={{
+                  width: "0.7em",
+                  color: (t) => (!id ? t.palette.secondary.main : "gray"),
+                }}
+              />
+            </Link>
             <Box>ゲーム一覧</Box>
           </Box>
           <Box
@@ -137,17 +151,17 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
               p: 0,
             }}
           >
-            {games.map((game) => {
-              const fromNow = game.startedAtUnixTime
-                ? dayjs.unix(game.startedAtUnixTime).fromNow()
+            {games.map((game_) => {
+              const fromNow = game_.startedAtUnixTime
+                ? dayjs.unix(game_.startedAtUnixTime).fromNow()
                 : "待機中";
 
               return (
                 <Link
-                  href={getGameHref(game.gameId)}
+                  href={getGameHref(game_.gameId)}
                   color="inherit"
                   underline="none"
-                  key={game.gameId}
+                  key={game_.gameId}
                   sx={{
                     display: "flex",
                     gap: 1,
@@ -155,6 +169,10 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
                     borderBottom: "1px solid gray",
                     p: 0.5,
                     fontSize: "0.8em",
+                    backgroundColor: (t) =>
+                      game_.gameId === game?.gameId
+                        ? t.palette.primary.main
+                        : "",
                     "&:hover": {
                       backgroundColor: (t) => t.palette.secondary.light,
                     },
@@ -174,9 +192,9 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
                       },
                     }}
                   >
-                    <Box>{game.gameName || "UnTitle"}</Box>
+                    <Box>{game_.gameName || "UnTitle"}</Box>
                     <Box sx={{ fontSize: "0.5em", fontFamily: "monospace" }}>
-                      {game.gameId}
+                      {game_.gameId}
                     </Box>
                   </Box>
                   <Box sx={{ width: "max-content" }}>{fromNow}</Box>
@@ -188,195 +206,179 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       </Box>
       <Box
         sx={{
-          flexGrow: 1,
-          mx: 2,
-          display: "grid",
-          gap: 1,
-          height: "100%",
-          gridTemplateColumns: "auto 1fr 2fr",
-          gridTemplateRows: "2em 1fr 1fr 1.4fr",
+          gridColumn: "2 / -1",
+          gridRow: "1 / 2",
+          display: "flex",
+          alignItems: "center",
         }}
       >
-        <Box
-          sx={{
-            gridColumn: "1 / -1",
-            gridRow: "1 / 2",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          ゲーム詳細
-          {game ? ` - ${game.gameId}` : ""}
-        </Box>
-        <Box
-          sx={{
-            gridColumn: "1 / 2",
-            gridRow: "2 / -1",
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            aspectRatio: `${game?.board?.width} / ${game?.board?.height}`,
-          }}
-        >
-          {game ? <GameBoard game={game} users={users} /> : ""}
-        </Box>
-        <Box
-          sx={{
-            gridColumn: "2 / 4",
-            gridRow: "4 / 5",
-          }}
-        >
-          {game ? <PointsGraph game={game} users={users} /> : ""}
-        </Box>
-        <Box
-          sx={{
-            // backgroundColor: "#EEEEEE",
-            // borderRadius: "0.2em",
-            // p: 1,
-            gridColumn: "3 / 4",
-            gridRow: "2 / 4",
-            display: "flex",
-            flexDirection: "column",
-            // alignItems: "stretch",
-            justifyContent: "center",
-          }}
-        >
-          <Box sx={{ textAlign: "center", fontSize: "0.8em" }}>順位</Box>
-          <Box>
-            {game?.players
-              .map((player, i) => {
-                const totalPoint =
-                  player.point.basepoint + player.point.wallpoint;
-                return { ...player, totalPoint, index: i };
-              })
-              ?.sort((a, b) => {
-                if (a.totalPoint !== b.totalPoint)
-                  return b.totalPoint - a.totalPoint;
-                else if (a.point.wallpoint !== b.point.wallpoint)
-                  return b.point.wallpoint - a.point.wallpoint;
-                else return b.point.basepoint - a.point.basepoint;
-              })
-              .map((player, i) => {
-                return (
+        ゲーム詳細
+        {game ? ` - ${game.gameId}` : ""}
+      </Box>
+      <Box
+        sx={{
+          gridColumn: "2",
+          gridRow: "2 / -1",
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          aspectRatio: `${game?.board?.width} / ${game?.board?.height}`,
+        }}
+      >
+        {game ? <GameBoard game={game} users={users} /> : ""}
+      </Box>
+      <Box
+        sx={{
+          gridColumn: "3 / 5",
+          gridRow: "4 / 5",
+        }}
+      >
+        {game ? <PointsGraph game={game} users={users} /> : ""}
+      </Box>
+      <Box
+        sx={{
+          gridColumn: "4 / 5",
+          gridRow: "2 / 4",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <Box sx={{ textAlign: "center", fontSize: "0.8em" }}>順位</Box>
+        <Box>
+          {game?.players
+            .map((player, i) => {
+              const totalPoint =
+                player.point.basepoint + player.point.wallpoint;
+              return { ...player, totalPoint, index: i };
+            })
+            ?.sort((a, b) => {
+              if (a.totalPoint !== b.totalPoint)
+                return b.totalPoint - a.totalPoint;
+              else if (a.point.wallpoint !== b.point.wallpoint)
+                return b.point.wallpoint - a.point.wallpoint;
+              else return b.point.basepoint - a.point.basepoint;
+            })
+            .map((player, i) => {
+              return (
+                <Box
+                  key={i}
+                  sx={{
+                    display: "grid",
+                    gap: 2,
+                    gridTemplateColumns:
+                      "max-content max-content 1fr max-content",
+                    borderBottom: "1px solid gray",
+                  }}
+                >
                   <Box
-                    key={i}
                     sx={{
-                      display: "grid",
-                      gap: 2,
-                      gridTemplateColumns:
-                        "max-content max-content 1fr max-content",
-                      borderBottom: "1px solid gray",
+                      gridColumn: "1",
                     }}
                   >
-                    <Box
-                      sx={{
-                        gridColumn: "1",
-                      }}
-                    >
-                      <Box component="span" sx={{ fontSize: "1.5em" }}>
-                        {i + 1}
-                      </Box>
-                      <Box component="span">位</Box>
+                    <Box component="span" sx={{ fontSize: "1.5em" }}>
+                      {i + 1}
                     </Box>
-                    <Box
-                      sx={{
-                        width: "10px",
-                        backgroundColor: datas[player.index].colors[1],
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        my: "auto",
-                        textAlign: "left",
-                        width: "90%",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        overflowX: "hidden",
-                        fontSize: "0.8em",
-                      }}
-                    >
-                      {(() => {
-                        const user = users.get(player.id);
-                        console.log(player);
-                        if (user) {
-                          return (
-                            <Link
-                              href={getUserHref(user.name)}
-                              color="inherit"
-                              underline="none"
-                            >
-                              {user.screenName}
-                            </Link>
-                          );
-                        } else return player.id;
-                      })()}
-                    </Box>
-                    <Box
-                      sx={{
-                        // gridColumn: "3",
-                        my: "auto",
-                        textAlign: "right",
-                        fontSize: "1.3em",
-                      }}
-                    >
-                      {player.totalPoint}
-                    </Box>
+                    <Box component="span">位</Box>
                   </Box>
+                  <Box
+                    sx={{
+                      width: "10px",
+                      backgroundColor: datas[player.index].colors[1],
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      my: "auto",
+                      textAlign: "left",
+                      width: "90%",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflowX: "hidden",
+                      fontSize: "0.8em",
+                    }}
+                  >
+                    {(() => {
+                      const user = users.get(player.id);
+                      console.log(player);
+                      if (user) {
+                        return (
+                          <Link
+                            href={getUserHref(user.name)}
+                            color="inherit"
+                            underline="none"
+                          >
+                            {user.screenName}
+                          </Link>
+                        );
+                      } else return player.id;
+                    })()}
+                  </Box>
+                  <Box
+                    sx={{
+                      // gridColumn: "3",
+                      my: "auto",
+                      textAlign: "right",
+                      fontSize: "1.3em",
+                    }}
+                  >
+                    {player.totalPoint}
+                  </Box>
+                </Box>
+              );
+            })}
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          gridColumn: "3",
+          gridRow: "2 / 3",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box sx={{ fontSize: "0.8em" }}>残りターン</Box>
+        <Box sx={{ fontSize: "3em" }}>{turn || "-"}</Box>
+      </Box>
+      <Box
+        sx={{
+          gridColumn: "3",
+          gridRow: "3 / 3",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box sx={{ fontSize: "0.8em" }}>次のターンまで</Box>
+        <Box sx={{ fontSize: "3em" }}>
+          {nextTurnTime ? (
+            <Countdown
+              key={nextTurnTime}
+              date={nextTurnTime}
+              intervalDelay={0}
+              precision={2}
+              renderer={({ seconds, milliseconds }) => {
+                return (
+                  <>
+                    <Box component="span">{seconds}</Box>.
+                    <Box component="span" sx={{ fontSize: "0.7em" }}>
+                      {(milliseconds.toString() + "0").slice(0, 2)}
+                    </Box>
+                    <Box component="span" sx={{ fontSize: "0.5em" }}>
+                      秒
+                    </Box>
+                  </>
                 );
-              })}
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            gridColumn: "2 / 3",
-            gridRow: "2 / 3",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Box sx={{ fontSize: "0.8em" }}>残りターン</Box>
-          <Box sx={{ fontSize: "3em" }}>{turn || "-"}</Box>
-        </Box>
-        <Box
-          sx={{
-            gridColumn: "2 / 3",
-            gridRow: "3 / 3",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Box sx={{ fontSize: "0.8em" }}>次のターンまで</Box>
-          <Box sx={{ fontSize: "3em" }}>
-            {nextTurnTime ? (
-              <Countdown
-                key={nextTurnTime}
-                date={nextTurnTime}
-                intervalDelay={0}
-                precision={2}
-                renderer={({ seconds, milliseconds }) => {
-                  return (
-                    <>
-                      <Box component="span">{seconds}</Box>.
-                      <Box component="span" sx={{ fontSize: "0.7em" }}>
-                        {(milliseconds.toString() + "0").slice(0, 2)}
-                      </Box>
-                      <Box component="span" sx={{ fontSize: "0.5em" }}>
-                        秒
-                      </Box>
-                    </>
-                  );
-                }}
-              />
-            ) : (
-              "-"
-            )}
-          </Box>
+              }}
+            />
+          ) : (
+            "-"
+          )}
         </Box>
       </Box>
     </Box>
