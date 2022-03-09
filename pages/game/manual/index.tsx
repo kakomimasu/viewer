@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { NextPage } from "next";
 import Button from "@mui/material/Button";
 import { TextField, Box, MenuItem } from "@mui/material";
@@ -13,6 +19,7 @@ import {
   host,
 } from "../../../src/apiClient";
 import Link from "../../../src/link";
+import { useGameUsers } from "../../../src/useGameUsers";
 import datas from "../../../components/player_datas";
 
 import Content from "../../../components/content";
@@ -190,6 +197,8 @@ function useKeyDirection(useKey: {
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [matchRes, setMatchRes] = useState<MatchRes>();
   const [game, setGame] = useState<Game>();
+  const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
+  const users = useGameUsers(playerIds);
   const [controllerList, setControllerList] = useState<Controller[]>([
     { label: "WSADキー", agentIndex: 0, axis: [0, 0] },
     { label: "Arrowキー", agentIndex: 1, axis: [0, 0] },
@@ -565,8 +574,8 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
               VR版はこちら
             </Button>
             <GameList games={[game]} pagenation={false} hover={false} />
-            <GameBoard game={game} />
-            <PointsGraph game={game} />
+            <GameBoard users={users} game={game} />
+            <PointsGraph users={users} game={game} />
           </>
         )}
       </div>

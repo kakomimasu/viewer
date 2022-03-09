@@ -16,6 +16,7 @@ export const useWebSocketGame = (req?: WsGameReq) => {
       setSocket(sock);
     };
     return () => {
+      setSocket(undefined);
       sock.close();
       console.log("websocket close");
     };
@@ -52,7 +53,7 @@ export const useWebSocketGame = (req?: WsGameReq) => {
   }, [req, socket]);
 
   useEffect(() => {
-    if (socket) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(req));
     }
   }, [req, socket]);

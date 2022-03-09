@@ -19,6 +19,7 @@ type Props = {
     | "ending"
     | "nextTurnUnixTime"
   >;
+  users: ReturnType<typeof useGameUsers>;
 };
 
 // conflictのアニメーション
@@ -64,13 +65,8 @@ const AgentDetail = styled("div")({
   },
 });
 
-export default function GameBoard({ game }: Props) {
+export default function GameBoard({ game, users }: Props) {
   const [status, setStatus] = useState<string>();
-  const playerIds = useMemo(
-    () => game.players.map((p) => p.id),
-    [game.players]
-  );
-  const users = useGameUsers(playerIds);
 
   const setStatusT = useCallback(() => {
     let status = "";
@@ -149,13 +145,15 @@ export default function GameBoard({ game }: Props) {
   return (
     <Box
       sx={{
-        my: 2,
+        height: "100%",
         display: "flex",
         flexDirection: "column",
+        justifyContent: "center",
         alignItems: "center",
+        aspectRatio: `${game.board?.width}/${game.board?.height}`,
       }}
     >
-      <div>{status}</div>
+      {/* <div>{status}</div> */}
       {(() => {
         const board = game.board;
         const tiled = game.tiled;
@@ -172,7 +170,7 @@ export default function GameBoard({ game }: Props) {
               gap: "1px",
               width: "100%",
               lineHeight: "1",
-              fontSize: `clamp(1px, calc(25vw/${board.width}), 15px)`,
+              fontSize: `clamp(10px, calc(25vw/${board.width}), 15px)`,
             }}
           >
             {[1, board.height + 2].map((y) => {
@@ -184,7 +182,6 @@ export default function GameBoard({ game }: Props) {
                     sx={{
                       gridColumn: x + 1,
                       gridRow: y,
-                      p: "0.5em",
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
@@ -205,7 +202,6 @@ export default function GameBoard({ game }: Props) {
                     sx={{
                       gridColumn: x,
                       gridRow: y + 1,
-                      p: "0.5em",
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
