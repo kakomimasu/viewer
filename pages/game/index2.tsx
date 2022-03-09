@@ -24,7 +24,8 @@ import PointsGraph from "../../components/pointsGraph";
 import { WsGameReq, Game } from "../../src/apiClient";
 import { useWebSocketGame } from "../../src/useWebsocketGame";
 import { useGameUsers } from "../../src/useGameUsers";
-import Link, { getGameHref } from "../../src/link";
+import Link, { getGameHref, getUserHref } from "../../src/link";
+import datas from "../../components/player_datas";
 
 dayjs.extend(relativeTime);
 
@@ -151,7 +152,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
                     display: "flex",
                     gap: 1,
                     alignItems: "center",
-                    borderBottom: "1px solid",
+                    borderBottom: "1px solid gray",
                     p: 0.5,
                     fontSize: "0.8em",
                     "&:hover": {
@@ -231,12 +232,101 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         </Box>
         <Box
           sx={{
-            backgroundColor: "blue",
+            // backgroundColor: "#EEEEEE",
+            // borderRadius: "0.2em",
+            // p: 1,
             gridColumn: "3 / 4",
             gridRow: "2 / 4",
+            display: "flex",
+            flexDirection: "column",
+            // alignItems: "stretch",
+            justifyContent: "center",
           }}
         >
-          ranking
+          <Box sx={{ textAlign: "center", fontSize: "0.8em" }}>順位</Box>
+          <Box>
+            {game?.players
+              .map((player, i) => {
+                const totalPoint =
+                  player.point.basepoint + player.point.wallpoint;
+                return { ...player, totalPoint, index: i };
+              })
+              ?.sort((a, b) => {
+                if (a.totalPoint !== b.totalPoint)
+                  return b.totalPoint - a.totalPoint;
+                else if (a.point.wallpoint !== b.point.wallpoint)
+                  return b.point.wallpoint - a.point.wallpoint;
+                else return b.point.basepoint - a.point.basepoint;
+              })
+              .map((player, i) => {
+                return (
+                  <Box
+                    key={i}
+                    sx={{
+                      display: "grid",
+                      gap: 2,
+                      gridTemplateColumns:
+                        "max-content max-content 1fr max-content",
+                      borderBottom: "1px solid gray",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        gridColumn: "1",
+                      }}
+                    >
+                      <Box component="span" sx={{ fontSize: "1.5em" }}>
+                        {i + 1}
+                      </Box>
+                      <Box component="span">位</Box>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: "10px",
+                        backgroundColor: datas[player.index].colors[1],
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        my: "auto",
+                        textAlign: "left",
+                        width: "90%",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        overflowX: "hidden",
+                        fontSize: "0.8em",
+                      }}
+                    >
+                      {(() => {
+                        const user = users.get(player.id);
+                        console.log(player);
+                        if (user) {
+                          return (
+                            <Link
+                              href={getUserHref(user.name)}
+                              color="inherit"
+                              underline="none"
+                            >
+                              {user.screenName}
+                            </Link>
+                          );
+                        } else return player.id;
+                      })()}
+                    </Box>
+                    <Box
+                      sx={{
+                        // gridColumn: "3",
+                        my: "auto",
+                        textAlign: "right",
+                        fontSize: "1.3em",
+                      }}
+                    >
+                      {player.totalPoint}
+                    </Box>
+                  </Box>
+                );
+              })}
+          </Box>
         </Box>
         <Box
           sx={{
