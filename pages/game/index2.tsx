@@ -7,7 +7,14 @@ import React, {
 } from "react";
 import { NextPage } from "next";
 import Head from "next/head";
-import { Box, Paper, FormControlLabel, Checkbox } from "@mui/material";
+import {
+  Box,
+  Paper,
+  FormControlLabel,
+  Checkbox,
+  Skeleton,
+  CircularProgress,
+} from "@mui/material";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 import PushPinIcon from "@mui/icons-material/PushPin";
@@ -126,7 +133,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
             borderTopLeftRadius: 0,
             borderBottomLeftRadius: 0,
             height: "100%",
-            width: gameListPin ? "fit-content" : "7em",
+            width: gameListPin ? "max-content" : "7em",
             overflowY: "scroll",
             overflowX: "hidden",
             whiteSpace: "nowrap",
@@ -226,61 +233,63 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
               ))}
             </Box>
           </Box>
-          <Box
-            sx={{
-              p: 0,
-            }}
-          >
-            {games.map((game_) => {
-              const fromNow = game_.startedAtUnixTime
-                ? dayjs.unix(game_.startedAtUnixTime).fromNow()
-                : "待機中";
+          <Box>
+            {games.length !== 0 ? (
+              games.map((game_) => {
+                const fromNow = game_.startedAtUnixTime
+                  ? dayjs.unix(game_.startedAtUnixTime).fromNow()
+                  : "待機中";
 
-              return (
-                <Link
-                  href={getGameHref(game_.gameId)}
-                  color="inherit"
-                  underline="none"
-                  key={game_.gameId}
-                  sx={{
-                    display: "flex",
-                    gap: 1,
-                    alignItems: "center",
-                    borderBottom: "1px solid gray",
-                    p: 0.5,
-                    fontSize: "0.8em",
-                    backgroundColor: (t) =>
-                      game_.gameId === game?.gameId
-                        ? t.palette.primary.main
-                        : "",
-                    "&:hover": {
-                      backgroundColor: (t) => t.palette.secondary.light,
-                    },
-                  }}
-                >
-                  <Box
+                return (
+                  <Link
+                    href={getGameHref(game_.gameId)}
+                    color="inherit"
+                    underline="none"
+                    key={game_.gameId}
                     sx={{
-                      width: "15vw",
-                      whiteSpace: "nowrap",
                       display: "flex",
-                      flexDirection: "column",
+                      gap: 1,
                       alignItems: "center",
-                      "& > div": {
-                        overflow: "hidden",
-                        width: "100%",
-                        textOverflow: "ellipsis",
+                      borderBottom: "1px solid gray",
+                      p: 0.5,
+                      fontSize: "0.8em",
+                      backgroundColor: (t) =>
+                        game_.gameId === game?.gameId
+                          ? t.palette.primary.main
+                          : "",
+                      "&:hover": {
+                        backgroundColor: (t) => t.palette.secondary.light,
                       },
                     }}
                   >
-                    <Box>{game_.gameName || "UnTitle"}</Box>
-                    <Box sx={{ fontSize: "0.5em", fontFamily: "monospace" }}>
-                      {game_.gameId}
+                    <Box
+                      sx={{
+                        width: "15vw",
+                        whiteSpace: "nowrap",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        "& > div": {
+                          overflow: "hidden",
+                          width: "100%",
+                          textOverflow: "ellipsis",
+                        },
+                      }}
+                    >
+                      <Box>{game_.gameName || "UnTitle"}</Box>
+                      <Box sx={{ fontSize: "0.5em", fontFamily: "monospace" }}>
+                        {game_.gameId}
+                      </Box>
                     </Box>
-                  </Box>
-                  <Box sx={{ width: "max-content" }}>{fromNow}</Box>
-                </Link>
-              );
-            })}
+                    <Box sx={{ width: "max-content" }}>{fromNow}</Box>
+                  </Link>
+                );
+              })
+            ) : (
+              <Box sx={{ width: "100%", textAlign: "center", mt: 3 }}>
+                <CircularProgress />
+              </Box>
+            )}
           </Box>
         </Paper>
       </Box>
@@ -320,10 +329,16 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          aspectRatio: `${game?.board?.width} / ${game?.board?.height}`,
+          aspectRatio: game?.board
+            ? `${game?.board?.width} / ${game?.board?.height}`
+            : "1",
         }}
       >
-        {game ? <GameBoard game={game} users={users} /> : ""}
+        {game?.board ? (
+          <GameBoard game={game} users={users} />
+        ) : (
+          <Skeleton variant="rectangular" width="inherit" height="inherit" />
+        )}
       </Box>
       <Box
         sx={{
@@ -331,7 +346,11 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
           gridRow: "4 / 5",
         }}
       >
-        {game ? <PointsGraph game={game} users={users} /> : ""}
+        {game ? (
+          <PointsGraph game={game} users={users} />
+        ) : (
+          <Skeleton variant="rectangular" width="100%" height="100%" />
+        )}
       </Box>
       <Box
         sx={{
@@ -344,87 +363,91 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       >
         <Box sx={{ textAlign: "center", fontSize: "0.8em" }}>順位</Box>
         <Box>
-          {game?.players
-            .map((player, i) => {
-              const totalPoint =
-                player.point.basepoint + player.point.wallpoint;
-              return { ...player, totalPoint, index: i };
-            })
-            ?.sort((a, b) => {
-              if (a.totalPoint !== b.totalPoint)
-                return b.totalPoint - a.totalPoint;
-              else if (a.point.wallpoint !== b.point.wallpoint)
-                return b.point.wallpoint - a.point.wallpoint;
-              else return b.point.basepoint - a.point.basepoint;
-            })
-            .map((player, i) => {
-              return (
-                <Box
-                  key={i}
-                  sx={{
-                    display: "grid",
-                    gap: 2,
-                    gridTemplateColumns:
-                      "max-content max-content 1fr max-content",
-                    borderBottom: "1px solid gray",
-                  }}
-                >
+          {game ? (
+            game.players
+              .map((player, i) => {
+                const totalPoint =
+                  player.point.basepoint + player.point.wallpoint;
+                return { ...player, totalPoint, index: i };
+              })
+              ?.sort((a, b) => {
+                if (a.totalPoint !== b.totalPoint)
+                  return b.totalPoint - a.totalPoint;
+                else if (a.point.wallpoint !== b.point.wallpoint)
+                  return b.point.wallpoint - a.point.wallpoint;
+                else return b.point.basepoint - a.point.basepoint;
+              })
+              .map((player, i) => {
+                return (
                   <Box
+                    key={i}
                     sx={{
-                      gridColumn: "1",
+                      display: "grid",
+                      gap: 2,
+                      gridTemplateColumns:
+                        "max-content max-content 1fr max-content",
+                      borderBottom: "1px solid gray",
                     }}
                   >
-                    <Box component="span" sx={{ fontSize: "1.5em" }}>
-                      {i + 1}
+                    <Box
+                      sx={{
+                        gridColumn: "1",
+                      }}
+                    >
+                      <Box component="span" sx={{ fontSize: "1.5em" }}>
+                        {i + 1}
+                      </Box>
+                      <Box component="span">位</Box>
                     </Box>
-                    <Box component="span">位</Box>
+                    <Box
+                      sx={{
+                        width: "10px",
+                        backgroundColor: datas[player.index].colors[1],
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        my: "auto",
+                        textAlign: "left",
+                        width: "90%",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        overflowX: "hidden",
+                        fontSize: "0.8em",
+                      }}
+                    >
+                      {(() => {
+                        const user = users.get(player.id);
+                        console.log(player);
+                        if (user) {
+                          return (
+                            <Link
+                              href={getUserHref(user.name)}
+                              color="inherit"
+                              underline="none"
+                            >
+                              {user.screenName}
+                            </Link>
+                          );
+                        } else return player.id;
+                      })()}
+                    </Box>
+                    <Box
+                      sx={{
+                        // gridColumn: "3",
+                        my: "auto",
+                        textAlign: "right",
+                        fontSize: "1.3em",
+                      }}
+                    >
+                      {player.totalPoint}
+                    </Box>
                   </Box>
-                  <Box
-                    sx={{
-                      width: "10px",
-                      backgroundColor: datas[player.index].colors[1],
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      my: "auto",
-                      textAlign: "left",
-                      width: "90%",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      overflowX: "hidden",
-                      fontSize: "0.8em",
-                    }}
-                  >
-                    {(() => {
-                      const user = users.get(player.id);
-                      console.log(player);
-                      if (user) {
-                        return (
-                          <Link
-                            href={getUserHref(user.name)}
-                            color="inherit"
-                            underline="none"
-                          >
-                            {user.screenName}
-                          </Link>
-                        );
-                      } else return player.id;
-                    })()}
-                  </Box>
-                  <Box
-                    sx={{
-                      // gridColumn: "3",
-                      my: "auto",
-                      textAlign: "right",
-                      fontSize: "1.3em",
-                    }}
-                  >
-                    {player.totalPoint}
-                  </Box>
-                </Box>
-              );
-            })}
+                );
+              })
+          ) : (
+            <Skeleton variant="rectangular" width="100%" height="5em" />
+          )}
         </Box>
       </Box>
       <Box

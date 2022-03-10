@@ -53,6 +53,7 @@ export const useWebSocketGame = (req?: WsGameReq) => {
   }, [req, socket]);
 
   useEffect(() => {
+    setGames([]);
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(req));
     }
