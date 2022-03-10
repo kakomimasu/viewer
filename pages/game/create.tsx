@@ -278,7 +278,7 @@ const Page: NextPage<{ boards: Board[] }> = ({ boards }) => {
           return (
             <div>
               <div>ボードプレビュー</div>
-              <GameBoard game={game} />
+              <GameBoard game={game} users={new Map()} />
             </div>
           );
         })()}

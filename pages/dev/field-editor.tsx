@@ -167,7 +167,7 @@ export default function FieldEditor() {
         </TextField>
         {game && (
           <div id="game-board">
-            <GameBoard game={game} />
+            <GameBoard game={game} users={new Map()} />
           </div>
         )}
       </StyledDiv>
