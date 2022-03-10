@@ -87,6 +87,14 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     return;
   }, [game?.nextTurnUnixTime]);
 
+  const status = useMemo(() => {
+    if (game) {
+      if (game?.ending) return { label: "終了", color: "red" };
+      else if (game?.gaming) return { label: "ゲーム中", color: "green" };
+      else return { label: "待機中", color: "yellow" };
+    } else return;
+  }, [game]);
+
   return (
     <Box
       sx={{
@@ -282,10 +290,26 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
           gridRow: "1 / 2",
           display: "flex",
           alignItems: "center",
+          gap: 1,
         }}
       >
-        ゲーム詳細
-        {game ? ` - ${game.gameId}` : ""}
+        {status && (
+          <Box
+            sx={{
+              backgroundColor: status.color,
+              py: 0.2,
+              px: 1,
+              borderRadius: "1em",
+              boxShadow: "0px 0px 3px gray",
+            }}
+          >
+            {status.label}
+          </Box>
+        )}
+        <Box sx={{ flexGrow: "1" }}>
+          {game?.gameName ? game.gameName : "UnTitle"}
+        </Box>
+        <Box>{game && game.gameId}</Box>
       </Box>
       <Box
         sx={{
