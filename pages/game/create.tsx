@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { NextPage } from "next";
+import { GetStaticProps, InferGetStaticPropsType } from "next";
 import { useRouter } from "next/router";
-import { styled, useTheme } from "@mui/material/styles";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
-import AutoComplete from "@mui/material/Autocomplete";
+import { styled } from "@mui/material/styles";
+import { TextField, Box, MenuItem, Button, Autocomplete } from "@mui/material";
 
 import { apiClient, Board, Game, User } from "../../src/apiClient";
 import firebase from "../../src/firebase";
@@ -26,7 +23,7 @@ const StyledTextField = styled(TextField)({
   marginTop: 20,
   width: "100%",
 });
-const StyledAutoComplete = styled(AutoComplete)({
+const StyledAutoComplete = styled(Autocomplete)({
   //textAlign: "left",
   marginTop: 20,
   width: "100%",
@@ -37,7 +34,17 @@ const StyledButton = styled(Button)({
   marginTop: 20,
 });
 
-const Page: NextPage<{ boards: Board[] }> = ({ boards }) => {
+export const getStaticProps: GetStaticProps<{ boards: Board[] }> = async () => {
+  const res = await apiClient.getBoards();
+  if (res.success) {
+    return {
+      props: { boards: res.data },
+      revalidate: 10,
+    };
+  } else throw new Error(res.data.message);
+};
+
+const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
   const router = useRouter();
   const query = router.query;
   const fixedUsers = (query.player as string[]) || [];
@@ -244,17 +251,7 @@ const Page: NextPage<{ boards: Board[] }> = ({ boards }) => {
           const tiled = new Array(board.height * board.width);
           for (let i = 0; i < tiled.length; i++)
             tiled[i] = { type: 0, player: null };
-          const game: Pick<
-            Game,
-            | "board"
-            | "tiled"
-            | "players"
-            | "log"
-            | "startedAtUnixTime"
-            | "gaming"
-            | "ending"
-            | "nextTurnUnixTime"
-          > = {
+          const game: React.ComponentProps<typeof GameBoard>["game"] = {
             board,
             tiled,
             players: [
@@ -270,26 +267,24 @@ const Page: NextPage<{ boards: Board[] }> = ({ boards }) => {
               },
             ],
             log: [],
-            startedAtUnixTime: null,
-            nextTurnUnixTime: null,
-            gaming: false,
-            ending: false,
           };
           return (
-            <div>
+            <Box
+              sx={{
+                height: "50vh",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                mt: 2,
+              }}
+            >
               <div>ボードプレビュー</div>
               <GameBoard game={game} users={new Map()} />
-            </div>
+            </Box>
           );
         })()}
     </Content>
   );
-};
-
-Page.getInitialProps = async () => {
-  const res = await apiClient.getBoards();
-  const boards = res.success ? res.data : [];
-  return { boards };
 };
 
 export default Page;

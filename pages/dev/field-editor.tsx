@@ -16,9 +16,7 @@ const StyledDiv = styled("div")({
 
 type GameProp = React.ComponentProps<typeof GameBoard>["game"];
 
-export const getStaticProps: GetStaticProps<{ boards: Board[] }> = async (
-  ctx
-) => {
+export const getStaticProps: GetStaticProps<{ boards: Board[] }> = async () => {
   const res = await apiClient.getBoards();
   if (res.success) {
     return {
