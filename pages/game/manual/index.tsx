@@ -17,6 +17,7 @@ import {
   ActionPost,
 } from "../../../src/apiClient";
 import { useGameUsers } from "../../../src/useGameUsers";
+import { useWebSocketGame } from "../../../src/useWebsocketGame";
 
 import datas from "../../../components/player_datas";
 import GamePanel from "../../../components/gamePanel";
@@ -193,7 +194,17 @@ function useKeyDirection(useKey: {
 
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [matchRes, setMatchRes] = useState<MatchRes>();
-  const [game, setGame] = useState<Game>();
+  const query = useMemo(() => {
+    if (!matchRes) return undefined;
+    const q = `id:${matchRes.gameId}`;
+    console.log(q);
+    const req: WsGameReq = {
+      q,
+    };
+    return req;
+  }, [matchRes]);
+  const selectedGame = useWebSocketGame(query);
+  const game = useMemo<Game | undefined>(() => selectedGame[0], [selectedGame]);
   const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
   const users = useGameUsers(playerIds);
   const [controllerList, setControllerList] = useState<Controller[]>([
@@ -245,16 +256,6 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       }
     };
   }, [updateGamepads]);
-
-  const query = useMemo(() => {
-    if (!matchRes) return undefined;
-    const q = `id:${matchRes.gameId}`;
-    console.log(q);
-    const req: WsGameReq = {
-      q,
-    };
-    return req;
-  }, [matchRes]);
 
   useEffect(() => {
     setControllerList((prev) => {
@@ -324,6 +325,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   }, [gamepads, changeController]);
 
   useEffect(() => {
+    console.log("useEffect");
     if (!matchRes || !game || !game.gaming || !game.board || !game.tiled)
       return;
     const board = game.board;
@@ -355,7 +357,9 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     });
     // console.log("update actions", game);
     // console.log(actions);
-    apiClient.setAction(game.gameId, { actions }, matchRes.pic);
+    apiClient
+      .setAction(game.gameId, { actions }, matchRes.pic)
+      .then((v) => console.log(v));
   }, [controllerList, game, matchRes]);
 
   useEffect(() => {
@@ -542,7 +546,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
               maxHeight: "calc(100vh - 64px)",
             }}
           >
-            <GamePanel query={query} />
+            <GamePanel game={game} users={users} />
           </Box>
         )}
       </div>
