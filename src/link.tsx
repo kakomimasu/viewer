@@ -111,5 +111,7 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 
 export const getUserHref = (id: string) => `/user/detail/${id}`;
 export const getGameHref = (id?: string) => (id ? `/game?id=${id}` : "/game");
+export const getVRGameHref = (id?: string) =>
+  id ? `/vr/index.html?id=${id}` : "/vr/index.html";
 
 export default Link;
