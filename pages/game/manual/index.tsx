@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { NextPage } from "next";
 import Button from "@mui/material/Button";
 import { TextField, Box, MenuItem } from "@mui/material";
@@ -7,18 +13,14 @@ import {
   apiClient,
   Game,
   WsGameReq,
-  WsGameRes,
   MatchRes,
   ActionPost,
-  host,
 } from "../../../src/apiClient";
-import Link from "../../../src/link";
-import datas from "../../../components/player_datas";
+import { useGameUsers } from "../../../src/useGameUsers";
 
+import datas from "../../../components/player_datas";
+import GamePanel from "../../../components/gamePanel";
 import Content from "../../../components/content";
-import GameList from "../../../components/gamelist";
-import GameBoard from "../../../components/gameBoard";
-import PointsGraph from "../../../components/pointsGraph";
 
 type NextActionType = [-1 | 0 | 1, -1 | 0 | 1];
 const NextActions: Record<
@@ -190,6 +192,8 @@ function useKeyDirection(useKey: {
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [matchRes, setMatchRes] = useState<MatchRes>();
   const [game, setGame] = useState<Game>();
+  const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
+  const users = useGameUsers(playerIds);
   const [controllerList, setControllerList] = useState<Controller[]>([
     { label: "WSADキー", agentIndex: 0, axis: [0, 0] },
     { label: "Arrowキー", agentIndex: 1, axis: [0, 0] },
@@ -240,42 +244,15 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     };
   }, [updateGamepads]);
 
-  const connect = useCallback(() => {
-    if (!matchRes) return;
-    const socket = new WebSocket(
-      (host.protocol === "https:" ? "wss://" : "ws://") +
-        host.host +
-        "/v1/ws/game"
-    );
-    socket.onopen = () => {
-      const q = `id:${matchRes.gameId}`;
-      console.log(q);
-      const req: WsGameReq = {
-        q,
-      };
-      socket.send(JSON.stringify(req));
+  const query = useMemo(() => {
+    if (!matchRes) return undefined;
+    const q = `id:${matchRes.gameId}`;
+    console.log(q);
+    const req: WsGameReq = {
+      q,
     };
-    socket.onmessage = (event) => {
-      const res = JSON.parse(event.data) as WsGameRes;
-      console.log(res);
-      let game: Game | undefined;
-      if (res.type === "initial") {
-        game = res.games[0];
-      } else {
-        game = res.game;
-      }
-      // console.log("setGame");
-      setGame(game);
-    };
-    return () => {
-      socket.close();
-      console.log("websocket close");
-    };
+    return req;
   }, [matchRes]);
-
-  useEffect(() => {
-    return connect();
-  }, [connect]);
 
   useEffect(() => {
     setControllerList((prev) => {
@@ -556,18 +533,15 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
             );
           })}
         </Box>
-        {game && (
-          <>
-            <Button
-              href={id ? `/vr/index.html?id=${id}` : "/vr/latest.html"}
-              style={{ margin: "auto" }}
-            >
-              VR版はこちら
-            </Button>
-            <GameList games={[game]} pagenation={false} hover={false} />
-            <GameBoard game={game} />
-            <PointsGraph game={game} />
-          </>
+        {query && (
+          <Box
+            sx={{
+              height: "calc(2em + 50vw)",
+              maxHeight: "calc(100vh - 64px)",
+            }}
+          >
+            <GamePanel query={query} />
+          </Box>
         )}
       </div>
     </Content>

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { GetStaticProps, InferGetStaticPropsType } from "next";
 import { styled } from "@mui/material/styles";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
+import { TextField, Box, MenuItem } from "@mui/material";
 
 import Content from "../../components/content";
 import GameBoard from "../../components/gameBoard";
 
-import { apiClient, Board, Game } from "../../src/apiClient";
+import { apiClient, Board } from "../../src/apiClient";
 
 const StyledDiv = styled("div")({
   display: "flex",
@@ -14,52 +14,32 @@ const StyledDiv = styled("div")({
   flexDirection: "column",
 });
 
-export default function FieldEditor() {
-  const [boards, setBoards] = useState<Board[]>();
-  const [game, setGame] =
-    useState<
-      Pick<
-        Game,
-        | "board"
-        | "tiled"
-        | "players"
-        | "log"
-        | "startedAtUnixTime"
-        | "gaming"
-        | "ending"
-        | "nextTurnUnixTime"
-      >
-    >();
+type GameProp = React.ComponentProps<typeof GameBoard>["game"];
 
-  useEffect(() => {
-    getBoards();
-  }, []);
+export const getStaticProps: GetStaticProps<{ boards: Board[] }> = async () => {
+  const res = await apiClient.getBoards();
+  if (res.success) {
+    return {
+      props: { boards: res.data },
+      revalidate: 10,
+    };
+  } else throw new Error(res.data.message);
+};
 
-  async function getBoards() {
-    const res = await apiClient.getBoards();
-    if (res.success) setBoards(res.data);
-  }
+export default function FieldEditor({
+  boards,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  const [game, setGame] = useState<GameProp>();
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value;
-    if (!boards) return;
     const board = boards.find((b) => b.name === value);
     if (!board) return;
     const tiled = new Array(board.height * board.width);
     for (let i = 0; i < tiled.length; i++) {
       tiled[i] = { type: 0, player: null };
     }
-    const game: Pick<
-      Game,
-      | "board"
-      | "tiled"
-      | "players"
-      | "log"
-      | "startedAtUnixTime"
-      | "gaming"
-      | "ending"
-      | "nextTurnUnixTime"
-    > = {
+    const game: GameProp = {
       board,
       tiled,
       players: [
@@ -71,10 +51,6 @@ export default function FieldEditor() {
         },
       ],
       log: [],
-      startedAtUnixTime: null,
-      nextTurnUnixTime: null,
-      gaming: false,
-      ending: false,
     };
     setGame(game);
   };
@@ -166,9 +142,15 @@ export default function FieldEditor() {
           })}
         </TextField>
         {game && (
-          <div id="game-board">
-            <GameBoard game={game} />
-          </div>
+          <Box
+            id="game-board"
+            sx={{
+              height: "50vh",
+              aspectRatio: `${game.board?.width}/${game.board?.height}`,
+            }}
+          >
+            <GameBoard game={game} users={new Map()} />
+          </Box>
         )}
       </StyledDiv>
     </Content>

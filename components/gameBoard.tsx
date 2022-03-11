@@ -1,4 +1,3 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { Box } from "@mui/material";
 
@@ -8,17 +7,8 @@ import { useGameUsers } from "../src/useGameUsers";
 import datas from "./player_datas";
 
 type Props = {
-  game: Pick<
-    Game,
-    | "board"
-    | "tiled"
-    | "players"
-    | "log"
-    | "startedAtUnixTime"
-    | "gaming"
-    | "ending"
-    | "nextTurnUnixTime"
-  >;
+  game: Pick<Game, "board" | "tiled" | "players" | "log">;
+  users: ReturnType<typeof useGameUsers>;
 };
 
 // conflictのアニメーション
@@ -64,35 +54,7 @@ const AgentDetail = styled("div")({
   },
 });
 
-export default function GameBoard({ game }: Props) {
-  const [status, setStatus] = useState<string>();
-  const playerIds = useMemo(
-    () => game.players.map((p) => p.id),
-    [game.players]
-  );
-  const users = useGameUsers(playerIds);
-
-  const setStatusT = useCallback(() => {
-    let status = "";
-    if (game.startedAtUnixTime === null) status = "プレイヤー入室待ち";
-    else if (game.ending) status = "ゲーム終了";
-    else if (game.gaming) {
-      if (!game.nextTurnUnixTime) return;
-      const nextTime = new Date(game.nextTurnUnixTime * 1000).getTime();
-      const nowTime = new Date().getTime();
-      const diffTime = (nextTime - nowTime) / 1000;
-      if (diffTime > 0) {
-        status = "次のターンまで" + diffTime.toFixed(1) + "秒";
-        setTimeout(setStatusT, 100);
-      } else status = "競合確認中…";
-    } else status = "ゲームスタート待ち";
-    setStatus(status);
-  }, [game.ending, game.gaming, game.nextTurnUnixTime, game.startedAtUnixTime]);
-
-  useEffect(() => {
-    setStatusT();
-  }, [setStatusT]);
-
+export default function GameBoard({ game, users }: Props) {
   const isAgent = (x: number, y: number) => {
     if (game.players) {
       const agent = game.players
@@ -149,13 +111,14 @@ export default function GameBoard({ game }: Props) {
   return (
     <Box
       sx={{
-        my: 2,
+        height: "100%",
         display: "flex",
         flexDirection: "column",
+        justifyContent: "center",
         alignItems: "center",
+        aspectRatio: `${game.board?.width}/${game.board?.height}`,
       }}
     >
-      <div>{status}</div>
       {(() => {
         const board = game.board;
         const tiled = game.tiled;
@@ -172,7 +135,7 @@ export default function GameBoard({ game }: Props) {
               gap: "1px",
               width: "100%",
               lineHeight: "1",
-              fontSize: `clamp(1px, calc(25vw/${board.width}), 15px)`,
+              fontSize: `clamp(10px, calc(25vw/${board.width}), 15px)`,
             }}
           >
             {[1, board.height + 2].map((y) => {
@@ -184,7 +147,6 @@ export default function GameBoard({ game }: Props) {
                     sx={{
                       gridColumn: x + 1,
                       gridRow: y,
-                      p: "0.5em",
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
@@ -205,7 +167,6 @@ export default function GameBoard({ game }: Props) {
                     sx={{
                       gridColumn: x,
                       gridRow: y + 1,
-                      p: "0.5em",
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
@@ -283,6 +244,8 @@ export default function GameBoard({ game }: Props) {
                       animation: isConflict
                         ? `${flash} 1s linear infinite`
                         : "",
+                      height: "100%",
+                      width: "100%",
                     }}
                     className="tile"
                   >

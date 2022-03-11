@@ -2,6 +2,8 @@ import * as React from "react";
 import Document, { Html, Head, Main, NextScript } from "next/document";
 import createEmotionServer from "@emotion/server/create-instance";
 import { CacheProvider } from "@emotion/react";
+import { Box, CssBaseline } from "@mui/material";
+
 import theme from "../src/theme";
 import createEmotionCache from "../src/createEmotionCache";
 
@@ -25,15 +27,21 @@ export default class MyDocument extends Document {
             href="https://fonts.googleapis.com/icon?family=Material+Icons"
           />
         </Head>
-        <body style={{ height: "100%" }}>
+        <Box
+          component="body"
+          sx={{
+            height: "100%",
+            "& #__next": {
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+            },
+          }}
+        >
+          <CssBaseline />
           <Main />
           <NextScript />
-          <style jsx global>{`
-            #__next {
-              height: 100%;
-            }
-          `}</style>
-        </body>
+        </Box>
       </Html>
     );
   }

@@ -8,7 +8,11 @@ import ChatIcon from "@mui/icons-material/Chat";
 import Link from "../src/link";
 import Section, { SubSection } from "../components/section";
 
-const Main = styled("main")({
+const Main = styled("div")({
+  width: "90%",
+  maxWidth: "1000px",
+  padding: "3em 0",
+  margin: "0 auto",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
