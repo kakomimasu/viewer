@@ -1,4 +1,3 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { Box } from "@mui/material";
 
@@ -8,17 +7,7 @@ import { useGameUsers } from "../src/useGameUsers";
 import datas from "./player_datas";
 
 type Props = {
-  game: Pick<
-    Game,
-    | "board"
-    | "tiled"
-    | "players"
-    | "log"
-    | "startedAtUnixTime"
-    | "gaming"
-    | "ending"
-    | "nextTurnUnixTime"
-  >;
+  game: Pick<Game, "board" | "tiled" | "players" | "log">;
   users: ReturnType<typeof useGameUsers>;
 };
 
@@ -66,29 +55,6 @@ const AgentDetail = styled("div")({
 });
 
 export default function GameBoard({ game, users }: Props) {
-  const [status, setStatus] = useState<string>();
-
-  const setStatusT = useCallback(() => {
-    let status = "";
-    if (game.startedAtUnixTime === null) status = "プレイヤー入室待ち";
-    else if (game.ending) status = "ゲーム終了";
-    else if (game.gaming) {
-      if (!game.nextTurnUnixTime) return;
-      const nextTime = new Date(game.nextTurnUnixTime * 1000).getTime();
-      const nowTime = new Date().getTime();
-      const diffTime = (nextTime - nowTime) / 1000;
-      if (diffTime > 0) {
-        status = "次のターンまで" + diffTime.toFixed(1) + "秒";
-        setTimeout(setStatusT, 100);
-      } else status = "競合確認中…";
-    } else status = "ゲームスタート待ち";
-    setStatus(status);
-  }, [game.ending, game.gaming, game.nextTurnUnixTime, game.startedAtUnixTime]);
-
-  useEffect(() => {
-    setStatusT();
-  }, [setStatusT]);
-
   const isAgent = (x: number, y: number) => {
     if (game.players) {
       const agent = game.players
@@ -153,7 +119,6 @@ export default function GameBoard({ game, users }: Props) {
         aspectRatio: `${game.board?.width}/${game.board?.height}`,
       }}
     >
-      {/* <div>{status}</div> */}
       {(() => {
         const board = game.board;
         const tiled = game.tiled;
