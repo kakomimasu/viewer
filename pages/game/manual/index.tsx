@@ -98,6 +98,7 @@ const ManualAgent = ({
             if (x === 0 && y === 0) {
               return (
                 <Box
+                  key={`${x}-${y}`}
                   sx={{
                     gridColumn,
                     gridRow,
@@ -115,6 +116,7 @@ const ManualAgent = ({
                 na[0] === x && na[1] === y ? playerData.colors[0] : "";
               return (
                 <Box
+                  key={`${x}-${y}`}
                   sx={{
                     gridColumn,
                     gridRow,
