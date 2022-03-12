@@ -160,7 +160,7 @@ function useKeyDirection(useKey: {
             return prev;
           else return [rawDirection.current[0], rawDirection.current[1]];
         });
-      }, 50);
+      }, 20);
     }
   }, []);
 
@@ -191,6 +191,30 @@ function useKeyDirection(useKey: {
 
   return direction;
 }
+
+const useGamepads = () => {
+  const [gamepads, setGamepads] = useState<Gamepads>([null, null, null, null]);
+
+  useEffect(() => {
+    let requestId: number | undefined;
+    const updateGamepads = () => {
+      const gps = navigator.getGamepads();
+      setGamepads((prev) => {
+        const isUpdate = !gps.every((gp, i) => gp === prev[i]);
+        return isUpdate ? gps : prev;
+      });
+      requestId = requestAnimationFrame(updateGamepads);
+    };
+    updateGamepads();
+    return () => {
+      if (requestId) {
+        cancelAnimationFrame(requestId);
+      }
+    };
+  }, []);
+
+  return gamepads;
+};
 
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [matchRes, setMatchRes] = useState<MatchRes>();
@@ -228,7 +252,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     right: "ArrowRight",
   });
 
-  const [gamepads, setGamepads] = useState<Gamepads>([null, null, null, null]);
+  const gamepads = useGamepads();
   const rawGamepadAxis = useRef<[number, number][]>([
     [0, 0],
     [0, 0],
@@ -241,21 +265,6 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     undefined,
     undefined,
   ]);
-  const requestId = useRef<number>();
-  const updateGamepads = useCallback(() => {
-    const gps = navigator.getGamepads();
-    setGamepads(gps);
-    requestId.current = requestAnimationFrame(updateGamepads);
-  }, []);
-
-  useEffect(() => {
-    updateGamepads();
-    return () => {
-      if (requestId.current) {
-        cancelAnimationFrame(requestId.current);
-      }
-    };
-  }, [updateGamepads]);
 
   useEffect(() => {
     setControllerList((prev) => {
@@ -325,7 +334,6 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   }, [gamepads, changeController]);
 
   useEffect(() => {
-    console.log("useEffect");
     if (!matchRes || !game || !game.gaming || !game.board || !game.tiled)
       return;
     const board = game.board;
@@ -357,9 +365,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     });
     // console.log("update actions", game);
     // console.log(actions);
-    apiClient
-      .setAction(game.gameId, { actions }, matchRes.pic)
-      .then((v) => console.log(v));
+    apiClient.setAction(game.gameId, { actions }, matchRes.pic);
   }, [controllerList, game, matchRes]);
 
   useEffect(() => {
