@@ -153,12 +153,8 @@ function useKeyDirection(useKey: {
 
         setDirection((prev) => {
           const curr = rawDirection.current;
-          if (
-            (curr[0] === prev[0] && curr[1] === prev[1]) ||
-            (curr[0] === 0 && curr[1] === 0)
-          )
-            return prev;
-          else return [rawDirection.current[0], rawDirection.current[1]];
+          if (curr[0] === prev[0] && curr[1] === prev[1]) return prev;
+          else return curr;
         });
       }, 20);
     }
@@ -267,19 +263,25 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   ]);
 
   useEffect(() => {
+    if (dirWSAD[0] === 0 && dirWSAD[1] === 0) return;
     setControllerList((prev) => {
       if (prev[0].axis === dirWSAD) return prev;
       const list = [...prev];
-      list[0].axis = dirWSAD;
+      const l = { ...list[0] };
+      l.axis = dirWSAD;
+      list[0] = l;
       return list;
     });
   }, [dirWSAD]);
 
   useEffect(() => {
+    if (dirArrow[0] === 0 && dirArrow[1] === 0) return;
     setControllerList((prev) => {
       if (prev[1].axis === dirArrow) return prev;
       const list = [...prev];
-      list[1].axis = dirArrow;
+      const l = { ...list[1] };
+      l.axis = dirArrow;
+      list[1] = l;
       return list;
     });
   }, [dirArrow]);
