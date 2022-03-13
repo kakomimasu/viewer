@@ -146,7 +146,7 @@ export default function FieldEditor({
             id="game-board"
             sx={{
               height: "50vh",
-              display: "grid",
+              aspectRatio: `${game.board?.width}/${game.board?.height}`,
             }}
           >
             <GameBoard game={game} users={new Map()} />
