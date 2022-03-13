@@ -1,5 +1,7 @@
+import { useMemo, useEffect, useRef } from "react";
 import { styled, keyframes } from "@mui/material/styles";
 import { Box } from "@mui/material";
+import { useResizeDetector } from "react-resize-detector";
 
 import { type Game } from "../src/apiClient";
 import { useGameUsers } from "../src/useGameUsers";
@@ -108,16 +110,29 @@ export default function GameBoard({ game, users }: Props) {
     return `translate(${transX},${transY})`;
   };
 
+  const { width, height, ref } = useResizeDetector();
+
+  const scale = useMemo(() => {
+    if (!width || !height || !game.board) return 1;
+    const idealWidth = (game.board.width + 2) * 50;
+    const idealHeight = (game.board.height + 2) * 50;
+    const scaleX = width / idealWidth;
+    const scaleY = height / idealHeight;
+    // console.log(scaleX, scaleY);
+    return Math.min(scaleX, scaleY);
+  }, [width, height, game.board]);
+
   return (
     <Box
       sx={{
         height: "100%",
+        width: "100%",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        aspectRatio: `${game.board?.width}/${game.board?.height}`,
       }}
+      ref={ref}
     >
       {(() => {
         const board = game.board;
@@ -130,12 +145,13 @@ export default function GameBoard({ game, users }: Props) {
             sx={{
               userSelect: "none",
               display: "grid",
-              gridTemplateColumns: `min-content repeat(${board.width}, 1fr) min-content`,
+              gridTemplateColumns: `min-content repeat(${board.width}, 50px) min-content`,
               gridTemplateRows: `min-content repeat(${board.height}, 1fr) min-content`,
               gap: "1px",
-              width: "100%",
               lineHeight: "1",
               fontSize: `clamp(10px, calc(25vw/${board.width}), 15px)`,
+              transform: `scale(${scale})`,
+              aspectRatio: `${game.board?.width}/${game.board?.height}`,
             }}
           >
             {[1, board.height + 2].map((y) => {
