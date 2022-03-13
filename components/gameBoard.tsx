@@ -9,7 +9,12 @@ import { useGameUsers } from "../src/useGameUsers";
 import datas from "./player_datas";
 
 type Props = {
-  game: Pick<Game, "board" | "tiled" | "players" | "log">;
+  game: {
+    board: NonNullable<Game["board"]>;
+    tiled: Game["tiled"];
+    players: Game["players"];
+    log: Game["log"];
+  };
   users: ReturnType<typeof useGameUsers>;
 };
 
@@ -102,7 +107,6 @@ export default function GameBoard({ game, users }: Props) {
   };
 
   const getAgentTransform = (x: number, y: number) => {
-    if (!game.board) return;
     const w = game.board.width;
     const h = game.board.height;
     const transX = x < w / 2 ? "0%" : "-100%";
@@ -113,7 +117,7 @@ export default function GameBoard({ game, users }: Props) {
   const { width, height, ref } = useResizeDetector();
 
   const scale = useMemo(() => {
-    if (!width || !height || !game.board) return 1;
+    if (!width || !height) return 1;
     const idealWidth = (game.board.width + 2) * 50;
     const idealHeight = (game.board.height + 2) * 50;
     const scaleX = width / idealWidth;
@@ -137,7 +141,7 @@ export default function GameBoard({ game, users }: Props) {
       {(() => {
         const board = game.board;
         const tiled = game.tiled;
-        if (!board || !tiled) return;
+        if (!tiled) return;
 
         return (
           <Box
