@@ -17,6 +17,7 @@ import {
   ActionPost,
 } from "../../../src/apiClient";
 import { useGameUsers } from "../../../src/useGameUsers";
+import { useWebSocketGame } from "../../../src/useWebsocketGame";
 
 import datas from "../../../components/player_datas";
 import GamePanel from "../../../components/gamePanel";
@@ -98,6 +99,7 @@ const ManualAgent = ({
             if (x === 0 && y === 0) {
               return (
                 <Box
+                  key={`${x}-${y}`}
                   sx={{
                     gridColumn,
                     gridRow,
@@ -115,6 +117,7 @@ const ManualAgent = ({
                 na[0] === x && na[1] === y ? playerData.colors[0] : "";
               return (
                 <Box
+                  key={`${x}-${y}`}
                   sx={{
                     gridColumn,
                     gridRow,
@@ -150,14 +153,10 @@ function useKeyDirection(useKey: {
 
         setDirection((prev) => {
           const curr = rawDirection.current;
-          if (
-            (curr[0] === prev[0] && curr[1] === prev[1]) ||
-            (curr[0] === 0 && curr[1] === 0)
-          )
-            return prev;
-          else return [rawDirection.current[0], rawDirection.current[1]];
+          if (curr[0] === prev[0] && curr[1] === prev[1]) return prev;
+          else return curr;
         });
-      }, 50);
+      }, 20);
     }
   }, []);
 
@@ -189,9 +188,43 @@ function useKeyDirection(useKey: {
   return direction;
 }
 
+const useGamepads = () => {
+  const [gamepads, setGamepads] = useState<Gamepads>([null, null, null, null]);
+
+  useEffect(() => {
+    let requestId: number | undefined;
+    const updateGamepads = () => {
+      const gps = navigator.getGamepads();
+      setGamepads((prev) => {
+        const isUpdate = !gps.every((gp, i) => gp === prev[i]);
+        return isUpdate ? gps : prev;
+      });
+      requestId = requestAnimationFrame(updateGamepads);
+    };
+    updateGamepads();
+    return () => {
+      if (requestId) {
+        cancelAnimationFrame(requestId);
+      }
+    };
+  }, []);
+
+  return gamepads;
+};
+
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [matchRes, setMatchRes] = useState<MatchRes>();
-  const [game, setGame] = useState<Game>();
+  const query = useMemo(() => {
+    if (!matchRes) return undefined;
+    const q = `id:${matchRes.gameId}`;
+    console.log(q);
+    const req: WsGameReq = {
+      q,
+    };
+    return req;
+  }, [matchRes]);
+  const selectedGame = useWebSocketGame(query);
+  const game = useMemo<Game | undefined>(() => selectedGame[0], [selectedGame]);
   const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
   const users = useGameUsers(playerIds);
   const [controllerList, setControllerList] = useState<Controller[]>([
@@ -215,7 +248,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     right: "ArrowRight",
   });
 
-  const [gamepads, setGamepads] = useState<Gamepads>([null, null, null, null]);
+  const gamepads = useGamepads();
   const rawGamepadAxis = useRef<[number, number][]>([
     [0, 0],
     [0, 0],
@@ -228,46 +261,27 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     undefined,
     undefined,
   ]);
-  const requestId = useRef<number>();
-  const updateGamepads = useCallback(() => {
-    const gps = navigator.getGamepads();
-    setGamepads(gps);
-    requestId.current = requestAnimationFrame(updateGamepads);
-  }, []);
 
   useEffect(() => {
-    updateGamepads();
-    return () => {
-      if (requestId.current) {
-        cancelAnimationFrame(requestId.current);
-      }
-    };
-  }, [updateGamepads]);
-
-  const query = useMemo(() => {
-    if (!matchRes) return undefined;
-    const q = `id:${matchRes.gameId}`;
-    console.log(q);
-    const req: WsGameReq = {
-      q,
-    };
-    return req;
-  }, [matchRes]);
-
-  useEffect(() => {
+    if (dirWSAD[0] === 0 && dirWSAD[1] === 0) return;
     setControllerList((prev) => {
       if (prev[0].axis === dirWSAD) return prev;
       const list = [...prev];
-      list[0].axis = dirWSAD;
+      const l = { ...list[0] };
+      l.axis = dirWSAD;
+      list[0] = l;
       return list;
     });
   }, [dirWSAD]);
 
   useEffect(() => {
+    if (dirArrow[0] === 0 && dirArrow[1] === 0) return;
     setControllerList((prev) => {
       if (prev[1].axis === dirArrow) return prev;
       const list = [...prev];
-      list[1].axis = dirArrow;
+      const l = { ...list[1] };
+      l.axis = dirArrow;
+      list[1] = l;
       return list;
     });
   }, [dirArrow]);
@@ -540,7 +554,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
               maxHeight: "calc(100vh - 64px)",
             }}
           >
-            <GamePanel query={query} />
+            <GamePanel game={game} users={users} />
           </Box>
         )}
       </div>

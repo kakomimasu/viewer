@@ -256,7 +256,15 @@ export default function GameBoard({ game, users }: Props) {
                         bottom: "0.2em",
                       }}
                     >
-                      <BoardCellPoint isAbs={isAbs}>{point}</BoardCellPoint>
+                      <Box
+                        sx={{
+                          textDecoration: isAbs ? "line-through" : undefined,
+                          color: isAbs ? "red" : undefined,
+                          fontSize: isAbs ? "80%" : undefined,
+                        }}
+                      >
+                        {point}
+                      </Box>
                       {isAbs && <span>{Math.abs(point)}</span>}
                     </Box>
                     {agent && (
