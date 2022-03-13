@@ -143,7 +143,7 @@ export default function GameBoard({ game, users }: Props) {
                 const x = i + 1;
                 return (
                   <Box
-                    key={`index-${x}-${y}`}
+                    key={`${board.name}-index-${x}-${y}`}
                     sx={{
                       gridColumn: x + 1,
                       gridRow: y,
@@ -163,7 +163,7 @@ export default function GameBoard({ game, users }: Props) {
                 const y = i + 1;
                 return (
                   <Box
-                    key={`index-${x}-${y}`}
+                    key={`${board.name}-index-${x}-${y}`}
                     sx={{
                       gridColumn: x,
                       gridRow: y + 1,
@@ -228,7 +228,7 @@ export default function GameBoard({ game, users }: Props) {
 
                 return (
                   <Box
-                    key={i}
+                    key={`${board.name}-${i}`}
                     sx={{
                       position: "relative",
                       gridColumn: x + 2,
@@ -303,7 +303,7 @@ export default function GameBoard({ game, users }: Props) {
                               {agentHistory(agent).map((e, i) => {
                                 return (
                                   <div
-                                    key={i}
+                                    key={`${board.name}-${i}`}
                                     style={{
                                       textDecoration:
                                         e.res > 0 ? "line-through" : "none",
