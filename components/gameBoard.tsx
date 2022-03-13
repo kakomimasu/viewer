@@ -120,8 +120,8 @@ export default function GameBoard({
 
   const scale = useMemo(() => {
     if (!width || !height) return 1;
-    const idealWidth = (board.width + 2) * 50;
-    const idealHeight = (board.height + 2) * 50;
+    const idealWidth = (board.width + 2) * 50 + (board.width + 1) * 1;
+    const idealHeight = (board.height + 2) * 50 + (board.height + 1) * 1;
     const scaleX = width / idealWidth;
     const scaleY = height / idealHeight;
     return Math.min(scaleX, scaleY);

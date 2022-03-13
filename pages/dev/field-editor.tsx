@@ -145,7 +145,7 @@ export default function FieldEditor({
           <Box
             id="game-board"
             sx={{
-              height: "50vh",
+              height: "calc(100vh - 64px)",
             }}
           >
             <GameBoard game={game} users={new Map()} />
