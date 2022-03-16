@@ -48,6 +48,8 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   const games = useWebSocketGame(req);
   const selectedGame = useWebSocketGame(selectedGameReq);
   const game = useMemo<Game | undefined>(() => selectedGame[0], [selectedGame]);
+  const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
+  const users = useGameUsers(playerIds);
 
   useEffect(() => {
     if (gameType) {
@@ -248,7 +250,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         </Paper>
       </Box>
       <Box sx={{ width: "100%", height: "100%" }}>
-        <GamePanel query={selectedGameReq} />
+        <GamePanel game={game} users={users} />
       </Box>
     </Box>
   );

@@ -132,8 +132,9 @@ export default function FieldEditor({
           autoComplete="off"
           style={{ width: "20em" }}
           onChange={handleChange}
+          value=""
         >
-          {boards?.map((board) => {
+          {boards.map((board) => {
             return (
               <MenuItem key={board.name} value={board.name}>
                 {board.name}

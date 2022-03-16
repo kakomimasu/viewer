@@ -6,18 +6,17 @@ import GameBoard from "./gameBoard";
 import PointsGraph from "./pointsGraph";
 import datas from "./player_datas";
 
-import { WsGameReq, Game } from "../src/apiClient";
-import { useWebSocketGame } from "../src/useWebsocketGame";
+import { Game } from "../src/apiClient";
 import { useGameUsers } from "../src/useGameUsers";
 import Link, { getUserHref, getVRGameHref } from "../src/link";
 
-export default function GamePanel({ query }: { query: WsGameReq }) {
-  const selectedGame = useWebSocketGame(query);
-  const game = useMemo<Game | undefined>(() => selectedGame[0], [selectedGame]);
-
-  const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
-  const users = useGameUsers(playerIds);
-
+export default function GamePanel({
+  game,
+  users,
+}: {
+  game?: Game;
+  users: ReturnType<typeof useGameUsers>;
+}) {
   const turn = useMemo(() => {
     if (game?.board) {
       const nTurn = game.board.nTurn;
