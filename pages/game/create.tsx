@@ -271,7 +271,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
           return (
             <Box
               sx={{
-                height: "50vh",
+                height: "calc(100vh - 64px)",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
