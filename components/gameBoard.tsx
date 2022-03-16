@@ -1,4 +1,5 @@
-import { useMemo, useEffect, useRef } from "react";
+import { useMemo } from "react";
+import Image from "next/image";
 import { styled, keyframes } from "@mui/material/styles";
 import { Box } from "@mui/material";
 import { useResizeDetector } from "react-resize-detector";
@@ -13,20 +14,12 @@ type Props = {
   users: ReturnType<typeof useGameUsers>;
 };
 
+const cellSize = 50;
+
 // conflictのアニメーション
 const flash = keyframes({
   "0%,100%": {},
   "50%": { backgroundColor: "#00ff00" },
-});
-
-const BoardCellPoint = styled("div")<{ isAbs: boolean }>(({ isAbs }) => {
-  return isAbs
-    ? {
-        textDecoration: "line-through",
-        color: "red",
-        fontSize: "80%",
-      }
-    : {};
 });
 
 const AgentDetailHistory = styled("div")({
@@ -42,7 +35,7 @@ const AgentDetail = styled("div")({
   position: "absolute",
   backgroundColor: "rgba(0, 0, 0, .7)",
   color: "white",
-  zIndex: 1,
+  zIndex: 2,
   top: "50%",
   left: "50%",
   textAlign: "center",
@@ -55,6 +48,72 @@ const AgentDetail = styled("div")({
     display: "block",
   },
 });
+
+type AgentProps = {
+  agent: { x: number; y: number };
+  playerIdx: number;
+  agentIdx: number;
+};
+const Agent: React.FC<AgentProps> = ({ agent, playerIdx, agentIdx }) => {
+  const isPuted = useMemo(() => agent.x !== -1, [agent.x]);
+  const top = useMemo(() => {
+    return (agent.y + 1) * cellSize + agent.y * 1;
+  }, [agent.y]);
+  const left = useMemo(() => {
+    return (agent.x + 1) * cellSize + agent.x * 1;
+  }, [agent.x]);
+  const agentData = useMemo(() => datas[playerIdx], [playerIdx]);
+
+  if (!isPuted) return <></>;
+  else
+    return (
+      <Box
+        sx={{
+          position: "absolute",
+          width: cellSize,
+          height: cellSize,
+          zIndex: 1,
+
+          top,
+          left,
+
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+
+          pointerEvents: "none",
+
+          transitionProperty: "top, left",
+          transitionDuration: "0.4s",
+        }}
+      >
+        <Image
+          src={agentData.agentUrl}
+          width={cellSize * 0.8}
+          height={cellSize * 0.8}
+          alt={`agent player:${playerIdx} n:${agentIdx}`}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            fontSize: "12px",
+            top: "3px",
+            left: "3px",
+            width: "1em",
+            height: "1em",
+            borderRadius: "50%",
+            backgroundColor: "yellow",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: "0.5em",
+          }}
+        >
+          {agentIdx + 1}
+        </Box>
+      </Box>
+    );
+};
 
 export default function GameBoard({
   game: { board, tiled, players, log },
@@ -149,6 +208,19 @@ export default function GameBoard({
             transform: `scale(${scale})`,
           }}
         >
+          {players.map((p, pIdx) => {
+            return p.agents.map((a, aIdx) => {
+              return (
+                <Agent
+                  key={`${pIdx}-${aIdx}`}
+                  agent={a}
+                  playerIdx={pIdx}
+                  agentIdx={aIdx}
+                />
+              );
+            });
+          })}
+
           {[1, board.height + 2].map((y) => {
             return new Array(board.width).fill(0).map((_, i) => {
               const x = i + 1;
@@ -246,11 +318,6 @@ export default function GameBoard({
                     gridRow: y + 2,
                     aspectRatio: "1",
                     backgroundColor: bgColor(),
-                    backgroundImage:
-                      agent && `url(${datas[agent.player].agentUrl})`,
-                    backgroundSize: "80%",
-                    backgroundPosition: "0% 50%",
-                    backgroundRepeat: "no-repeat",
                     outline: "1px solid #555555",
                     animation: isConflict ? `${flash} 1s linear infinite` : "",
                     height: "100%",
@@ -276,26 +343,6 @@ export default function GameBoard({
                     </Box>
                     {isAbs && <span>{Math.abs(point)}</span>}
                   </Box>
-                  {agent && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: "0.2em",
-                        left: "0.2em",
-                        width: "1em",
-                        height: "1em",
-                        borderRadius: "50%",
-                        backgroundColor: "yellow",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "0.8em",
-                        p: "0.5em",
-                      }}
-                    >
-                      {agent.n + 1}
-                    </Box>
-                  )}
                   {agent &&
                     (() => {
                       const userId = players[agent.player].id;
