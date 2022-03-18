@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { Box } from "@mui/material";
+import { useResizeDetector } from "react-resize-detector";
 
 import { type Game } from "../src/apiClient";
 import { useGameUsers } from "../src/useGameUsers";
@@ -35,14 +36,16 @@ const PointsGraph: NextPage<{
     return maxPoint.toString().length;
   }, [data]);
 
+  const { width, height, ref } = useResizeDetector();
+
   return (
-    <Box
-      component={ResponsiveContainer}
-      width="100%"
-      height="100%"
-      sx={{ fontSize: "0.8em" }}
-    >
-      <LineChart data={data}>
+    <Box sx={{ width: "100%", height: "100%" }} ref={ref}>
+      <LineChart
+        data={data}
+        width={width}
+        height={height}
+        style={{ position: "absolute", fontSize: "0.8em" }}
+      >
         <CartesianGrid strokeDasharray="3 3" />
 
         <XAxis
