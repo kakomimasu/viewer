@@ -172,7 +172,7 @@
       }
 
       const gameId = getUrlQueries().id;
-      var socket = new WebSocket("wss://api.kakomimasu.com/v1/ws/game");
+      var socket = new WebSocket("ws://localhost:8880/v1/ws/game");
       socket.onopen = (event) => {
         const q = (
           gameId
@@ -198,9 +198,13 @@
         }(), 100);
       }
       socket.onmessage = (event) => {
-        const game = JSON.parse(event.data).games[0];
-        console.log(game);
-        getRoomInfo(game);
+        try {
+          const game = JSON.parse(event.data).games[0];
+          console.log(game);
+          getRoomInfo(game);
+        } catch (e) {
+          // console.error(e);
+        }
       }
       socket.onerror = (event) => {
         //console.log('ws wrror', event);
