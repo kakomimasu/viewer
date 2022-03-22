@@ -172,7 +172,7 @@
       }
 
       const gameId = getUrlQueries().id;
-      var socket = new WebSocket("ws://localhost:8880/v1/ws/game");
+      var socket = new WebSocket("wss://api.kakomimasu.com/v1/ws/game");
       socket.onopen = (event) => {
         const q = (
           gameId
