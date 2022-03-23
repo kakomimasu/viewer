@@ -7,7 +7,8 @@ import React, {
 } from "react";
 import { NextPage } from "next";
 import Button from "@mui/material/Button";
-import { TextField, Box, MenuItem } from "@mui/material";
+import { TextField, Box, MenuItem, Tab } from "@mui/material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 import {
   apiClient,
@@ -15,6 +16,7 @@ import {
   WsGameReq,
   MatchRes,
   ActionPost,
+  MatchReq,
 } from "../../../src/apiClient";
 import { useGameUsers } from "../../../src/useGameUsers";
 import { useWebSocketGame } from "../../../src/useWebsocketGame";
@@ -46,6 +48,15 @@ const NextActions: Record<
   DOWNLEFT: [-1, 1],
   NONE: [0, 0],
 };
+
+const aiList = [
+  { label: "AI-1", name: "a1" },
+  { label: "AI-2", name: "a2" },
+  { label: "AI-3", name: "a3" },
+  { label: "AI-4", name: "a4" },
+  { label: "AI-5", name: "a5" },
+  { label: "None", name: "none" },
+] as const;
 
 type AgentData = { index: number; nextAction: NextActionType };
 
@@ -211,6 +222,8 @@ const useGamepads = () => {
 
   return gamepads;
 };
+
+type ParticipateType = "free" | "gameId" | "ai";
 
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [matchRes, setMatchRes] = useState<MatchRes>();
@@ -406,17 +419,30 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     }
   }, [game]);
 
-  async function joinGame(gameId?: string) {
-    const matchRes = await apiClient.match({
-      gameId,
-      guest: {
-        name: "guest1",
-      },
-    });
+  const [participateType, setParticipateType] =
+    useState<ParticipateType>("free");
+  const [gameId, setGameId] = useState<string>();
+  const [ai, setAi] = useState<typeof aiList[number]["name"]>(aiList[0].name);
+
+  const joinGame = useCallback(async () => {
+    const req: MatchReq = { guest: { name: "guest" } };
+    if (participateType === "gameId") {
+      req.gameId = gameId;
+    } else if (participateType === "ai") {
+      req.useAi = true;
+      req.aiOption = {
+        aiName: ai,
+      };
+    }
+    const matchRes = await apiClient.match(req);
     if (matchRes.success) {
       setMatchRes(matchRes.data);
     }
-  }
+  }, [gameId, participateType, ai]);
+
+  // const preview = useCallback(() => {
+  //   console.log(participateType, gameId, ai);
+  // }, [participateType, gameId, ai]);
 
   const changeAgentController = useCallback(
     (
@@ -447,25 +473,81 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   return (
     <Content title="手動ゲーム参加">
       <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
-        <Box sx={{ display: "flex", flexDirection: "row", gap: "0 1em" }}>
-          <Button
-            onClick={() => {
-              joinGame();
-            }}
-          >
-            フリーマッチ参加
-          </Button>
-          <Box component="p">or</Box>
-          <form style={{ display: "flex", gap: "0 1em", flexGrow: "1" }}>
-            <TextField sx={{ flexGrow: "1" }} label="ゲームID" />
-            <Button
-              sx={{
-                height: "100%",
+        <TabContext value={participateType}>
+          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <TabList
+              textColor="secondary"
+              indicatorColor="secondary"
+              centered
+              onChange={(_, v) => {
+                setParticipateType(v);
               }}
             >
-              ゲームIDで参加
-            </Button>
-          </form>
+              <Tab
+                label="フリーマッチ参加"
+                value="free"
+                disabled={Boolean(matchRes)}
+              />
+              <Tab
+                label="ゲームIDで参加"
+                value="gameId"
+                disabled={Boolean(matchRes)}
+              />
+              <Tab label="対AI戦" value="ai" disabled={Boolean(matchRes)} />
+            </TabList>
+          </Box>
+          <TabPanel value="gameId">
+            <TextField
+              fullWidth
+              label="ゲームID"
+              value={gameId}
+              disabled={Boolean(matchRes)}
+              onChange={({ target: { value } }) => {
+                setGameId(value);
+                // console.log(e);
+              }}
+            />
+          </TabPanel>
+          <TabPanel value="ai">
+            <TextField
+              fullWidth
+              select
+              label="対戦AI"
+              value={ai}
+              disabled={Boolean(matchRes)}
+              onChange={({ target: { value } }) => {
+                setAi(value as typeof ai);
+              }}
+            >
+              {aiList.map((ai) => {
+                return (
+                  <MenuItem key={ai.name} value={ai.name}>
+                    {ai.label}
+                  </MenuItem>
+                );
+              })}
+            </TextField>
+          </TabPanel>
+        </TabContext>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 3,
+            justifyContent: "center",
+          }}
+        >
+          {/* <Button
+            disabled={participateType === "ai"}
+            onClick={() => {
+              preview();
+            }}
+          >
+            ゲームプレビュー
+          </Button> */}
+          <Button onClick={joinGame} disabled={Boolean(matchRes)}>
+            参加する
+          </Button>
         </Box>
         <Box
           sx={{
