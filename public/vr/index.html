@@ -198,9 +198,13 @@
         }(), 100);
       }
       socket.onmessage = (event) => {
-        const game = JSON.parse(event.data).games[0];
-        console.log(game);
-        getRoomInfo(game);
+        try {
+          const game = JSON.parse(event.data).games[0];
+          console.log(game);
+          getRoomInfo(game);
+        } catch (e) {
+          // console.error(e);
+        }
       }
       socket.onerror = (event) => {
         //console.log('ws wrror', event);

@@ -25,7 +25,9 @@ export const useWebSocketGame = (req?: WsGameReq) => {
   useEffect(() => {
     if (!socket) return;
     socket.onmessage = (event) => {
-      const res = JSON.parse(event.data) as WsGameRes;
+      const data = event.data;
+      if (!data) return;
+      const res = JSON.parse(data) as WsGameRes;
       //console.log(res);
       if (res.type === "initial") {
         setGames(res.games);
