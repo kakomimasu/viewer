@@ -15,6 +15,7 @@
     "@emotion/styled": "^11.8.1",
     "@kakomimasu/client-js": "github:kakomimasu/client-js#v1.0.0-beta.6",
     "@mui/icons-material": "^5.5.1",
+    "@mui/lab": "^5.0.0-alpha.74",
     "@mui/material": "^5.5.2",
     "@types/react-syntax-highlighter": "^13.5.2",
     "dayjs": "^1.11.0",
