@@ -33,14 +33,16 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [gameType, setGameType] = useState<"normal" | "self">("normal");
   const [req, setReq] = useState<WsGameReq>();
   const query = useMemo(
-    () => ["sort:startAtUnixTime-desc", "is:newGame", `is:${gameType}`],
+    () => ["sort:startAtUnixTime-desc", `type:${gameType}`],
     [gameType]
   );
   const selectedGameReq = useMemo(() => {
     const q = (id ? [`id:${id}`] : query).join(" ");
+    const allowNewGame = !Boolean(id);
     const req: WsGameReq = {
       q,
       endIndex: 1,
+      allowNewGame,
     };
     return req;
   }, [id, query]);
@@ -57,6 +59,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       console.log(q);
       const req: WsGameReq = {
         q,
+        allowNewGame: true,
       };
       setReq(req);
     }

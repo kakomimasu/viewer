@@ -226,16 +226,24 @@ const useGamepads = () => {
 type ParticipateType = "free" | "gameId" | "ai";
 
 const Page: NextPage<{ id?: string }> = ({ id }) => {
+  const [participateType, setParticipateType] =
+    useState<ParticipateType>("free");
+  const [gameId, setGameId] = useState<string>();
+  const [ai, setAi] = useState<typeof aiList[number]["name"]>(aiList[0].name);
+
   const [matchRes, setMatchRes] = useState<MatchRes>();
-  const query = useMemo(() => {
-    if (!matchRes) return undefined;
-    const q = `id:${matchRes.gameId}`;
-    console.log(q);
-    const req: WsGameReq = {
-      q,
-    };
-    return req;
-  }, [matchRes]);
+  const query = useMemo<WsGameReq | undefined>(() => {
+    if (!matchRes) {
+      if (participateType === "free") {
+        return {
+          q: "sort:startAtUnixTime-desc type:normal is:waiting",
+          allowNewGame: true,
+        };
+      }
+    } else {
+      return { q: `id:${matchRes.gameId}` };
+    }
+  }, [matchRes, participateType]);
   const selectedGame = useWebSocketGame(query);
   const game = useMemo<Game | undefined>(() => selectedGame[0], [selectedGame]);
   const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
@@ -418,11 +426,6 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       });
     }
   }, [game]);
-
-  const [participateType, setParticipateType] =
-    useState<ParticipateType>("free");
-  const [gameId, setGameId] = useState<string>();
-  const [ai, setAi] = useState<typeof aiList[number]["name"]>(aiList[0].name);
 
   const joinGame = useCallback(async () => {
     const req: MatchReq = { guest: { name: "guest" } };
