@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { styled } from "@mui/material/styles";
@@ -8,15 +8,9 @@ import Section, { SubSection } from "../../../components/section";
 import Content from "../../../components/content";
 import GameList from "../../../components/gamelist";
 import firebase from "../../../src/firebase";
+import { useWebSocketGame } from "../../../src/useWebsocketGame";
 
-import {
-  apiClient,
-  Game,
-  User,
-  host,
-  WsGameRes,
-  WsGameReq,
-} from "../../../src/apiClient";
+import { apiClient, Game, User, WsGameReq } from "../../../src/apiClient";
 import Link from "../../../src/link";
 
 const StyledContent = styled(Content)({
@@ -26,6 +20,9 @@ const StyledContent = styled(Content)({
 });
 
 const PieGraph = styled("div")({ height: 300 });
+const wsReq: WsGameReq = {
+  q: "sort:startAtUnixTime-desc type:personal",
+};
 
 const Detail: NextPage<{}> = () => {
   const router = useRouter();
@@ -35,12 +32,6 @@ const Detail: NextPage<{}> = () => {
       return id_[0];
     } else return id_;
   })();
-
-  const [games, setGames] = useState<Game[]>([]);
-  const [socket, setSocket] = useState<WebSocket>();
-  const refGames = useRef(games);
-  //const [isSelf, setIsSelf] = useState(false);
-  const [firebaseUser, setFirebaseUser] = useState<firebase.User>();
 
   const [user, setUser] = useState<
     | ({
@@ -53,6 +44,7 @@ const Detail: NextPage<{}> = () => {
     | undefined
     | null
   >(undefined);
+  const games = useWebSocketGame(wsReq, user?.bearerToken);
 
   const getUser = async (id: string, idToken?: string) => {
     const res = await apiClient.usersShow(id, idToken);
@@ -104,54 +96,12 @@ const Detail: NextPage<{}> = () => {
   useEffect(() => {
     //console.log("id", id);
     firebase.auth().onAuthStateChanged(async (user) => {
-      if (user) setFirebaseUser(user);
       const idToken = await user?.getIdToken(true);
       const userId = id || user?.uid;
       if (!userId) setUser(null);
       else getUser(userId, idToken);
     });
   }, [id]);
-
-  useEffect(() => {
-    if (isSelf && user?.bearerToken) {
-      const sock = new WebSocket(
-        (host.protocol === "https:" ? "wss://" : "ws://") +
-          host.host +
-          "/v1/ws/game",
-        `${user.bearerToken}`
-      );
-      sock.onopen = () => {
-        setSocket(sock);
-        const q = ["sort:startAtUnixTime-desc", `is:personal`].join(" ");
-        console.log(q);
-        const req: WsGameReq = {
-          q,
-        };
-        sock.send(JSON.stringify(req));
-      };
-      sock.onmessage = (event) => {
-        const res = JSON.parse(event.data) as WsGameRes;
-        console.log(res);
-        if (res.type === "initial") {
-          setGames(res.games);
-        } else {
-          const gs = refGames.current;
-          const updateGameIndex = gs.findIndex(
-            (g) => g.gameId === res.game.gameId
-          );
-          if (updateGameIndex >= 0) gs[updateGameIndex] = res.game;
-          else gs.push(res.game);
-          console.log(gs);
-          setGames([...gs]);
-        }
-      };
-
-      return () => {
-        sock.close();
-        console.log("websocket close");
-      };
-    } else return;
-  }, [isSelf, user?.bearerToken]);
 
   return (
     <StyledContent title="ユーザ詳細">

@@ -177,12 +177,13 @@
         const q = (
           gameId
             ? [`id:${gameId}`]
-            : ["sort:startAtUnixTime-desc", "is:newGame", `is:normal`]
+            : ["sort:startAtUnixTime-desc", `type:normal`]
         ).join(" ");
         console.log(q);
         const req = {
           q,
           endIndex: 1,
+          allowNewGame: gameId ? false : true
         };
         socket.send(JSON.stringify(req));
 
@@ -199,7 +200,19 @@
       }
       socket.onmessage = (event) => {
         try {
-          const game = JSON.parse(event.data).games[0];
+          const data = event.data;
+          if (!data) return;
+          const res = JSON.parse(data);
+          let game;
+          if (res.type === "initial") {
+            game = res.games[0];
+          } else if (res.type === "update") {
+            game = res.game;
+          } else if (res.type === "remove") {
+            game = [];
+          } else if (res.type === "add") {
+            game = res.game;
+          }
           console.log(game);
           getRoomInfo(game);
         } catch (e) {
