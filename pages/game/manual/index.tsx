@@ -6,8 +6,15 @@ import React, {
   useMemo,
 } from "react";
 import { NextPage } from "next";
-import Button from "@mui/material/Button";
-import { TextField, Box, MenuItem, Tab } from "@mui/material";
+import {
+  TextField,
+  Box,
+  MenuItem,
+  Tab,
+  IconButton,
+  Button,
+} from "@mui/material";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 import {
@@ -224,6 +231,7 @@ const useGamepads = () => {
 };
 
 type ParticipateType = "free" | "gameId" | "ai";
+const localStorageKey = "controllerSettings";
 
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [participateType, setParticipateType] =
@@ -256,6 +264,25 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     { label: "GamePad 3", agentIndex: 4, axis: [0, 0] },
     { label: "GamePad 4", agentIndex: 5, axis: [0, 0] },
   ]);
+  const readControllerSettings = useCallback(() => {
+    const dataStr = localStorage.getItem(localStorageKey);
+    setControllerList((prev) => {
+      const indexList = dataStr ? JSON.parse(dataStr) : [];
+      return prev.map((c, i) => ({ ...c, agentIndex: indexList[i] ?? i }));
+    });
+  }, []);
+  useEffect(() => {
+    readControllerSettings();
+  }, [readControllerSettings]);
+  const resetControllerSettings = useCallback(() => {
+    localStorage.removeItem(localStorageKey);
+    readControllerSettings();
+  }, [readControllerSettings]);
+  useEffect(() => {
+    const list = controllerList.map(({ agentIndex }) => agentIndex);
+    localStorage.setItem(localStorageKey, JSON.stringify(list));
+  }, [controllerList]);
+
   const dirWSAD = useKeyDirection({
     up: "w",
     down: "s",
@@ -560,8 +587,18 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
             p: 1.5,
           }}
         >
-          <Box component="h4" sx={{ m: 0 }}>
+          <Box
+            component="h4"
+            sx={{ m: 0, display: "flex", alignItems: "center" }}
+          >
             コントローラ設定
+            <IconButton
+              color="secondary"
+              onClick={resetControllerSettings}
+              size="small"
+            >
+              <RestartAltIcon />
+            </IconButton>
           </Box>
           <Box sx={{ mx: 1, display: "flex" }}>
             <Box
