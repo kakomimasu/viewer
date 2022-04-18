@@ -4,9 +4,10 @@ import { Box } from "@mui/material";
 
 type Props = {
   title: string;
+  children: React.ReactNode;
 };
 
-const Content: React.FC<Props> = (props) => {
+const Content = (props: Props) => {
   return (
     <Box
       sx={{
