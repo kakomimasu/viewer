@@ -10,7 +10,7 @@ import Link from "../src/link";
 const components: React.ComponentProps<typeof ReactMarkdown>["components"] = {
   a: ({ href, children }) => {
     console.log("href", href);
-    let h = href?.split("/").at(-1)?.replace(".md", "") || "";
+    let h = href?.toString().split("/").at(-1)?.replace(".md", "") || "";
     const hSplit = h.split("#");
     if (hSplit[1]) hSplit[1] = hSplit[1].toLowerCase();
     h = hSplit.join("#");
