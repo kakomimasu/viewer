@@ -9,8 +9,7 @@ import Link from "../src/link";
 
 const components: React.ComponentProps<typeof ReactMarkdown>["components"] = {
   a: ({ href, children }) => {
-    console.log("href", typeof href);
-    let h = href?.toString().split("/").at(-1)?.replace(".md", "") || "";
+    let h = href?.split("/").slice(-1)[0]?.replace(".md", "") || "";
     const hSplit = h.split("#");
     if (hSplit[1]) hSplit[1] = hSplit[1].toLowerCase();
     h = hSplit.join("#");
@@ -37,8 +36,9 @@ const components: React.ComponentProps<typeof ReactMarkdown>["components"] = {
   td: ({ children }) => (
     <td>{children.map((child) => (child === "<br>" ? <br /> : child))}</td>
   ),
-  h1: () => {
-    return <></>;
+  h2: (props) => {
+    const text = props.children[0]?.toString().toLowerCase();
+    return <h2 id={text} {...props} />;
   },
 };
 
