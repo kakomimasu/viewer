@@ -299,10 +299,12 @@ export default function GameBoard({
               };
               const isConflict = log
                 ? (() => {
-                    const lastActLog = log.at(-1)?.players.flatMap((e) => {
-                      if (e.actions) return [...e.actions];
-                      else return [];
-                    });
+                    const lastActLog = log
+                      .slice(-1)[0]
+                      ?.players.flatMap((e) => {
+                        if (e.actions) return [...e.actions];
+                        else return [];
+                      });
                     const isConflict = lastActLog?.some(
                       (a) => a.res > 0 && a.res < 3 && a.x === x && a.y === y
                     );
