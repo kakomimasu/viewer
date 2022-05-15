@@ -8,10 +8,10 @@ import Link from "../../src/link";
 import Content from "../../components/content";
 
 const StyledDiv = styled("div")({
-  display: "flex",
-  flexDirection: "row",
-  fiex: "1 1 auto",
-  width: "100%",
+  display: "grid",
+  gap: "1em",
+  gridTemplateColumns: "repeat(auto-fit, minmax(min(370px,100%), 1fr))",
+  gridAutoRows: "1fr",
 });
 
 function DocCard({
@@ -24,14 +24,7 @@ function DocCard({
   explain: string;
 }) {
   return (
-    <Card
-      elevation={4}
-      sx={{
-        width: "370px",
-        height: "200px",
-        margin: "1em",
-      }}
-    >
+    <Card elevation={4}>
       <CardActionArea
         component={Link}
         href={href}
