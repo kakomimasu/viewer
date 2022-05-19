@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Game, WsGameReq, WsGameRes, host } from "./apiClient";
 
@@ -6,7 +6,8 @@ export const useWebSocketGame = (req?: WsGameReq, bearerToken?: string) => {
   const [games, setGames] = useState<Game[]>([]);
   const [socket, setSocket] = useState<WebSocket>();
 
-  useEffect(() => {
+  const connect = useCallback(() => {
+    console.log("websocket connecting...");
     const sock = new WebSocket(
       (host.protocol === "https:" ? "wss://" : "ws://") +
         host.host +
@@ -14,14 +15,31 @@ export const useWebSocketGame = (req?: WsGameReq, bearerToken?: string) => {
       bearerToken
     );
     sock.onopen = () => {
+      console.log("websocket open");
       setSocket(sock);
     };
-    return () => {
+    sock.onclose = () => {
       setSocket(undefined);
-      sock.close();
       console.log("websocket close");
     };
   }, [bearerToken]);
+
+  useEffect(() => {
+    connect();
+  }, [connect]);
+
+  useEffect(() => {
+    if (socket == undefined) {
+      const id = setInterval(connect, 5000);
+      return () => {
+        clearInterval(id);
+      };
+    } else {
+      return () => {
+        socket.close();
+      };
+    }
+  }, [socket, connect]);
 
   useEffect(() => {
     if (!socket) return;
