@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { GetStaticProps, InferGetStaticPropsType } from "next";
 import { useRouter } from "next/router";
 import { styled } from "@mui/material/styles";
 import { TextField, Box, MenuItem, Button, Autocomplete } from "@mui/material";
 
-import { apiClient, Board, Game, User } from "../../src/apiClient";
-import firebase from "../../src/firebase";
+import { apiClient, Board, Game } from "../../src/apiClient";
+import { UserContext } from "../../src/userStore";
 
 import Content from "../../components/content";
 import GameList from "../../components/gamelist";
@@ -63,7 +63,8 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     q: string[];
   }>({ value: "", q: fixedUsers });
   const [usersHelperText, setUsersHelperText] = useState("");
-  const [authedUser, setAuthedUser] = useState<User>();
+
+  const { kkmmUser } = useContext(UserContext);
 
   const submit = async () => {
     const sendData = { ...data };
@@ -81,33 +82,18 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
   };
 
   const submitPersonal = async () => {
-    console.log("submitPersonal", authedUser);
     const sendData = { ...data, isMySelf: true };
     sendData.playerIdentifiers = sendData.playerIdentifiers.filter((e) =>
       Boolean(e)
     );
-    if (!authedUser?.bearerToken) return;
-    const idToken = authedUser.bearerToken;
+    if (!kkmmUser?.bearerToken) return;
+    const idToken = kkmmUser.bearerToken;
 
     const res = await apiClient.gameCreate(sendData, `Bearer ${idToken}`);
     console.log(res);
     if (!res.success) return;
     setGame(res.data);
   };
-
-  useEffect(() => {
-    firebase.auth().onAuthStateChanged(async (user) => {
-      if (user) {
-        const userRes = await apiClient.usersShow(
-          user.uid,
-          await user.getIdToken()
-        );
-        if (userRes.success) {
-          setAuthedUser(userRes.data);
-        }
-      } else setAuthedUser(undefined);
-    });
-  }, []);
 
   // 参加ユーザのHeplerTextを更新
   useEffect(() => {
@@ -237,7 +223,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
         {!data.tournamentId && (
           <StyledButton
             onClick={submitPersonal}
-            disabled={!(btnStatus && authedUser)}
+            disabled={!(btnStatus && kkmmUser)}
           >
             マイゲーム作成！
           </StyledButton>

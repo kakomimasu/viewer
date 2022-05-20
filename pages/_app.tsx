@@ -14,6 +14,7 @@ import Header from "../components/header";
 import theme from "../src/theme";
 import createEmotionCache from "../src/createEmotionCache";
 import { host } from "../src/apiClient";
+import { StateProvider } from "../src/userStore";
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -54,24 +55,26 @@ function MyApp({
         />
       </Head>
       <ThemeProvider theme={theme}>
-        <Header />
-        <Main>
-          <Component {...pageProps} />
-        </Main>
-        <Footer />
-        <Snackbar open={apiFailBar} autoHideDuration={6000}>
-          <Alert
-            variant="filled"
-            severity="error"
-            sx={{ width: "100%" }}
-            onClose={() => {
-              setApiFailBar(false);
-            }}
-          >
-            <AlertTitle>APIサーバに接続できません</AlertTitle>
-            しばらくしてからリロードし、それでも直らない場合は管理者までご連絡ください。
-          </Alert>
-        </Snackbar>
+        <StateProvider>
+          <Header />
+          <Main>
+            <Component {...pageProps} />
+          </Main>
+          <Footer />
+          <Snackbar open={apiFailBar} autoHideDuration={6000}>
+            <Alert
+              variant="filled"
+              severity="error"
+              sx={{ width: "100%" }}
+              onClose={() => {
+                setApiFailBar(false);
+              }}
+            >
+              <AlertTitle>APIサーバに接続できません</AlertTitle>
+              しばらくしてからリロードし、それでも直らない場合は管理者までご連絡ください。
+            </Alert>
+          </Snackbar>
+        </StateProvider>
       </ThemeProvider>
     </CacheProvider>
   );
