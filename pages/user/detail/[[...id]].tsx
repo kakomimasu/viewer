@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useContext,
+  useCallback,
+} from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { styled } from "@mui/material/styles";
@@ -7,8 +13,8 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import Section, { SubSection } from "../../../components/section";
 import Content from "../../../components/content";
 import GameList from "../../../components/gamelist";
-import firebase from "../../../src/firebase";
 import { useWebSocketGame } from "../../../src/useWebsocketGame";
+import { UserContext } from "../../../src/userStore";
 
 import { apiClient, Game, User, WsGameReq } from "../../../src/apiClient";
 import Link from "../../../src/link";
@@ -33,31 +39,34 @@ const Detail: NextPage<{}> = () => {
     } else return id_;
   })();
 
-  const [user, setUser] = useState<
-    | ({
-        games: Game[];
-        pieData: {
-          name: string;
-          value: number;
-        }[];
-      } & User)
-    | undefined
-    | null
-  >(undefined);
-  const games = useWebSocketGame(wsReq, user?.bearerToken);
+  const { kkmmUser } = useContext(UserContext);
 
-  const getUser = async (id: string, idToken?: string) => {
-    const res = await apiClient.usersShow(id, idToken);
-    if (res.success === false) {
-      setUser(null);
-    } else {
-      const user = res.data;
-      const games: Game[] = [];
+  const [user, setUser] = useState<User | undefined | null>(undefined);
+  const myGames = useWebSocketGame(wsReq, kkmmUser?.bearerToken);
+
+  const [games, setGames] = useState<Game[]>([]);
+  const updateGames = useCallback(async () => {
+    const games: Game[] = [];
+    if (user) {
       for (const gameId of user.gamesId) {
         const res = await apiClient.getMatch(gameId);
         if (res.success) games.push(res.data);
       }
-      const result = [0, 0, 0]; // 勝ち、負け、引き分け
+    }
+    setGames(games);
+  }, [user]);
+  useEffect(() => {
+    updateGames();
+  }, [updateGames]);
+
+  const pieData = useMemo<
+    {
+      name: string;
+      value: number;
+    }[]
+  >(() => {
+    const result = [0, 0, 0]; // 勝ち、負け、引き分け
+    if (user) {
       games.forEach((g) => {
         if (g.ending === false) return;
         const players = g.players.map((p) => {
@@ -78,30 +87,38 @@ const Detail: NextPage<{}> = () => {
         }
         //console.log(result);
       });
-
-      const pieData = [
-        { name: "Win", value: result[0] },
-        { name: "Lose", value: result[1] },
-        { name: "Even", value: result[2] },
-      ];
-      setUser({ ...res.data, games, pieData });
     }
-  };
+    const pieData = [
+      { name: "Win", value: result[0] },
+      { name: "Lose", value: result[1] },
+      { name: "Even", value: result[2] },
+    ];
+    return pieData;
+  }, [user, games]);
+
+  const getUser = useCallback(async () => {
+    if (kkmmUser === undefined) return;
+    if (id === undefined) {
+      // ログインしているユーザを表示
+      setUser(kkmmUser);
+    } else {
+      const res = await apiClient.usersShow(id);
+      if (res.success === false) {
+        setUser(null);
+      } else {
+        const user = res.data;
+        setUser(user);
+      }
+    }
+  }, [id, kkmmUser]);
+  useEffect(() => {
+    getUser();
+  }, [getUser]);
 
   const isSelf = useMemo(
-    () => typeof user?.bearerToken === "string",
-    [user?.bearerToken]
+    () => typeof kkmmUser?.bearerToken === "string",
+    [kkmmUser?.bearerToken]
   );
-
-  useEffect(() => {
-    //console.log("id", id);
-    firebase.auth().onAuthStateChanged(async (user) => {
-      const idToken = await user?.getIdToken(true);
-      const userId = id || user?.uid;
-      if (!userId) setUser(null);
-      else getUser(userId, idToken);
-    });
-  }, [id]);
 
   return (
     <StyledContent title="ユーザ詳細">
@@ -134,7 +151,7 @@ const Detail: NextPage<{}> = () => {
                   <ResponsiveContainer>
                     <PieChart>
                       <Pie
-                        data={user.pieData}
+                        data={pieData}
                         dataKey="value"
                         nameKey="name"
                         cx="50%"
@@ -192,11 +209,11 @@ const Detail: NextPage<{}> = () => {
                 </PieGraph>
               </Section>
               <Section title="参加ゲーム一覧">
-                <GameList games={user.games} />
+                <GameList games={games} />
               </Section>
               {isSelf && (
                 <Section title="マイゲーム一覧">
-                  <GameList games={games} />
+                  <GameList games={myGames} />
                 </Section>
               )}
             </>

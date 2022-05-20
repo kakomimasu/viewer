@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import Image from "next/image";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
@@ -9,11 +9,10 @@ import MenuItem from "@mui/material/MenuItem";
 
 import firebase from "../src/firebase";
 import Link from "../src/link";
-import { apiClient } from "../src/apiClient";
+import { UserContext } from "../src/userStore";
 
 export default function Header() {
-  const [user, setUser] = useState<firebase.User | undefined | null>(undefined);
-  const [verified, setVerified] = useState<boolean>(false);
+  const { firebaseUser, kkmmUser } = useContext(UserContext);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -31,23 +30,6 @@ export default function Header() {
       console.log(`ログアウト時にエラーが発生しました (${error})`);
     }
   };
-
-  useEffect(() => {
-    firebase.auth().onAuthStateChanged(async (user) => {
-      if (user) {
-        const idToken = await user.getIdToken();
-        const res = await apiClient.usersVerify(idToken);
-        setVerified(res.success);
-        if (res.success === false) {
-          if (location.pathname !== "/user/login") {
-            logOut();
-            return;
-          }
-        }
-      }
-      setUser(user);
-    });
-  }, []);
 
   return (
     <AppBar position="sticky">
@@ -72,9 +54,9 @@ export default function Header() {
             ドキュメント
           </Button>
         </div>
-        {user !== undefined && (
+        {kkmmUser !== undefined && (
           <>
-            {user && verified ? (
+            {kkmmUser ? (
               <>
                 <Button variant="text" color="inherit" onClick={logOut}>
                   ログアウト
@@ -84,7 +66,7 @@ export default function Header() {
                   onClick={handleClick}
                   style={{ cursor: "pointer" }}
                 >
-                  <Avatar src={user.photoURL ? user.photoURL : ""} />
+                  <Avatar src={firebaseUser.photoURL ?? ""} />
                 </div>
                 <Menu
                   id="user-icon"

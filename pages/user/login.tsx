@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/router";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
@@ -11,6 +11,7 @@ import Section from "../../components/section";
 import Content from "../../components/content";
 
 import { apiClient } from "../../src/apiClient";
+import { UserContext } from "../../src/userStore";
 
 const StyledContent = styled("div")({
   textAlign: "center",
@@ -127,30 +128,20 @@ function Signup({ user }: { user: firebase.User }) {
 export default function Login() {
   const router = useRouter();
 
-  // user : undefined=>認証待ち null=>未ログイン User=>ログイン済み
-  const [user, setUser] = useState<firebase.User | undefined | null>(undefined);
+  const { kkmmUser, firebaseUser } = useContext(UserContext);
 
   useEffect(() => {
-    firebase.auth().onAuthStateChanged(async (user) => {
-      if (user !== null) {
-        const idToken = await user.getIdToken(true);
-        const res = await apiClient.usersVerify(idToken);
-        if (res.success === true) {
-          // ユーザが登録されていたらトップに戻る
-          router.push("/");
-          return;
-        }
-      }
-      setUser(user);
-    });
-  }, [router]);
+    if (kkmmUser) {
+      router.push("/");
+    }
+  }, [router, kkmmUser]);
 
   return (
     <Content title="ログイン">
       <StyledContent>
-        {user !== undefined ? (
+        {firebaseUser !== undefined ? (
           <>
-            {user === null ? (
+            {firebaseUser === null ? (
               <StyledFirebaseAuth
                 uiConfig={{
                   callbacks: {
@@ -169,7 +160,7 @@ export default function Login() {
                 firebaseAuth={firebase.auth()}
               />
             ) : (
-              <Signup user={user} />
+              <Signup user={firebaseUser} />
             )}
           </>
         ) : (
