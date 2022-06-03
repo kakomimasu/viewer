@@ -58,7 +58,7 @@
       "parameters": [
         {
           "schema": {
-            "type": "integer",
+            "type": "string",
             "minimum": 1
           },
           "name": "matchID",
@@ -118,7 +118,7 @@
       "parameters": [
         {
           "schema": {
-            "type": "integer",
+            "type": "string",
             "minimum": 1
           },
           "name": "matchID",
@@ -239,7 +239,7 @@
       "parameters": [
         {
           "schema": {
-            "type": "integer",
+            "type": "string",
             "minimum": 1
           },
           "name": "teamID",
@@ -555,7 +555,7 @@
         "properties": {
           "matchID": {
             "description": "試合のID",
-            "type": "integer",
+            "type": "string",
             "minimum": 1
           },
           "teams": {

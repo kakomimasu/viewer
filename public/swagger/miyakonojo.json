@@ -42,7 +42,7 @@
                 "properties": {
                   "id": {
                     "description": "試合のID",
-                    "type": "integer"
+                    "type": "string"
                   },
                   "intervalMillis": {
                     "description": "ターンとターンの間の時間(ミリ秒)",
@@ -94,7 +94,7 @@
         "summary": "試合状態取得API",
         "parameters": [
           {
-            "type": "integer",
+            "type": "string",
             "name": "id",
             "in": "path",
             "required": true
@@ -318,7 +318,7 @@
         "summary": "行動更新API",
         "parameters": [
           {
-            "type": "integer",
+            "type": "string",
             "name": "id",
             "in": "path",
             "required": true
