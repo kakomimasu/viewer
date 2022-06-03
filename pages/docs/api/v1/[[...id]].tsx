@@ -17,7 +17,7 @@ const components: React.ComponentProps<typeof ReactMarkdown>["components"] = {
     h = hSplit.join("#");
     let linkHref;
     if (h.startsWith("#")) linkHref = h;
-    else linkHref = `/docs/apiv1/${h}`;
+    else linkHref = `/docs/api/v1/${h}`;
     return (
       <Link href={linkHref} noLinkStyle>
         {children[0]}
