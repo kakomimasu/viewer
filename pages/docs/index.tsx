@@ -64,6 +64,11 @@ export default function Index() {
           title="苫小牧(procon31) API"
           explain=""
         />
+        <DocCard
+          href="/docs/miyakonojou"
+          title="都城(procon30) API"
+          explain=""
+        />
       </StyledDiv>
     </Content>
   );
