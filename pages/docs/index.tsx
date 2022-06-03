@@ -59,6 +59,11 @@ export default function Index() {
           title="チュートリアル"
           explain="ローカルサーバの立て方などを紹介します。"
         />
+        <DocCard
+          href="/docs/tomakomai"
+          title="苫小牧(procon31) API"
+          explain=""
+        />
       </StyledDiv>
     </Content>
   );
