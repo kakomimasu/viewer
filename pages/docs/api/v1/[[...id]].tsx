@@ -6,8 +6,8 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { a11yDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
-import Content from "../../../components/content";
-import Link from "../../../src/link";
+import Content from "../../../../components/content";
+import Link from "../../../../src/link";
 
 const components: React.ComponentProps<typeof ReactMarkdown>["components"] = {
   a: ({ href, children }) => {
@@ -17,7 +17,7 @@ const components: React.ComponentProps<typeof ReactMarkdown>["components"] = {
     h = hSplit.join("#");
     let linkHref;
     if (h.startsWith("#")) linkHref = h;
-    else linkHref = `/docs/apiv1/${h}`;
+    else linkHref = `/docs/api/v1/${h}`;
     return (
       <Link href={linkHref} noLinkStyle>
         {children[0]}

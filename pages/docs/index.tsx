@@ -50,14 +50,24 @@ export default function Index() {
           explain="囲みマス公式のルールです。"
         />
         <DocCard
-          href="/docs/apiv1"
+          href="/docs/tutorial"
+          title="チュートリアル"
+          explain="ローカルサーバの立て方などを紹介します。"
+        />
+        <DocCard
+          href="/docs/api/v1"
           title="囲みマス API v1"
           explain="囲みマス API v1を利用すると、任意のクライアントからゲーム作成・参加、大会作成、ユーザ取得などを行うことが出来ます。"
         />
         <DocCard
-          href="/docs/tutorial"
-          title="チュートリアル"
-          explain="ローカルサーバの立て方などを紹介します。"
+          href="/docs/api/tomakomai"
+          title="苫小牧(procon31) API"
+          explain=""
+        />
+        <DocCard
+          href="/docs/api/miyakonojo"
+          title="都城(procon30) API"
+          explain=""
         />
       </StyledDiv>
     </Content>
