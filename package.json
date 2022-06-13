@@ -17,7 +17,7 @@
     "@mui/icons-material": "^5.8.2",
     "@mui/lab": "^5.0.0-alpha.85",
     "@mui/material": "^5.8.2",
-    "@types/react-syntax-highlighter": "^15.5.1",
+    "@types/react-syntax-highlighter": "^15.5.2",
     "dayjs": "^1.11.3",
     "firebase": "^8.10.1",
     "next": "12.1.6",
