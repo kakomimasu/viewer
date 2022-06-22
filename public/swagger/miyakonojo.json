@@ -54,8 +54,8 @@
                     "type": "string"
                   },
                   "teamID": {
-                    "description": "自分の試合でのteam ID",
-                    "type": "integer"
+                    "description": "pic",
+                    "type": "string"
                   },
                   "turnMillis": {
                     "description": "1ターンあたりの時間(ミリ秒)",
