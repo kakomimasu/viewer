@@ -68,8 +68,7 @@
       "parameters": [
         {
           "schema": {
-            "type": "string",
-            "minimum": 1
+            "type": "string"
           },
           "name": "matchID",
           "in": "path",
@@ -138,8 +137,7 @@
       "parameters": [
         {
           "schema": {
-            "type": "string",
-            "minimum": 1
+            "type": "string"
           },
           "name": "matchID",
           "in": "path",
@@ -279,8 +277,7 @@
       "parameters": [
         {
           "schema": {
-            "type": "string",
-            "minimum": 1
+            "type": "string"
           },
           "name": "teamID",
           "in": "path",
@@ -347,15 +344,11 @@
     "schemas": {
       "ActionPosX": {
         "description": "行動の対象となるX座標(左から1とする), 行動種別が停留の場合のみ0が許容される",
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 24
+        "type": "integer"
       },
       "ActionPosY": {
         "description": "行動の対象となるY座標(上から1とする), 行動種別が停留の場合のみ0が許容される",
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 24
+        "type": "integer"
       },
       "ActionResult": {
         "description": "行動の結果(無効: -1, 競合: 0, 適用: 1)",
@@ -378,47 +371,34 @@
       },
       "AgentPosX": {
         "description": "エージェントの現在のX座標(左から1とする), 未配置の場合は0",
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 24
+        "type": "integer"
       },
       "AgentPosY": {
         "description": "エージェントの現在のY座標(上から1とする), 未配置の場合は0",
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 24
+        "type": "integer"
       },
       "GetMatchResponseOK": {
         "type": "object",
         "properties": {
           "turn": {
             "description": "現在のターン (初期状態は0ターン目とする)",
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 100
+            "type": "integer"
           },
           "startedAtUnixTime": {
             "description": "試合が始まったUnix時間",
-            "type": "integer",
-            "minimum": 0
+            "type": "integer"
           },
           "width": {
             "description": "競技ボードの横幅",
-            "type": "integer",
-            "minimum": 12,
-            "maximum": 24
+            "type": "integer"
           },
           "height": {
             "description": "競技ボードの縦幅",
-            "type": "integer",
-            "minimum": 12,
-            "maximum": 24
+            "type": "integer"
           },
           "teams": {
             "type": "array",
-            "description": "チームの情報",
-            "maxItems": 2,
-            "minItems": 2,
+            "description": "チームの情報"
             "items": {
               "$ref": "#/components/schemas/Team"
             }
@@ -426,46 +406,30 @@
           "walls": {
             "type": "array",
             "description": "現在の城壁の状況(城壁以外のマス: 0, 城壁が築かれているマス: チームID)",
-            "maxItems": 24,
-            "minItems": 12,
             "items": {
               "type": "array",
-              "maxItems": 24,
-              "minItems": 12,
               "items": {
-                "type": "integer",
-                "minimum": 0
+                "type": "integer"
               }
             }
           },
           "areas": {
             "type": "array",
             "description": "現在の陣地の状況(陣地以外のマス: 0,青チームのマス: 1, 赤チームのマス: 2)",
-            "maxItems": 24,
-            "minItems": 12,
             "items": {
               "type": "array",
-              "maxItems": 24,
-              "minItems": 12,
               "items": {
-                "type": "integer",
-                "minimum": 0
+                "type": "integer"
               }
             }
           },
           "points": {
             "type": "array",
             "description": "競技ボードのポイント情報",
-            "maxItems": 24,
-            "minItems": 12,
             "items": {
               "type": "array",
-              "maxItems": 24,
-              "minItems": 12,
               "items": {
-                "type": "integer",
-                "minimum": -16,
-                "maximum": 16
+                "type": "integer"
               }
             }
           },
@@ -494,14 +458,11 @@
         "properties": {
           "teamID": {
             "description": "チームのID",
-            "type": "string",
-            "minimum": 1
+            "type": "string"
           },
           "agent": {
             "description": "エージェントの数",
-            "type": "integer",
-            "minimum": 6,
-            "maximum": 14
+            "type": "integer"
           },
           "agents": {
             "description": "エージェントの位置情報",
@@ -512,8 +473,7 @@
           },
           "areaPoint": {
             "description": "陣地ポイント",
-            "type": "integer",
-            "minimum": 0
+            "type": "integer"
           },
           "wallPoint": {
             "description": "城壁ポイント",
@@ -539,8 +499,7 @@
           },
           "agentID": {
             "description": "エージェントのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           }
         },
         "required": [
@@ -563,14 +522,11 @@
           },
           "turn": {
             "description": "行動を行ったターン",
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 100
+            "type": "integer"
           },
           "agentID": {
             "description": "行動を行ったエージェントのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           },
           "apply": {
             "$ref": "#/components/schemas/ActionResult"
@@ -605,35 +561,26 @@
         "properties": {
           "matchID": {
             "description": "試合のID",
-            "type": "string",
-            "minimum": 1
+            "type": "string"
           },
           "teams": {
             "description": "試合に参加するチームの情報\n1番目が自チーム, 2番目が敵チームとなる\n",
             "type": "array",
-            "minItems": 2,
-            "maxItems": 2,
             "items": {
               "$ref": "#/components/schemas/TeamInfo"
             }
           },
           "turns": {
             "description": "試合のターン数",
-            "type": "integer",
-            "minimum": 30,
-            "maximum": 100
+            "type": "integer"
           },
           "operationMillis": {
             "description": "作戦ステップの時間(ミリ秒)",
-            "type": "integer",
-            "minimum": 3000,
-            "maximum": 15000
+            "type": "integer"
           },
           "transitionMillis": {
             "description": "遷移ステップの時間(ミリ秒)",
-            "type": "integer",
-            "minimum": 1000,
-            "maximum": 15000
+            "type": "integer"
           }
         },
         "required": [
@@ -650,7 +597,6 @@
           "actions": {
             "description": "行動",
             "type": "array",
-            "maxItems": 14,
             "items": {
               "$ref": "#/components/schemas/ActionRequest"
             }
@@ -674,8 +620,7 @@
           },
           "agentID": {
             "description": "行動するエージェントのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           }
         },
         "required": [
@@ -721,14 +666,11 @@
           },
           "turn": {
             "description": "受理されたターン",
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 100
+            "type": "integer"
           },
           "agentID": {
             "description": "行動するエージェントのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           }
         }
       },
@@ -742,8 +684,7 @@
         "properties": {
           "teamID": {
             "description": "チームのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           },
           "name": {
             "description": "チームの名前",
