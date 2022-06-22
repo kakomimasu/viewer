@@ -14,6 +14,16 @@
     "/matches": {
       "get": {
         "summary": "試合一覧取得API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "BearerToken"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -68,6 +78,16 @@
       ],
       "get": {
         "summary": "試合状態取得API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "pic"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -128,6 +148,16 @@
       ],
       "post": {
         "summary": "行動更新API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "pic"
+          }
+        ],
         "operationId": "post-action",
         "responses": {
           "202": {
@@ -195,6 +225,16 @@
     "/teams/me": {
       "get": {
         "summary": "チーム情報取得API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "BearerToken"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -249,6 +289,16 @@
       ],
       "get": {
         "summary": "試合一覧取得API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "BearerToken"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -390,7 +440,7 @@
           },
           "areas": {
             "type": "array",
-            "description": "現在の陣地の状況(陣地以外のマス: 0, 陣地になっているマス: チームID)",
+            "description": "現在の陣地の状況(陣地以外のマス: 0,青チームのマス: 1, 赤チームのマス: 2)",
             "maxItems": 24,
             "minItems": 12,
             "items": {
@@ -444,7 +494,7 @@
         "properties": {
           "teamID": {
             "description": "チームのID",
-            "type": "integer",
+            "type": "string",
             "minimum": 1
           },
           "agent": {
@@ -707,11 +757,6 @@
         "name": "x-api-token",
         "type": "apiKey",
         "in": "header"
-      },
-      "Query": {
-        "name": "token",
-        "type": "apiKey",
-        "in": "query"
       }
     },
     "responses": {
