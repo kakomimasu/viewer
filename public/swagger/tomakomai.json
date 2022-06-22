@@ -398,7 +398,7 @@
           },
           "teams": {
             "type": "array",
-            "description": "チームの情報"
+            "description": "チームの情報",
             "items": {
               "$ref": "#/components/schemas/Team"
             }
