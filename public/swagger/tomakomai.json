@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "procon31",
-    "version": "1.0",
-    "description": "第31回高専プログラミングコンテスト競技部門の競技サーバのAPI\n\nエンドポイントにアクセスするためにはAPIトークンが必要です\n\nAPIトークンごとに1秒あたり15回までリクエストすることができます.\nこの制限はサーバーを過剰な負荷から守るために存在します. 現実的な使い方において十分な回数のリクエストが可能です.\n制限ギリギリまでのリクエストを保証するものではありません.\n\n# Authentication\n\n<!-- ReDoc-Inject: <security-definitions> -->"
+    "title": "囲みマス API",
+    "version": "苫小牧",
+    "description": ""
   },
   "servers": [
     {
-      "url": "http://localhost:3000"
+      "url": "https://api.kakomimasu.com"
     }
   ],
   "paths": {
