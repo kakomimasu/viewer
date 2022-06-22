@@ -1,19 +1,29 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "procon31",
-    "version": "1.0",
-    "description": "第31回高専プログラミングコンテスト競技部門の競技サーバのAPI\n\nエンドポイントにアクセスするためにはAPIトークンが必要です\n\nAPIトークンごとに1秒あたり15回までリクエストすることができます.\nこの制限はサーバーを過剰な負荷から守るために存在します. 現実的な使い方において十分な回数のリクエストが可能です.\n制限ギリギリまでのリクエストを保証するものではありません.\n\n# Authentication\n\n<!-- ReDoc-Inject: <security-definitions> -->"
+    "title": "囲みマス API",
+    "version": "苫小牧",
+    "description": ""
   },
   "servers": [
     {
-      "url": "http://localhost:3000"
+      "url": "https://api.kakomimasu.com"
     }
   ],
   "paths": {
     "/matches": {
       "get": {
         "summary": "試合一覧取得API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "BearerToken"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -37,13 +47,10 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "operationId": "get-matches",
-        "description": "試合の一覧を取得するためのエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 429\n  * 1秒に16回以上リクエストした場合",
+        "description": "試合の一覧を取得するためのエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合",
         "security": [
           {
             "Header": []
@@ -58,8 +65,7 @@
       "parameters": [
         {
           "schema": {
-            "type": "string",
-            "minimum": 1
+            "type": "string"
           },
           "name": "matchID",
           "in": "path",
@@ -68,6 +74,16 @@
       ],
       "get": {
         "summary": "試合状態取得API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "pic"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -97,13 +113,10 @@
           },
           "425": {
             "$ref": "#/components/responses/TooEarly"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "operationId": "get-match",
-        "description": "試合中に試合の状態を取得するためのエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 429\n  * 1秒に16回以上リクエストした場合\n* 404\n  * 参加していない試合に対するリクエスト, また存在しない試合IDの場合\n* 425\n  * 試合開始前のリクエストの場合",
+        "description": "試合中に試合の状態を取得するためのエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 404\n  * 参加していない試合に対するリクエスト, また存在しない試合IDの場合\n* 425\n  * 試合開始前のリクエストの場合",
         "security": [
           {
             "Header": []
@@ -118,8 +131,7 @@
       "parameters": [
         {
           "schema": {
-            "type": "string",
-            "minimum": 1
+            "type": "string"
           },
           "name": "matchID",
           "in": "path",
@@ -128,6 +140,16 @@
       ],
       "post": {
         "summary": "行動更新API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "pic"
+          }
+        ],
         "operationId": "post-action",
         "responses": {
           "202": {
@@ -159,20 +181,14 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
           "422": {
             "$ref": "#/components/responses/UnprocessableEntity"
           },
           "425": {
             "$ref": "#/components/responses/TooEarly"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
           }
         },
-        "description": "試合中にエージェントの行動を更新するためのエンドポイントです\n\n同一ターン中に複数回更新した場合は正常に受理された最後のリクエストが採用されます\n\n並列で更新をリクエストした場合は順序を保証しません\n\nリクエストに含まれていないエージェントの行動は停留となります\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 429\n  * 1秒に16回以上リクエストした場合\n* 413\n  * リクエストが16KB以上だった場合\n* 422\n  * リクエストがフォーマットに則ってない場合\n* 404\n  * 参加していない試合に対するリクエスト, また存在しない試合IDの場合\n* 425\n  * 試合開始前のリクエストの場合\n* 400\n  * 遷移ステップや試合終了後にアクセスした場合\n  * リクエストの中に自分のエージェント以外を指定したアクションが含まれる場合\n  * リクエストの中にエージェントIDが重複しているアクションが含まれる場合",
+        "description": "試合中にエージェントの行動を更新するためのエンドポイントです\n\n同一ターン中に複数回更新した場合は正常に受理された最後のリクエストが採用されます\n\n並列で更新をリクエストした場合は順序を保証しません\n\nリクエストに含まれていないエージェントの行動は停留となります\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 422\n  * リクエストがフォーマットに則ってない場合\n* 404\n  * 参加していない試合に対するリクエスト, また存在しない試合IDの場合\n* 425\n  * 試合開始前のリクエストの場合\n* 400\n  * 遷移ステップや試合終了後にアクセスした場合\n  * リクエストの中に自分のエージェント以外を指定したアクションが含まれる場合\n  * リクエストの中にエージェントIDが重複しているアクションが含まれる場合",
         "requestBody": {
           "content": {
             "application/json": {
@@ -195,6 +211,16 @@
     "/teams/me": {
       "get": {
         "summary": "チーム情報取得API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "BearerToken"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -218,13 +244,10 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "operationId": "get-team-me",
-        "description": "自分のチーム情報を取得するエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 429\n  * 1秒に16回以上リクエストした場合",
+        "description": "自分のチーム情報を取得するエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n",
         "security": [
           {
             "Header": []
@@ -239,8 +262,7 @@
       "parameters": [
         {
           "schema": {
-            "type": "string",
-            "minimum": 1
+            "type": "string"
           },
           "name": "teamID",
           "in": "path",
@@ -249,6 +271,16 @@
       ],
       "get": {
         "summary": "試合一覧取得API",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "x-api-token",
+            "in": "header",
+            "description": "BearerToken"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -275,13 +307,10 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
           }
         },
         "operationId": "get-team-matches",
-        "description": "試合開始前に自分に関連する試合の一覧を取得するためのエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 429\n  * 1秒に16回以上リクエストした場合\n* 403\n  * APIトークンと異なるチームのリソースにアクセスした場合",
+        "description": "試合開始前に自分に関連する試合の一覧を取得するためのエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 403\n  * APIトークンと異なるチームのリソースにアクセスした場合",
         "security": [
           {
             "Header": []
@@ -297,15 +326,11 @@
     "schemas": {
       "ActionPosX": {
         "description": "行動の対象となるX座標(左から1とする), 行動種別が停留の場合のみ0が許容される",
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 24
+        "type": "integer"
       },
       "ActionPosY": {
         "description": "行動の対象となるY座標(上から1とする), 行動種別が停留の場合のみ0が許容される",
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 24
+        "type": "integer"
       },
       "ActionResult": {
         "description": "行動の結果(無効: -1, 競合: 0, 適用: 1)",
@@ -328,47 +353,34 @@
       },
       "AgentPosX": {
         "description": "エージェントの現在のX座標(左から1とする), 未配置の場合は0",
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 24
+        "type": "integer"
       },
       "AgentPosY": {
         "description": "エージェントの現在のY座標(上から1とする), 未配置の場合は0",
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 24
+        "type": "integer"
       },
       "GetMatchResponseOK": {
         "type": "object",
         "properties": {
           "turn": {
             "description": "現在のターン (初期状態は0ターン目とする)",
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 100
+            "type": "integer"
           },
           "startedAtUnixTime": {
             "description": "試合が始まったUnix時間",
-            "type": "integer",
-            "minimum": 0
+            "type": "integer"
           },
           "width": {
             "description": "競技ボードの横幅",
-            "type": "integer",
-            "minimum": 12,
-            "maximum": 24
+            "type": "integer"
           },
           "height": {
             "description": "競技ボードの縦幅",
-            "type": "integer",
-            "minimum": 12,
-            "maximum": 24
+            "type": "integer"
           },
           "teams": {
             "type": "array",
             "description": "チームの情報",
-            "maxItems": 2,
-            "minItems": 2,
             "items": {
               "$ref": "#/components/schemas/Team"
             }
@@ -376,46 +388,30 @@
           "walls": {
             "type": "array",
             "description": "現在の城壁の状況(城壁以外のマス: 0, 城壁が築かれているマス: チームID)",
-            "maxItems": 24,
-            "minItems": 12,
             "items": {
               "type": "array",
-              "maxItems": 24,
-              "minItems": 12,
               "items": {
-                "type": "integer",
-                "minimum": 0
+                "type": "integer"
               }
             }
           },
           "areas": {
             "type": "array",
-            "description": "現在の陣地の状況(陣地以外のマス: 0, 陣地になっているマス: チームID)",
-            "maxItems": 24,
-            "minItems": 12,
+            "description": "現在の陣地の状況(陣地以外のマス: 0,青チームのマス: 1, 赤チームのマス: 2)",
             "items": {
               "type": "array",
-              "maxItems": 24,
-              "minItems": 12,
               "items": {
-                "type": "integer",
-                "minimum": 0
+                "type": "integer"
               }
             }
           },
           "points": {
             "type": "array",
             "description": "競技ボードのポイント情報",
-            "maxItems": 24,
-            "minItems": 12,
             "items": {
               "type": "array",
-              "maxItems": 24,
-              "minItems": 12,
               "items": {
-                "type": "integer",
-                "minimum": -16,
-                "maximum": 16
+                "type": "integer"
               }
             }
           },
@@ -444,14 +440,11 @@
         "properties": {
           "teamID": {
             "description": "チームのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "string"
           },
           "agent": {
             "description": "エージェントの数",
-            "type": "integer",
-            "minimum": 6,
-            "maximum": 14
+            "type": "integer"
           },
           "agents": {
             "description": "エージェントの位置情報",
@@ -462,8 +455,7 @@
           },
           "areaPoint": {
             "description": "陣地ポイント",
-            "type": "integer",
-            "minimum": 0
+            "type": "integer"
           },
           "wallPoint": {
             "description": "城壁ポイント",
@@ -489,8 +481,7 @@
           },
           "agentID": {
             "description": "エージェントのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           }
         },
         "required": [
@@ -513,14 +504,11 @@
           },
           "turn": {
             "description": "行動を行ったターン",
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 100
+            "type": "integer"
           },
           "agentID": {
             "description": "行動を行ったエージェントのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           },
           "apply": {
             "$ref": "#/components/schemas/ActionResult"
@@ -555,35 +543,26 @@
         "properties": {
           "matchID": {
             "description": "試合のID",
-            "type": "string",
-            "minimum": 1
+            "type": "string"
           },
           "teams": {
             "description": "試合に参加するチームの情報\n1番目が自チーム, 2番目が敵チームとなる\n",
             "type": "array",
-            "minItems": 2,
-            "maxItems": 2,
             "items": {
               "$ref": "#/components/schemas/TeamInfo"
             }
           },
           "turns": {
             "description": "試合のターン数",
-            "type": "integer",
-            "minimum": 30,
-            "maximum": 100
+            "type": "integer"
           },
           "operationMillis": {
             "description": "作戦ステップの時間(ミリ秒)",
-            "type": "integer",
-            "minimum": 3000,
-            "maximum": 15000
+            "type": "integer"
           },
           "transitionMillis": {
             "description": "遷移ステップの時間(ミリ秒)",
-            "type": "integer",
-            "minimum": 1000,
-            "maximum": 15000
+            "type": "integer"
           }
         },
         "required": [
@@ -600,7 +579,6 @@
           "actions": {
             "description": "行動",
             "type": "array",
-            "maxItems": 14,
             "items": {
               "$ref": "#/components/schemas/ActionRequest"
             }
@@ -624,8 +602,7 @@
           },
           "agentID": {
             "description": "行動するエージェントのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           }
         },
         "required": [
@@ -671,14 +648,11 @@
           },
           "turn": {
             "description": "受理されたターン",
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 100
+            "type": "integer"
           },
           "agentID": {
             "description": "行動するエージェントのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           }
         }
       },
@@ -692,8 +666,7 @@
         "properties": {
           "teamID": {
             "description": "チームのID",
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           },
           "name": {
             "description": "チームの名前",
@@ -707,11 +680,6 @@
         "name": "x-api-token",
         "type": "apiKey",
         "in": "header"
-      },
-      "Query": {
-        "name": "token",
-        "type": "apiKey",
-        "in": "query"
       }
     },
     "responses": {
@@ -775,12 +743,6 @@
             "description": "リクエストごとに発行される一意なID"
           }
         }
-      },
-      "TooManyRequests": {
-        "description": "* 1秒に16回以上リクエストした場合"
-      },
-      "PayloadTooLarge": {
-        "description": "* リクエストが16KB以上だった場合"
       }
     }
   }

@@ -7,11 +7,11 @@
   ],
   "swagger": "2.0",
   "info": {
-    "description": "ProconAPI",
-    "title": "ProconAPI",
-    "version": "0.0.1"
+    "description": "",
+    "title": "囲みマス API",
+    "version": "都城"
   },
-  "host": "localhost:3000",
+  "host": "api.kakomimasu.com",
   "paths": {
     "/matches": {
       "get": {
@@ -21,7 +21,8 @@
           {
             "type": "string",
             "name": "Authorization",
-            "in": "header"
+            "in": "header",
+            "description": "BearerToken"
           }
         ],
         "responses": {
@@ -53,8 +54,8 @@
                     "type": "string"
                   },
                   "teamID": {
-                    "description": "自分の試合でのteam ID",
-                    "type": "integer"
+                    "description": "pic",
+                    "type": "string"
                   },
                   "turnMillis": {
                     "description": "1ターンあたりの時間(ミリ秒)",
@@ -102,7 +103,8 @@
           {
             "type": "string",
             "name": "Authorization",
-            "in": "header"
+            "in": "header",
+            "description": "pic"
           }
         ],
         "responses": {
@@ -239,8 +241,8 @@
                         "type": "integer"
                       },
                       "teamID": {
-                        "description": "プレイヤーのID",
-                        "type": "integer"
+                        "description": "pic",
+                        "type": "string"
                       },
                       "tilePoint": {
                         "description": "タイルポイント",
@@ -250,7 +252,7 @@
                   }
                 },
                 "tiled": {
-                  "description": "フィールドの現在の状況(空きマス: 0, プレイヤーのタイルが置かれているマス: プレイヤーID)",
+                  "description": "フィールドの現在の状況(空きマス: 0, プレイヤー青: 1 プレイヤー赤: 2",
                   "type": "array",
                   "items": {
                     "type": "array",
@@ -326,7 +328,8 @@
           {
             "type": "string",
             "name": "Authorization",
-            "in": "header"
+            "in": "header",
+            "description": "pic"
           },
           {
             "name": "request body",
@@ -354,11 +357,11 @@
                         "type": "integer"
                       },
                       "dx": {
-                        "description": "行動をするx方向の向き",
+                        "description": "行動をするx方向の向き (typeがputならばX座標)",
                         "type": "integer"
                       },
                       "dy": {
-                        "description": "行動をするy方向の向き",
+                        "description": "行動をするy方向の向き (typeがputならばY座標)",
                         "type": "integer"
                       },
                       "type": {
@@ -480,7 +483,8 @@
           {
             "type": "string",
             "name": "Authorization",
-            "in": "header"
+            "in": "header",
+            "description": "BearerToken"
           }
         ],
         "responses": {
