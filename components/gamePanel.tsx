@@ -26,11 +26,14 @@ export default function GamePanel({
   }, [game?.board, game?.turn]);
 
   const nextTurnTime = useMemo(() => {
-    if (game?.nextTurnUnixTime) {
-      return game.nextTurnUnixTime * 1000;
+    if (game && game.startedAtUnixTime) {
+      const nextTurnAtUnixTime =
+        game.startedAtUnixTime +
+        (game.operationTime + game.transitionTime) * game.turn;
+      return nextTurnAtUnixTime * 1000;
     }
     return;
-  }, [game?.nextTurnUnixTime]);
+  }, [game]);
 
   const status = useMemo(() => {
     if (game) {
