@@ -29,7 +29,7 @@ export default function GamePanel({
     if (game && game.startedAtUnixTime) {
       const nextTurnAtUnixTime =
         game.startedAtUnixTime +
-        (game.operationTime + game.transitionTime) * game.turn;
+        (game.operationSec + game.transitionSec) * game.turn;
       return nextTurnAtUnixTime * 1000;
     }
     return;
@@ -88,7 +88,7 @@ export default function GamePanel({
                 textOverflow: "ellipsis",
               }}
             >
-              {game.gameName ? game.gameName : "UnTitle"}
+              {game.name ?? "UnTitle"}
             </Box>
             <Box
               sx={{
@@ -97,10 +97,10 @@ export default function GamePanel({
                 textOverflow: "ellipsis",
               }}
             >
-              ID : {game.gameId}
+              ID : {game.id}
             </Box>
             <Box>
-              <Button size="small" href={getVRGameHref(game.gameId)}>
+              <Button size="small" href={getVRGameHref(game.id)}>
                 VR
               </Button>
             </Box>
@@ -151,15 +151,15 @@ export default function GamePanel({
             game.players
               .map((player, i) => {
                 const totalPoint =
-                  player.point.basepoint + player.point.wallpoint;
+                  player.point.areaPoint + player.point.wallPoint;
                 return { ...player, totalPoint, index: i };
               })
               ?.sort((a, b) => {
                 if (a.totalPoint !== b.totalPoint)
                   return b.totalPoint - a.totalPoint;
-                else if (a.point.wallpoint !== b.point.wallpoint)
-                  return b.point.wallpoint - a.point.wallpoint;
-                else return b.point.basepoint - a.point.basepoint;
+                else if (a.point.wallPoint !== b.point.wallPoint)
+                  return b.point.wallPoint - a.point.wallPoint;
+                else return b.point.areaPoint - a.point.areaPoint;
               })
               .map((player, i) => {
                 return (

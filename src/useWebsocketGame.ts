@@ -53,18 +53,14 @@ export const useWebSocketGame = (req?: WsGameReq, bearerToken?: string) => {
       } else if (res.type === "update") {
         setGames((prev) => {
           const games = [...prev];
-          const updateGameIndex = games.findIndex(
-            (g) => g.gameId === res.game.gameId
-          );
+          const updateGameIndex = games.findIndex((g) => g.id === res.game.id);
           if (updateGameIndex >= 0) games[updateGameIndex] = res.game;
           return games;
         });
       } else if (res.type === "remove") {
         setGames((prev) => {
           const games = [...prev];
-          const removeGameIndex = games.findIndex(
-            (g) => g.gameId === res.gameId
-          );
+          const removeGameIndex = games.findIndex((g) => g.id === res.gameId);
           if (removeGameIndex >= 0) games.splice(removeGameIndex, 1);
           return games;
         });

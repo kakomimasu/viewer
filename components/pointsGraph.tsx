@@ -24,7 +24,7 @@ const PointsGraph: NextPage<{
   const data = useMemo(() => {
     return game.log.map((turn, i) => {
       const points = turn.players.map((player) => {
-        return player.point.basepoint + player.point.wallpoint;
+        return player.point.areaPoint + player.point.wallPoint;
       });
       return { turn: i, points };
     });

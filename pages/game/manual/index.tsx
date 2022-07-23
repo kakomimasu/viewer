@@ -415,7 +415,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     });
     // console.log("update actions", game);
     // console.log(actions);
-    apiClient.setAction(game.gameId, { actions }, matchRes.pic);
+    apiClient.setAction(game.id, { actions }, matchRes.pic);
   }, [controllerList, game, matchRes]);
 
   useEffect(() => {

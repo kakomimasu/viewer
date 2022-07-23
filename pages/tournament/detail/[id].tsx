@@ -72,7 +72,7 @@ const Page: NextPage<{
         (e.reservedUsers[0] === oUserId && e.reservedUsers[1] === mUserId)
     );
     if (game) {
-      const url = `/game/detail/` + game.gameId;
+      const url = `/game/detail/` + game.id;
       let pointText = "";
       let resultText = "-";
       if (game.gaming || game.ending) {
@@ -80,8 +80,8 @@ const Page: NextPage<{
         const mPlayer = p.find((e) => e.id === mUserId);
         const oPlayer = p.find((e) => e.id === oUserId);
         if (!mPlayer || !oPlayer) return;
-        const mPoint = mPlayer.point.basepoint + mPlayer.point.wallpoint;
-        const oPoint = oPlayer.point.basepoint + oPlayer.point.wallpoint;
+        const mPoint = mPlayer.point.areaPoint + mPlayer.point.wallPoint;
+        const oPoint = oPlayer.point.areaPoint + oPlayer.point.wallPoint;
         pointText = `${mPoint} - ${oPoint}`;
         if (mPoint > oPoint) resultText = "○";
         else if (mPoint < oPoint) resultText = "×";
@@ -170,9 +170,9 @@ const Page: NextPage<{
   function getUserResult(game: Game) {
     const a = game.players.map((p) => ({
       id: p.id,
-      point: p.point.basepoint + p.point.wallpoint,
-      basepoint: p.point.basepoint,
-      wallpoint: p.point.wallpoint,
+      point: p.point.areaPoint + p.point.wallPoint,
+      basepoint: p.point.areaPoint,
+      wallpoint: p.point.wallPoint,
     }));
     a.sort((a, b) => {
       if (a.point < b.point) return 1;
