@@ -65,7 +65,7 @@ const PointsGraph: NextPage<{
           return (
             <Line
               key={i}
-              type="monotone"
+              isAnimationActive={false}
               dataKey={`points[${i}]`}
               stroke={datas[i].colors[1]}
               name={user ? user.screenName : player.id}
