@@ -15,12 +15,12 @@
     "@emotion/styled": "^11.9.3",
     "@kakomimasu/client-js": "github:kakomimasu/client-js#v1.0.0-beta.11",
     "@mui/icons-material": "^5.8.4",
-    "@mui/lab": "^5.0.0-alpha.86",
-    "@mui/material": "^5.8.4",
-    "@types/react-syntax-highlighter": "^15.5.2",
-    "dayjs": "^1.11.3",
+    "@mui/lab": "^5.0.0-alpha.92",
+    "@mui/material": "^5.9.2",
+    "@types/react-syntax-highlighter": "^15.5.4",
+    "dayjs": "^1.11.4",
     "firebase": "^8.10.1",
-    "next": "12.1.6",
+    "next": "12.2.3",
     "react": "17.0.2",
     "react-code-blocks": "^0.0.9-0",
     "react-countdown": "^2.3.2",
@@ -29,15 +29,15 @@
     "react-markdown": "^8.0.3",
     "react-resize-detector": "^7.1.1",
     "react-syntax-highlighter": "^15.5.0",
-    "recharts": "^2.1.12",
-    "redoc": "2.0.0-rc.72",
-    "remark-gfm": "^3.0.1"
+    "recharts": "^2.1.13",
+    "remark-gfm": "^3.0.1",
+    "redoc": "2.0.0-rc.72"
   },
   "devDependencies": {
     "@types/react": "18.0.9",
     "@types/recharts": "^1.8.23",
-    "eslint": "8.18.0",
-    "eslint-config-next": "12.1.6",
+    "eslint": "8.20.0",
+    "eslint-config-next": "12.2.3",
     "typescript": "4.7.4"
   }
 }
