@@ -201,10 +201,10 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
 
                 return (
                   <Link
-                    href={getGameHref(game_.gameId)}
+                    href={getGameHref(game_.id)}
                     color="inherit"
                     underline="none"
-                    key={game_.gameId}
+                    key={game_.id}
                     sx={{
                       display: "flex",
                       gap: 1,
@@ -213,9 +213,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
                       p: 0.5,
                       fontSize: "0.8em",
                       backgroundColor: (t) =>
-                        game_.gameId === game?.gameId
-                          ? t.palette.primary.main
-                          : "",
+                        game_.id === game?.id ? t.palette.primary.main : "",
                       "&:hover": {
                         backgroundColor: (t) => t.palette.secondary.light,
                       },
@@ -235,9 +233,9 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
                         },
                       }}
                     >
-                      <Box>{game_.gameName || "UnTitle"}</Box>
+                      <Box>{game_.name || "UnTitle"}</Box>
                       <Box sx={{ fontSize: "0.5em", fontFamily: "monospace" }}>
-                        {game_.gameId}
+                        {game_.id}
                       </Box>
                     </Box>
                     <Box sx={{ width: "max-content" }}>{fromNow}</Box>

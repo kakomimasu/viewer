@@ -75,7 +75,7 @@ const GameList = (props: {
   };
 
   const getPoint = (player: Player) => {
-    return player.point.basepoint + player.point.wallpoint;
+    return player.point.areaPoint + player.point.wallPoint;
   };
 
   const getPlacedAgentStr = (game: Game, i: number) => {
@@ -124,7 +124,7 @@ const GameList = (props: {
                 )
               : games
             ).map((game) => (
-              <TableRow key={game.gameId} hover={hover}>
+              <TableRow key={game.id} hover={hover}>
                 <TableCell align="center">
                   {getStatusClass(game)}
                   <div>
@@ -191,17 +191,17 @@ const GameList = (props: {
                 </TableCell>
                 <TableCell>
                   <Link
-                    href={getGameHref(game.gameId)}
+                    href={getGameHref(game.id)}
                     underline="none"
                     sx={{
                       width: "fit-content",
                       "&:hover": { color: (t) => t.palette.secondary.main },
-                      color: game.gameName ? "black" : "gray",
+                      color: game.name ? "black" : "gray",
                     }}
                   >
-                    {game.gameName || "Untitle"}
+                    {game.name || "Untitle"}
                   </Link>
-                  <GameId>{game.gameId}</GameId>
+                  <GameId>{game.id}</GameId>
                 </TableCell>
                 <TableCell>{getStartTime(game.startedAtUnixTime)}</TableCell>
               </TableRow>

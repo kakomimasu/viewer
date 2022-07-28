@@ -48,7 +48,7 @@ const Detail: NextPage<{}> = () => {
   const updateGames = useCallback(async () => {
     const games: Game[] = [];
     if (user) {
-      for (const gameId of user.gamesId) {
+      for (const gameId of user.gameIds) {
         const res = await apiClient.getMatch(gameId);
         if (res.success) games.push(res.data);
       }
@@ -72,7 +72,7 @@ const Detail: NextPage<{}> = () => {
         const players = g.players.map((p) => {
           return {
             id: p.id,
-            point: p.point.wallpoint + p.point.basepoint,
+            point: p.point.wallPoint + p.point.areaPoint,
           };
         });
         players.sort((a, b) => a.point - b.point);
