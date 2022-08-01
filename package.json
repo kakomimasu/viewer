@@ -31,7 +31,7 @@
     "react-syntax-highlighter": "^15.5.0",
     "recharts": "^2.1.13",
     "remark-gfm": "^3.0.1",
-    "redoc": "2.0.0-rc.72"
+    "redoc": "2.0.0-rc.74"
   },
   "devDependencies": {
     "@types/react": "18.0.9",
