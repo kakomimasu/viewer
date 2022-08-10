@@ -14,16 +14,6 @@
     "/matches": {
       "get": {
         "summary": "試合一覧取得API",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "x-api-token",
-            "in": "header",
-            "description": "BearerToken"
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -53,10 +43,7 @@
         "description": "試合の一覧を取得するためのエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合",
         "security": [
           {
-            "Header": []
-          },
-          {
-            "Query": []
+            "BearerToken": []
           }
         ]
       }
@@ -74,16 +61,6 @@
       ],
       "get": {
         "summary": "試合状態取得API",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "x-api-token",
-            "in": "header",
-            "description": "pic"
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -119,10 +96,7 @@
         "description": "試合中に試合の状態を取得するためのエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 404\n  * 参加していない試合に対するリクエスト, また存在しない試合IDの場合\n* 425\n  * 試合開始前のリクエストの場合",
         "security": [
           {
-            "Header": []
-          },
-          {
-            "Query": []
+            "PIC": []
           }
         ]
       }
@@ -140,16 +114,6 @@
       ],
       "post": {
         "summary": "行動更新API",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "x-api-token",
-            "in": "header",
-            "description": "pic"
-          }
-        ],
         "operationId": "post-action",
         "responses": {
           "202": {
@@ -200,10 +164,7 @@
         },
         "security": [
           {
-            "Header": []
-          },
-          {
-            "Query": []
+            "PIC": []
           }
         ]
       }
@@ -211,16 +172,6 @@
     "/teams/me": {
       "get": {
         "summary": "チーム情報取得API",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "x-api-token",
-            "in": "header",
-            "description": "BearerToken"
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -250,10 +201,7 @@
         "description": "自分のチーム情報を取得するエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n",
         "security": [
           {
-            "Header": []
-          },
-          {
-            "Query": []
+            "BearerToken": []
           }
         ]
       }
@@ -271,16 +219,6 @@
       ],
       "get": {
         "summary": "試合一覧取得API",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "x-api-token",
-            "in": "header",
-            "description": "BearerToken"
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -313,10 +251,7 @@
         "description": "試合開始前に自分に関連する試合の一覧を取得するためのエンドポイントです\n\n以下の場合にエラーを返します (優先度順)\n* 401\n  * リクエストにAPIトークンが含まれていない, または不正な場合\n* 403\n  * APIトークンと異なるチームのリソースにアクセスした場合",
         "security": [
           {
-            "Header": []
-          },
-          {
-            "Query": []
+            "BearerToken": []
           }
         ]
       }
@@ -387,7 +322,7 @@
           },
           "walls": {
             "type": "array",
-            "description": "現在の城壁の状況(城壁以外のマス: 0, 城壁が築かれているマス: チームID)",
+            "description": "現在の城壁の状況(城壁以外のマス: 0, 城壁が築かれているマス: teamsの対応するチームのインデックス+1)",
             "items": {
               "type": "array",
               "items": {
@@ -397,7 +332,7 @@
           },
           "areas": {
             "type": "array",
-            "description": "現在の陣地の状況(陣地以外のマス: 0,青チームのマス: 1, 赤チームのマス: 2)",
+            "description": "現在の陣地の状況(陣地以外のマス: 0, 陣地になっているマス: teamsの対応するチームのインデックス+1)",
             "items": {
               "type": "array",
               "items": {
@@ -439,8 +374,8 @@
         "type": "object",
         "properties": {
           "teamID": {
-            "description": "チームのID",
-            "type": "string"
+            "description": "チーム（ユーザ）のPIC\n\n相手チームは「0」で固定されます。",
+            "type": "number"
           },
           "agent": {
             "description": "エージェントの数",
@@ -546,7 +481,7 @@
             "type": "string"
           },
           "teams": {
-            "description": "試合に参加するチームの情報\n1番目が自チーム, 2番目が敵チームとなる\n",
+            "description": "試合に参加するチームの情報\n1番目が自チーム, 2番目以降が相手チームとなる\n",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TeamInfo"
@@ -657,7 +592,7 @@
         }
       },
       "TeamInfo": {
-        "description": "チームの情報",
+        "description": "チーム（ユーザ）の情報",
         "type": "object",
         "required": [
           "teamID",
@@ -665,21 +600,27 @@
         ],
         "properties": {
           "teamID": {
-            "description": "チームのID",
+            "description": "チーム（ユーザ）のゲーム別PIC\n\n相手チームやチーム情報取得APIでは「0」になります。",
             "type": "integer"
           },
           "name": {
-            "description": "チームの名前",
+            "description": "チーム（ユーザ）のID\n\nゲストユーザの場合はユーザ名",
             "type": "string"
           }
         }
       }
     },
     "securitySchemes": {
-      "Header": {
+      "BearerToken": {
         "name": "x-api-token",
         "type": "apiKey",
         "in": "header"
+      },
+      "PIC": {
+        "name": "x-api-token",
+        "type": "apiKey",
+        "in": "header",
+        "description": "個人識別コード（Personal Identification Code）\n\n試合状態取得APIにて各ゲームに対応するPICを取得できます。"
       }
     },
     "responses": {
