@@ -55,6 +55,12 @@ export default function Index() {
           explain="ローカルサーバの立て方などを紹介します。"
         />
         <DocCard
+          href="https://scrapbox.io/kakomimasu/"
+          title="Scrapbox"
+          explain="囲みマスに関する様々な記事などが書かれた公式Scrapboxです。"
+        />
+
+        <DocCard
           href="/docs/api/v1"
           title="囲みマス API v1"
           explain="囲みマス API v1を利用すると、任意のクライアントからゲーム作成・参加、大会作成、ユーザ取得などを行うことが出来ます。"

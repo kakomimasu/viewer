@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import Toolbar from "@mui/material/Toolbar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 import firebase from "../src/firebase";
 import Link from "../src/link";
@@ -51,7 +52,16 @@ export default function Header() {
           }}
         >
           <Button href="/docs" variant="text" color="inherit">
-            ドキュメント
+            Docs
+          </Button>
+          <Button
+            href="https://scrapbox.io/kakomimasu/"
+            variant="text"
+            color="inherit"
+            target="_blank"
+            endIcon={<OpenInNewIcon />}
+          >
+            Scrapbox
           </Button>
         </div>
         {kkmmUser !== undefined && (

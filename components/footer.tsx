@@ -1,39 +1,27 @@
 import React from "react";
 import Image from "next/image";
-import { styled } from "@mui/material/styles";
-
-const Footer = styled("footer")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  padding: "20px 0",
-  backgroundColor: theme.palette.primary.main,
-  width: "100%",
-  "& a": {
-    textDecoration: "none",
-    color: "black",
-    display: "inline-block",
-  },
-  "& a:active": {
-    color: "black",
-  },
-}));
-
-const Div = styled("div")({
-  margin: "5px 0",
-});
-
-const Img = styled(Image)({ height: "1.5em" });
+import { Box, IconButton } from "@mui/material";
+import GitHubIcon from "@mui/icons-material/GitHub";
 
 export default function StyledFooter() {
   return (
-    <Footer>
-      <Div id="f_link">
-        <a href="https://github.com/codeforkosen/Kakomimasu">
-          <Img src="/img/GitHub-Mark-64px.png" width={24} height={24} />
-        </a>
-      </Div>
-      <Div>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "20px 0",
+        backgroundColor: (t) => t.palette.primary.main,
+        width: "100%",
+        gap: "10px",
+      }}
+    >
+      <div id="f_link">
+        <IconButton color="inherit" href="https://github.com/kakomimasu">
+          <GitHubIcon />
+        </IconButton>
+      </div>
+      <div>
         <a href="https://deno.land/">
           {
             <Image
@@ -44,10 +32,21 @@ export default function StyledFooter() {
             />
           }
         </a>
-      </Div>
-      <Div>
+      </div>
+      <Box
+        sx={{
+          "& a": {
+            textDecoration: "none",
+            color: "black",
+            display: "inline-block",
+          },
+          "& a:active": {
+            color: "black",
+          },
+        }}
+      >
         <a href="https://codeforkosen.github.io/">CC BY Code for KOSEN</a>
-      </Div>
-    </Footer>
+      </Box>
+    </Box>
   );
 }

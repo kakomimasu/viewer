@@ -158,10 +158,16 @@ export default function Index() {
           またAPIドキュメントを公開していますので異なる言語でもゲームへの参加が可能です。
         </SubSection>
         <SubSection title="APIドキュメント">
-          現在APIのバージョンはv1です。以下のリンクからご覧ください。
+          現在APIの最新バージョンはv1です。また、procon30(都城),procon31(苫小牧)互換APIもあります。以下のリンクからご覧ください。
           <ul>
             <li>
-              <Link href="/docs/apiv1">囲みマス API v1</Link>
+              <Link href="/docs/api/v1">API v1</Link>
+            </li>
+            <li>
+              <Link href="/docs/api/miyakonojo">API miyakonojo</Link>
+            </li>
+            <li>
+              <Link href="/docs/api/tomakomai">API tomakomai</Link>
             </li>
           </ul>
         </SubSection>
