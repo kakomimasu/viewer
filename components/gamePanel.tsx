@@ -47,7 +47,7 @@ export default function GamePanel({
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "auto 1fr 2fr",
+        gridTemplateColumns: "auto auto 2fr",
         gridTemplateRows: "2em 1fr 1fr 1.4fr",
         gap: 1,
         width: "100%",
@@ -262,13 +262,13 @@ export default function GamePanel({
               key={nextTurnTime}
               date={nextTurnTime}
               intervalDelay={0}
-              precision={2}
+              precision={1}
               renderer={({ seconds, milliseconds }) => {
                 return (
                   <>
                     <Box component="span">{seconds}</Box>.
                     <Box component="span" sx={{ fontSize: "0.7em" }}>
-                      {(milliseconds.toString() + "0").slice(0, 2)}
+                      {(milliseconds.toString() + "0").slice(0, 1)}
                     </Box>
                     <Box component="span" sx={{ fontSize: "0.5em" }}>
                       秒
