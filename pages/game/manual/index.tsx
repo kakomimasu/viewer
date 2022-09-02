@@ -68,12 +68,7 @@ const aiList = [
 type AgentData = { index: number; nextAction: NextActionType };
 
 type Gamepads = ReturnType<typeof navigator["getGamepads"]>;
-type Controller = {
-  label: string;
-  helperText?: string;
-  agentIndex: number;
-  axis: NextActionType;
-};
+type Controller = { label: string; helperText?: string; agentIndex: number };
 
 const ManualAgent = ({
   playerIndex,
@@ -236,7 +231,7 @@ const localStorageKey = "controllerSettings";
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [participateType, setParticipateType] =
     useState<ParticipateType>("free");
-  const [gameId, setGameId] = useState<string>();
+  const [gameId, setGameId] = useState<string>("");
   const [ai, setAi] = useState<typeof aiList[number]["name"]>(aiList[0].name);
 
   const [matchRes, setMatchRes] = useState<MatchRes>();
@@ -257,12 +252,20 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
   const users = useGameUsers(playerIds);
   const [controllerList, setControllerList] = useState<Controller[]>([
-    { label: "WSADキー", agentIndex: 0, axis: [0, 0] },
-    { label: "Arrowキー", agentIndex: 1, axis: [0, 0] },
-    { label: "GamePad 1", agentIndex: 2, axis: [0, 0] },
-    { label: "GamePad 2", agentIndex: 3, axis: [0, 0] },
-    { label: "GamePad 3", agentIndex: 4, axis: [0, 0] },
-    { label: "GamePad 4", agentIndex: 5, axis: [0, 0] },
+    { label: "WSADキー", agentIndex: 0 },
+    { label: "Arrowキー", agentIndex: 1 },
+    { label: "GamePad 1", agentIndex: 2 },
+    { label: "GamePad 2", agentIndex: 3 },
+    { label: "GamePad 3", agentIndex: 4 },
+    { label: "GamePad 4", agentIndex: 5 },
+  ]);
+  const [axisList, setAxisList] = useState<NextActionType[]>([
+    [0, 0],
+    [0, 0],
+    [0, 0],
+    [0, 0],
+    [0, 0],
+    [0, 0],
   ]);
   const readControllerSettings = useCallback(() => {
     const dataStr = localStorage.getItem(localStorageKey);
@@ -312,57 +315,62 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
 
   useEffect(() => {
     if (dirWSAD[0] === 0 && dirWSAD[1] === 0) return;
-    setControllerList((prev) => {
-      if (prev[0].axis === dirWSAD) return prev;
+    const index = controllerList[0].agentIndex;
+    if (index < 0) return;
+    setAxisList((prev) => {
+      if (prev[index] === dirWSAD) return prev;
       const list = [...prev];
-      const l = { ...list[0] };
-      l.axis = dirWSAD;
-      list[0] = l;
+      list[index] = dirWSAD;
       return list;
     });
-  }, [dirWSAD]);
+  }, [dirWSAD, controllerList]);
 
   useEffect(() => {
     if (dirArrow[0] === 0 && dirArrow[1] === 0) return;
-    setControllerList((prev) => {
-      if (prev[1].axis === dirArrow) return prev;
+    const index = controllerList[1].agentIndex;
+    if (index < 0) return;
+    setAxisList((prev) => {
+      if (prev[index] === dirArrow) return prev;
       const list = [...prev];
-      const l = { ...list[1] };
-      l.axis = dirArrow;
-      list[1] = l;
+      list[index] = dirArrow;
       return list;
     });
-  }, [dirArrow]);
+  }, [dirArrow, controllerList]);
 
-  const changeController = useCallback((i: number, dir: NextActionType) => {
-    rawGamepadAxis.current[i] = dir;
+  const changeController = useCallback(
+    (i: number, dir: NextActionType) => {
+      rawGamepadAxis.current[i] = dir;
+      const axisListIndex = controllerList[i + 2].agentIndex;
+      if (axisListIndex < 0) return;
 
-    if (gamepadChangeTime.current[i] === undefined) {
-      gamepadChangeTime.current[i] = Date.now();
-      setTimeout(() => {
-        gamepadChangeTime.current[i] = undefined;
+      if (gamepadChangeTime.current[i] === undefined) {
+        gamepadChangeTime.current[i] = Date.now();
+        setTimeout(() => {
+          gamepadChangeTime.current[i] = undefined;
 
-        setControllerList((prev) => {
-          const list = [...prev];
-          const c = list[i + 2];
-          const axis = rawGamepadAxis.current[i];
-          if (
-            (axis[0] === c.axis[0] && axis[1] === c.axis[1]) ||
-            (axis[0] === 0 && axis[1] === 0)
-          ) {
-            return prev;
-          } else {
-            c.axis = axis as NextActionType;
-            return list;
-          }
-        });
-      }, 50);
-    }
-  }, []);
+          setAxisList((prev) => {
+            const list = [...prev];
+            const c = list[axisListIndex];
+            const axis = rawGamepadAxis.current[i];
+            if (
+              (axis[0] === c[0] && axis[1] === c[1]) ||
+              (axis[0] === 0 && axis[1] === 0)
+            ) {
+              return prev;
+            } else {
+              list[axisListIndex] = axis as NextActionType;
+              return list;
+            }
+          });
+        }, 50);
+      }
+    },
+    [controllerList]
+  );
 
   useEffect(() => {
     setControllerList((prev) => {
-      const list = [...prev];
+      const list = structuredClone(prev);
       let isUpdate = false;
       for (let i = 0; i < gamepads.length; i++) {
         const gp = gamepads[i];
@@ -372,15 +380,17 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
           c.helperText = helperText;
           isUpdate = true;
         }
-
-        const axis =
-          (gp?.axes.map((a) => Math.round(a)) as NextActionType) ||
-          NextActions.NONE;
-        changeController(i, axis);
       }
       if (isUpdate) return list;
       else return prev;
     });
+    for (let i = 0; i < gamepads.length; i++) {
+      const gp = gamepads[i];
+      const axis =
+        (gp?.axes.map((a) => Math.round(a)) as NextActionType) ||
+        NextActions.NONE;
+      changeController(i, axis);
+    }
   }, [gamepads, changeController]);
 
   useEffect(() => {
@@ -389,34 +399,25 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     const board = game.board;
     const tiled = game.tiled;
     if (!board || !tiled) return;
-    const actions: ActionPost[] = controllerList.flatMap((controller, i) => {
-      const agentIndex = controller.agentIndex;
-      const agent = game.players[matchRes.index].agents[agentIndex] || {
+
+    const actions: ActionPost[] = axisList.flatMap((axis, agentId) => {
+      const agent = game.players[matchRes.index].agents[agentId] || {
         x: -1,
         y: -1,
       };
       if (agent.x < 0) return [];
-      const x = agent.x + controller.axis[0];
-      const y = agent.y + controller.axis[1];
+      const x = agent.x + axis[0];
+      const y = agent.y + axis[1];
       const nextTile = tiled[y * board.width + x];
       if (!nextTile) return [];
       const type =
         nextTile.player !== matchRes.index && nextTile.type === 1
           ? "REMOVE"
           : "MOVE";
-      return [
-        {
-          agentId: agentIndex,
-          x,
-          y,
-          type,
-        },
-      ];
+      return [{ agentId, x, y, type }];
     });
-    // console.log("update actions", game);
-    // console.log(actions);
     apiClient.setAction(game.id, { actions }, matchRes.pic);
-  }, [controllerList, game, matchRes]);
+  }, [controllerList, game, matchRes, axisList]);
 
   useEffect(() => {
     if (!game || !matchRes || !game.gaming || !game.board) return;
@@ -428,10 +429,8 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         .filter((c) => c.agentIndex >= 0)
         .map((c, i, array) => {
           const y = Math.floor(((board.height - 1) / (array.length - 1)) * i);
-          // console.log(board.height, y);
           return { agentId: c.agentIndex, x, y, type: "PUT" };
         });
-      // console.log("actions", actions);
       const res = apiClient.setAction(
         matchRes.gameId,
         { actions },
@@ -444,13 +443,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   useEffect(() => {
     if (!game) return;
     if (game.turn >= 3) {
-      setControllerList((prev) => {
-        const list = [...prev];
-        list.forEach((c) => {
-          c.axis = NextActions.NONE;
-        });
-        return list;
-      });
+      setAxisList(new Array(6).fill(NextActions.NONE));
     }
   }, [game]);
 
@@ -469,10 +462,6 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       setMatchRes(matchRes.data);
     }
   }, [gameId, participateType, ai]);
-
-  // const preview = useCallback(() => {
-  //   console.log(participateType, gameId, ai);
-  // }, [participateType, gameId, ai]);
 
   const changeAgentController = useCallback(
     (
@@ -500,185 +489,213 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     []
   );
 
+  const matchTypeTabs = useMemo(() => {
+    const isMatchStarted = Boolean(matchRes);
+    return (
+      <TabContext value={participateType}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <TabList
+            textColor="secondary"
+            indicatorColor="secondary"
+            centered
+            onChange={(_, v) => {
+              setParticipateType(v);
+            }}
+          >
+            <Tab
+              label="フリーマッチ参加"
+              value="free"
+              disabled={isMatchStarted}
+            />
+            <Tab
+              label="ゲームIDで参加"
+              value="gameId"
+              disabled={isMatchStarted}
+            />
+            <Tab label="対AI戦" value="ai" disabled={isMatchStarted} />
+          </TabList>
+        </Box>
+        <TabPanel value="gameId">
+          <TextField
+            fullWidth
+            label="ゲームID"
+            value={gameId}
+            disabled={isMatchStarted}
+            onChange={({ target: { value } }) => {
+              setGameId(value);
+            }}
+            onKeyDown={(e) => {
+              e.stopPropagation();
+            }}
+          />
+        </TabPanel>
+        <TabPanel value="ai">
+          <TextField
+            fullWidth
+            select
+            label="対戦AI"
+            value={ai}
+            disabled={Boolean(matchRes)}
+            onChange={({ target: { value } }) => {
+              setAi(value as typeof ai);
+            }}
+          >
+            {aiList.map((ai) => {
+              return (
+                <MenuItem key={ai.name} value={ai.name}>
+                  {ai.label}
+                </MenuItem>
+              );
+            })}
+          </TextField>
+        </TabPanel>
+      </TabContext>
+    );
+  }, [ai, gameId, matchRes, participateType]);
+
+  const participateButton = useMemo(() => {
+    let buttonDiasbled = false;
+    if (matchRes) buttonDiasbled = true;
+    else if (participateType === "gameId" && !gameId) buttonDiasbled = true;
+
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          gap: 3,
+          justifyContent: "center",
+        }}
+      >
+        <Button onClick={joinGame} disabled={buttonDiasbled}>
+          参加する
+        </Button>
+      </Box>
+    );
+  }, [gameId, participateType, joinGame, matchRes]);
+
+  const controllerSetting = useMemo(() => {
+    return (
+      <Box
+        sx={{
+          border: "3px solid",
+          borderColor: "#BBB",
+          borderRadius: 1,
+          p: 1.5,
+        }}
+      >
+        <Box
+          component="h4"
+          sx={{ m: 0, display: "flex", alignItems: "center" }}
+        >
+          コントローラ設定
+          <IconButton
+            color="secondary"
+            onClick={resetControllerSettings}
+            size="small"
+          >
+            <RestartAltIcon />
+          </IconButton>
+        </Box>
+        <Box sx={{ mx: 1, display: "flex" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-evenly",
+              m: 1,
+              gap: 1,
+              width: "100%",
+              "& > *": {
+                display: "flex",
+                minWidth: "15em",
+              },
+            }}
+          >
+            {new Array(6).fill(0).map((_, i) => {
+              const controllerIndex = controllerList.findIndex(
+                (c) => c.agentIndex === i
+              );
+              return (
+                <TextField
+                  key={i}
+                  select
+                  value={controllerIndex}
+                  label={`Agent ${i + 1}`}
+                  size="small"
+                  onChange={(e) => changeAgentController(e, i)}
+                >
+                  <MenuItem key={-1} value={-1}>
+                    None
+                  </MenuItem>
+                  {controllerList.map((c, j) => (
+                    <MenuItem key={j} value={j}>
+                      {c.label}{" "}
+                      <Box sx={{ fontSize: "0.8em", display: "inline" }}>
+                        {c.helperText && `[${c.helperText}]`}
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </TextField>
+              );
+            })}
+          </Box>
+        </Box>
+      </Box>
+    );
+  }, [controllerList, changeAgentController, resetControllerSettings]);
+
+  const agentViewer = useMemo(() => {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          gap: "0 1em",
+        }}
+      >
+        {axisList.map((axis, i) => {
+          const c = controllerList.find((c) => c.agentIndex === i);
+          return (
+            <ManualAgent
+              key={i}
+              playerIndex={matchRes?.index || 0}
+              agentData={{
+                index: i,
+                nextAction: axis || NextActions.NONE,
+              }}
+              enable={Boolean(c)}
+            />
+          );
+        })}
+      </Box>
+    );
+  }, [controllerList, matchRes?.index, axisList]);
+
+  const gamePanel = useMemo(() => {
+    if (query) {
+      return (
+        <Box
+          sx={{
+            height: "calc(2em + 50vw)",
+            maxHeight: "calc(100vh - 64px)",
+          }}
+        >
+          <GamePanel game={game} users={users} />
+        </Box>
+      );
+    } else return;
+  }, [game, users, query]);
+
   return (
     <Content title="手動ゲーム参加">
       <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
-        <TabContext value={participateType}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <TabList
-              textColor="secondary"
-              indicatorColor="secondary"
-              centered
-              onChange={(_, v) => {
-                setParticipateType(v);
-              }}
-            >
-              <Tab
-                label="フリーマッチ参加"
-                value="free"
-                disabled={Boolean(matchRes)}
-              />
-              <Tab
-                label="ゲームIDで参加"
-                value="gameId"
-                disabled={Boolean(matchRes)}
-              />
-              <Tab label="対AI戦" value="ai" disabled={Boolean(matchRes)} />
-            </TabList>
-          </Box>
-          <TabPanel value="gameId">
-            <TextField
-              fullWidth
-              label="ゲームID"
-              value={gameId}
-              disabled={Boolean(matchRes)}
-              onChange={({ target: { value } }) => {
-                setGameId(value);
-                // console.log(e);
-              }}
-            />
-          </TabPanel>
-          <TabPanel value="ai">
-            <TextField
-              fullWidth
-              select
-              label="対戦AI"
-              value={ai}
-              disabled={Boolean(matchRes)}
-              onChange={({ target: { value } }) => {
-                setAi(value as typeof ai);
-              }}
-            >
-              {aiList.map((ai) => {
-                return (
-                  <MenuItem key={ai.name} value={ai.name}>
-                    {ai.label}
-                  </MenuItem>
-                );
-              })}
-            </TextField>
-          </TabPanel>
-        </TabContext>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            gap: 3,
-            justifyContent: "center",
-          }}
-        >
-          {/* <Button
-            disabled={participateType === "ai"}
-            onClick={() => {
-              preview();
-            }}
-          >
-            ゲームプレビュー
-          </Button> */}
-          <Button onClick={joinGame} disabled={Boolean(matchRes)}>
-            参加する
-          </Button>
-        </Box>
-        <Box
-          sx={{
-            border: "3px solid",
-            borderColor: "#BBB",
-            borderRadius: 1,
-            p: 1.5,
-          }}
-        >
-          <Box
-            component="h4"
-            sx={{ m: 0, display: "flex", alignItems: "center" }}
-          >
-            コントローラ設定
-            <IconButton
-              color="secondary"
-              onClick={resetControllerSettings}
-              size="small"
-            >
-              <RestartAltIcon />
-            </IconButton>
-          </Box>
-          <Box sx={{ mx: 1, display: "flex" }}>
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "space-evenly",
-                m: 1,
-                gap: 1,
-                width: "100%",
-                "& > *": {
-                  display: "flex",
-                  minWidth: "15em",
-                },
-              }}
-            >
-              {new Array(6).fill(0).map((_, i) => {
-                const controllerIndex = controllerList.findIndex(
-                  (c) => c.agentIndex === i
-                );
-
-                return (
-                  <TextField
-                    key={i}
-                    select
-                    value={controllerIndex}
-                    label={`Agent ${i + 1}`}
-                    size="small"
-                    onChange={(e) => changeAgentController(e, i)}
-                  >
-                    <MenuItem key={-1} value={-1}>
-                      None
-                    </MenuItem>
-                    {controllerList.map((c, j) => (
-                      <MenuItem key={j} value={j}>
-                        {c.label}{" "}
-                        <Box sx={{ fontSize: "0.8em", display: "inline" }}>
-                          {c.helperText && `[${c.helperText}]`}
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                );
-              })}
-            </Box>
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            gap: "0 1em",
-          }}
-        >
-          {new Array(6).fill(0).map((_, i) => {
-            const c = controllerList.find((c) => c.agentIndex === i);
-            return (
-              <ManualAgent
-                key={i}
-                playerIndex={matchRes?.index || 0}
-                agentData={{
-                  index: i,
-                  nextAction: c?.axis || NextActions.NONE,
-                }}
-                enable={Boolean(c)}
-              />
-            );
-          })}
-        </Box>
-        {query && (
-          <Box
-            sx={{
-              height: "calc(2em + 50vw)",
-              maxHeight: "calc(100vh - 64px)",
-            }}
-          >
-            <GamePanel game={game} users={users} />
-          </Box>
-        )}
+        {matchTypeTabs}
+        {participateButton}
+        {controllerSetting}
+        {agentViewer}
+        {gamePanel}
       </div>
     </Content>
   );
