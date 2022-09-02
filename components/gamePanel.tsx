@@ -14,7 +14,7 @@ export default function GamePanel({
   game,
   users,
 }: {
-  game?: Game;
+  game: Game;
   users: ReturnType<typeof useGameUsers>;
 }) {
   const turn = useMemo(() => {

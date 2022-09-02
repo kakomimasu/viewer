@@ -251,7 +251,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         </Paper>
       </Box>
       <Box sx={{ width: "100%", height: "100%" }}>
-        <GamePanel game={game} users={users} />
+        {game && <GamePanel game={game} users={users} />}
       </Box>
     </Box>
   );

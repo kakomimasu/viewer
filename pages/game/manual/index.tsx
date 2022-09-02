@@ -674,7 +674,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   }, [controllerList, matchRes?.index, axisList]);
 
   const gamePanel = useMemo(() => {
-    if (query) {
+    if (query && game) {
       return (
         <Box
           sx={{
