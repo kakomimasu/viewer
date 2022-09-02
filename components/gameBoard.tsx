@@ -182,6 +182,54 @@ export default function GameBoard({
     return Math.min(scaleX, scaleY);
   }, [width, height, board]);
 
+  const edgeCells = useMemo(() => {
+    if (!board?.height) return;
+    return (
+      <>
+        {[1, board.height + 2].map((y) => {
+          return new Array(board.width).fill(0).map((_, i) => {
+            const x = i + 1;
+            return (
+              <Box
+                key={`index-${x}-${y}`}
+                sx={{
+                  gridColumn: x + 1,
+                  gridRow: y,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                {x}
+              </Box>
+            );
+          });
+        })}
+        {[1, board.width + 2].map((x) => {
+          return new Array(board.width).fill(0).map((_, i) => {
+            const y = i + 1;
+            return (
+              <Box
+                key={`index-${x}-${y}`}
+                sx={{
+                  gridColumn: x,
+                  gridRow: y + 1,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                {y}
+              </Box>
+            );
+          });
+        })}
+      </>
+    );
+  }, [board?.height, board?.width]);
+
   return (
     <Box
       sx={{
@@ -221,47 +269,7 @@ export default function GameBoard({
               );
             });
           })}
-
-          {[1, board.height + 2].map((y) => {
-            return new Array(board.width).fill(0).map((_, i) => {
-              const x = i + 1;
-              return (
-                <Box
-                  key={`index-${x}-${y}`}
-                  sx={{
-                    gridColumn: x + 1,
-                    gridRow: y,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {x}
-                </Box>
-              );
-            });
-          })}
-          {[1, board.width + 2].map((x) => {
-            return new Array(board.width).fill(0).map((_, i) => {
-              const y = i + 1;
-              return (
-                <Box
-                  key={`index-${x}-${y}`}
-                  sx={{
-                    gridColumn: x,
-                    gridRow: y + 1,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {y}
-                </Box>
-              );
-            });
-          })}
+          {edgeCells}
           {(() => {
             return board.points.map((point, i) => {
               const tile: NonNullable<typeof tiled>[number] = (tiled &&
