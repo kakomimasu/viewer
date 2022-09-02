@@ -18,36 +18,39 @@ export default function GamePanel({
   users: ReturnType<typeof useGameUsers>;
 }) {
   const turn = useMemo(() => {
-    if (game?.board) {
+    if (game.board) {
       const nTurn = game.board.nTurn;
       const turn = game.turn;
       return nTurn - turn;
     }
-  }, [game?.board, game?.turn]);
+  }, [game.board, game.turn]);
 
   const nextTurnTime = useMemo(() => {
-    if (game && game.startedAtUnixTime) {
+    if (game.startedAtUnixTime) {
       const nextTurnAtUnixTime =
         game.startedAtUnixTime +
         (game.operationSec + game.transitionSec) * game.turn;
       return nextTurnAtUnixTime * 1000;
     }
     return;
-  }, [game]);
+  }, [
+    game.operationSec,
+    game.startedAtUnixTime,
+    game.transitionSec,
+    game.turn,
+  ]);
 
   const status = useMemo(() => {
-    if (game) {
-      if (game?.ending) return { label: "終了", color: "red" };
-      else if (game?.gaming) return { label: "ゲーム中", color: "green" };
-      else return { label: "待機中", color: "yellow" };
-    } else return;
-  }, [game]);
+    if (game.ending) return { label: "終了", color: "red" };
+    else if (game.gaming) return { label: "ゲーム中", color: "green" };
+    else return { label: "待機中", color: "yellow" };
+  }, [game.ending, game.gaming]);
 
   return (
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "auto auto 2fr",
+        gridTemplateColumns: "auto minmax(max-content,1fr) 2fr",
         gridTemplateRows: "2em 1fr 1fr 1.4fr",
         gap: 1,
         width: "100%",
@@ -78,34 +81,31 @@ export default function GamePanel({
             {status.label}
           </Box>
         )}
-        {game && (
-          <>
-            <Box
-              sx={{
-                flexGrow: "1",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {game.name ?? "UnTitle"}
-            </Box>
-            <Box
-              sx={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              ID : {game.id}
-            </Box>
-            <Box>
-              <Button size="small" href={getVRGameHref(game.id)}>
-                VR
-              </Button>
-            </Box>
-          </>
-        )}
+
+        <Box
+          sx={{
+            flexGrow: "1",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {game.name ?? "UnTitle"}
+        </Box>
+        <Box
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          ID : {game.id}
+        </Box>
+        <Box>
+          <Button size="small" href={getVRGameHref(game.id)}>
+            VR
+          </Button>
+        </Box>
       </Box>
       <Box
         sx={{
@@ -113,12 +113,12 @@ export default function GamePanel({
           gridRow: "2 / -1",
           height: "100%",
           width: "100%",
-          aspectRatio: game?.board
-            ? `${game?.board?.width} / ${game?.board?.height}`
+          aspectRatio: game.board
+            ? `${game.board?.width} / ${game.board?.height}`
             : "1",
         }}
       >
-        {game?.board ? (
+        {game.board ? (
           <GameBoard game={game} users={users} />
         ) : (
           <Skeleton variant="rectangular" width="inherit" height="inherit" />
