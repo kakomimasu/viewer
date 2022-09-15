@@ -55,7 +55,7 @@
                   },
                   "teamID": {
                     "description": "pic",
-                    "type": "string"
+                    "type": "integer"
                   },
                   "turnMillis": {
                     "description": "1ターンあたりの時間(ミリ秒)",
@@ -242,7 +242,7 @@
                       },
                       "teamID": {
                         "description": "pic",
-                        "type": "string"
+                        "type": "integer"
                       },
                       "tilePoint": {
                         "description": "タイルポイント",
