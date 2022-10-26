@@ -26,7 +26,7 @@ import {
   MatchReq,
 } from "../../../src/apiClient";
 import { useGameUsers } from "../../../src/useGameUsers";
-import { useWebSocketGame } from "../../../src/useWebsocketGame";
+import { useGameStream } from "../../../src/useGameStream";
 
 import datas from "../../../components/player_datas";
 import GamePanel from "../../../components/gamePanel";
@@ -247,7 +247,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       return { q: `id:${matchRes.gameId}` };
     }
   }, [matchRes, participateType]);
-  const selectedGame = useWebSocketGame(query);
+  const selectedGame = useGameStream(query);
   const game = useMemo<Game | undefined>(() => selectedGame[0], [selectedGame]);
   const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
   const users = useGameUsers(playerIds);
