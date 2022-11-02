@@ -13,7 +13,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import Section, { SubSection } from "../../../components/section";
 import Content from "../../../components/content";
 import GameList from "../../../components/gamelist";
-import { useWebSocketGame } from "../../../src/useWebsocketGame";
+import { useGameStream } from "../../../src/useGameStream";
 import { UserContext } from "../../../src/userStore";
 
 import { apiClient, Game, User, WsGameReq } from "../../../src/apiClient";
@@ -42,7 +42,7 @@ const Detail: NextPage<{}> = () => {
   const { kkmmUser } = useContext(UserContext);
 
   const [user, setUser] = useState<User | undefined | null>(undefined);
-  const myGames = useWebSocketGame(wsReq, kkmmUser?.bearerToken);
+  const myGames = useGameStream(wsReq, kkmmUser?.bearerToken);
 
   const [games, setGames] = useState<Game[]>([]);
   const updateGames = useCallback(async () => {

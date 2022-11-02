@@ -17,7 +17,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import GamePanel from "../../components/gamePanel";
 
 import { WsGameReq, Game } from "../../src/apiClient";
-import { useWebSocketGame } from "../../src/useWebsocketGame";
+import { useGameStream } from "../../src/useGameStream";
 import { useGameUsers } from "../../src/useGameUsers";
 import Link, { getGameHref } from "../../src/link";
 
@@ -47,8 +47,8 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     return req;
   }, [id, query]);
 
-  const games = useWebSocketGame(req);
-  const selectedGame = useWebSocketGame(selectedGameReq);
+  const games = useGameStream(req);
+  const selectedGame = useGameStream(selectedGameReq);
   const game = useMemo<Game | undefined>(() => selectedGame[0], [selectedGame]);
   const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
   const users = useGameUsers(playerIds);
@@ -59,6 +59,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
       console.log(q);
       const req: WsGameReq = {
         q,
+        // endIndex: 1,
         allowNewGame: true,
       };
       setReq(req);
