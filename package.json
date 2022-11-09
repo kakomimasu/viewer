@@ -19,6 +19,7 @@
     "@mui/material": "^5.9.2",
     "@types/react-syntax-highlighter": "^15.5.4",
     "dayjs": "^1.11.4",
+    "event-source-polyfill": "^1.0.31",
     "firebase": "^8.10.1",
     "next": "12.2.3",
     "react": "17.0.2",
@@ -29,11 +30,12 @@
     "react-markdown": "^8.0.3",
     "react-resize-detector": "^7.1.1",
     "react-syntax-highlighter": "^15.5.0",
-    "recharts": "^2.1.13",
-    "remark-gfm": "^3.0.1",
-    "redoc": "2.0.0-rc.72"
+    "recharts": "2.1.12",
+    "redoc": "2.0.0-rc.72",
+    "remark-gfm": "^3.0.1"
   },
   "devDependencies": {
+    "@types/event-source-polyfill": "^1.0.0",
     "@types/react": "18.0.9",
     "@types/recharts": "^1.8.23",
     "eslint": "8.26.0",

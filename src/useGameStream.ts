@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { EventSourcePolyfill } from "event-source-polyfill";
 
 import { Game, WsGameReq, WsGameRes, host } from "./apiClient";
 
@@ -7,8 +8,6 @@ export const useGameStream = (req?: WsGameReq, bearerToken?: string) => {
 
   useEffect(() => {
     if (!req) return;
-    const ac = new AbortController();
-
     const url = new URL("/v1/game/stream", host);
     url.searchParams.append("q", req.q);
     if (req.allowNewGame !== undefined)
@@ -18,85 +17,52 @@ export const useGameStream = (req?: WsGameReq, bearerToken?: string) => {
     if (req.startIndex !== undefined)
       url.searchParams.append("startIndex", String(req.startIndex));
 
-    const headers = bearerToken
-      ? new Headers()
-      : new Headers({
-          Authorization: "Bearer " + bearerToken,
+    const headers: Record<string, string> = {};
+    if (bearerToken) {
+      headers["Authorization"] = "Bearer " + bearerToken;
+    }
+
+    const res = new EventSourcePolyfill(url.href, { headers });
+    res.addEventListener("message", (e) => {
+      const data = JSON.parse(e.data) as WsGameRes;
+      // console.log(data);
+
+      if (data.type === "initial") {
+        setGames(data.games);
+      } else if (data.type === "update") {
+        setGames((prev) => {
+          const games = [...prev];
+          const updateGameIndex = games.findIndex((g) => g.id === data.game.id);
+          if (updateGameIndex >= 0) games[updateGameIndex] = data.game;
+          return games;
         });
-
-    fetch(url, {
-      headers,
-      signal: ac.signal,
-    }).then(async (res) => {
-      const reader = res.body?.getReader();
-      if (!reader) return;
-
-      new ReadableStream({
-        start(controller) {
-          const pump = async () => {
-            return reader.read().then(({ done, value }) => {
-              if (done) {
-                controller.close();
-                return;
-              }
-
-              const datas = new TextDecoder().decode(value).trim().split("\n");
-              for (const data of datas) {
-                const str = data.trim();
-                if (!str) continue;
-                try {
-                  const res = JSON.parse(str) as WsGameRes;
-                  // console.log("getData: ", data);
-
-                  if (res.type === "initial") {
-                    setGames(res.games);
-                  } else if (res.type === "update") {
-                    setGames((prev) => {
-                      const games = [...prev];
-                      const updateGameIndex = games.findIndex(
-                        (g) => g.id === res.game.id
-                      );
-                      if (updateGameIndex >= 0)
-                        games[updateGameIndex] = res.game;
-                      return games;
-                    });
-                  } else if (res.type === "remove") {
-                    setGames((prev) => {
-                      const games = [...prev];
-                      const removeGameIndex = games.findIndex(
-                        (g) => g.id === res.gameId
-                      );
-                      if (removeGameIndex >= 0)
-                        games.splice(removeGameIndex, 1);
-                      return games;
-                    });
-                  } else if (res.type === "add") {
-                    setGames((prev) => {
-                      const games = [...prev];
-                      games.push(res.game);
-                      if (req?.q.includes("sort:startAtUnixTime-desc")) {
-                        games.sort((a, b) => {
-                          const aTime = a.startedAtUnixTime || 10000000000;
-                          const bTime = b.startedAtUnixTime || 10000000000;
-                          return bTime - aTime;
-                        });
-                      }
-                      return games;
-                    });
-                  }
-                } catch (e) {
-                  console.log(e, str);
-                }
-              }
-              pump();
+      } else if (data.type === "remove") {
+        setGames((prev) => {
+          const games = [...prev];
+          const removeGameIndex = games.findIndex((g) => g.id === data.gameId);
+          if (removeGameIndex >= 0) games.splice(removeGameIndex, 1);
+          return games;
+        });
+      } else if (data.type === "add") {
+        setGames((prev) => {
+          const games = [...prev];
+          games.push(data.game);
+          if (req?.q.includes("sort:startAtUnixTime-desc")) {
+            games.sort((a, b) => {
+              const aTime = a.startedAtUnixTime || 10000000000;
+              const bTime = b.startedAtUnixTime || 10000000000;
+              return bTime - aTime;
             });
-          };
-          return pump();
-        },
-      });
+          }
+          return games;
+        });
+      }
     });
+    res.onerror = (e) => {
+      console.log("error", e);
+    };
     return () => {
-      ac.abort();
+      res.close();
     };
   }, [req, bearerToken]);
 
