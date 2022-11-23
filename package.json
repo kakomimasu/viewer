@@ -31,7 +31,7 @@
     "react-resize-detector": "^7.1.1",
     "react-syntax-highlighter": "^15.5.0",
     "recharts": "2.1.12",
-    "redoc": "2.0.0-rc.72",
+    "redoc": "2.0.0",
     "remark-gfm": "^3.0.1"
   },
   "devDependencies": {
