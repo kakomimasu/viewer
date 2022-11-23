@@ -62,18 +62,23 @@ export default function Index() {
 
         <DocCard
           href="/docs/api/v1"
-          title="囲みマス API v1"
+          title="v1 API"
           explain="囲みマス API v1を利用すると、任意のクライアントからゲーム作成・参加、大会作成、ユーザ取得などを行うことが出来ます。"
         />
         <DocCard
           href="/docs/api/tomakomai"
           title="苫小牧(procon31) API"
-          explain=""
+          explain="2020 procon31 苫小牧大会の互換APIです。"
         />
         <DocCard
           href="/docs/api/miyakonojo"
           title="都城(procon30) API"
-          explain=""
+          explain="2019 procon30 都城大会の互換APIです。"
+        />
+        <DocCard
+          href="/docs/api/v1-beta"
+          title="v1 API(OpenAPI版、β版)"
+          explain="v1 APIをOpenAPIで定義したものです。まだ未完成なので詳しくは「v1 API」の方をご覧ください。"
         />
       </StyledDiv>
     </Content>
