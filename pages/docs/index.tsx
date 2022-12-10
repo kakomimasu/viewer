@@ -75,11 +75,6 @@ export default function Index() {
           title="都城(procon30) API"
           explain="2019 procon30 都城大会の互換APIです。"
         />
-        <DocCard
-          href="/docs/api/v1-beta"
-          title="v1 API(OpenAPI版、β版)"
-          explain="v1 APIをOpenAPIで定義したものです。まだ未完成なので詳しくは「v1 API」の方をご覧ください。"
-        />
       </StyledDiv>
     </Content>
   );
