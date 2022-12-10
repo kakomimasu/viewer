@@ -71,7 +71,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     sendData.playerIdentifiers = sendData.playerIdentifiers.filter((e) =>
       Boolean(e)
     );
-    const res = await apiClient.gameCreate(sendData);
+    const res = await apiClient.createMatch(sendData);
     console.log(res);
     if (!res.success) return;
     if (query.return) {
@@ -89,7 +89,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     if (!kkmmUser?.bearerToken) return;
     const idToken = kkmmUser.bearerToken;
 
-    const res = await apiClient.gameCreate(sendData, `Bearer ${idToken}`);
+    const res = await apiClient.createMatch(sendData, `Bearer ${idToken}`);
     console.log(res);
     if (!res.success) return;
     setGame(res.data);
@@ -122,7 +122,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     event: React.ChangeEvent<{ value: string }>
   ) => {
     const value = event.target.value;
-    const req = await apiClient.usersSearch(value);
+    const req = await apiClient.getUsers(value);
     let q: typeof addUserInput.q = [];
     if (req.success) q = req.data.map((user) => user.name);
     setAddUserInput({ value, q });
@@ -241,8 +241,18 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
             board,
             tiled,
             players: [
-              { id: "", agents: [], point: { areaPoint: 0, wallPoint: 0 } },
-              { id: "", agents: [], point: { areaPoint: 0, wallPoint: 0 } },
+              {
+                id: "",
+                agents: [],
+                point: { areaPoint: 0, wallPoint: 0 },
+                type: "guest",
+              },
+              {
+                id: "",
+                agents: [],
+                point: { areaPoint: 0, wallPoint: 0 },
+                type: "guest",
+              },
             ],
             log: [],
           };

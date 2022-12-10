@@ -20,10 +20,11 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import {
   apiClient,
   Game,
-  WsGameReq,
-  MatchRes,
-  ActionPost,
-  MatchReq,
+  JoinMatchRes,
+  ApiRes,
+  StreamMatchesReq,
+  ActionMatchReq,
+  JoinMatchReqBase,
 } from "../../../src/apiClient";
 import { useGameUsers } from "../../../src/useGameUsers";
 import { useGameStream } from "../../../src/useGameStream";
@@ -234,8 +235,8 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [gameId, setGameId] = useState<string>("");
   const [ai, setAi] = useState<typeof aiList[number]["name"]>(aiList[0].name);
 
-  const [matchRes, setMatchRes] = useState<MatchRes>();
-  const query = useMemo<WsGameReq | undefined>(() => {
+  const [matchRes, setMatchRes] = useState<JoinMatchRes>();
+  const query = useMemo<StreamMatchesReq | undefined>(() => {
     if (!matchRes) {
       if (participateType === "free") {
         return {
@@ -400,22 +401,24 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     const tiled = game.tiled;
     if (!board || !tiled) return;
 
-    const actions: ActionPost[] = axisList.flatMap((axis, agentId) => {
-      const agent = game.players[matchRes.index].agents[agentId] || {
-        x: -1,
-        y: -1,
-      };
-      if (agent.x < 0) return [];
-      const x = agent.x + axis[0];
-      const y = agent.y + axis[1];
-      const nextTile = tiled[y * board.width + x];
-      if (!nextTile) return [];
-      const type =
-        nextTile.player !== matchRes.index && nextTile.type === 1
-          ? "REMOVE"
-          : "MOVE";
-      return [{ agentId, x, y, type }];
-    });
+    const actions: ActionMatchReq["actions"] = axisList.flatMap(
+      (axis, agentId) => {
+        const agent = game.players[matchRes.index].agents[agentId] || {
+          x: -1,
+          y: -1,
+        };
+        if (agent.x < 0) return [];
+        const x = agent.x + axis[0];
+        const y = agent.y + axis[1];
+        const nextTile = tiled[y * board.width + x];
+        if (!nextTile) return [];
+        const type =
+          nextTile.player !== matchRes.index && nextTile.type === 1
+            ? "REMOVE"
+            : "MOVE";
+        return [{ agentId, x, y, type }];
+      }
+    );
     apiClient.setAction(game.id, { actions }, matchRes.pic);
   }, [controllerList, game, matchRes, axisList]);
 
@@ -425,7 +428,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     if (game.turn === 1) {
       const playerIndex = matchRes.index;
       let x = playerIndex === 0 ? 1 : board.width - 2;
-      const actions: ActionPost[] = controllerList
+      const actions: ActionMatchReq["actions"] = controllerList
         .filter((c) => c.agentIndex >= 0)
         .map((c, i, array) => {
           const y = Math.floor(((board.height - 1) / (array.length - 1)) * i);
@@ -448,16 +451,20 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   }, [game]);
 
   const joinGame = useCallback(async () => {
-    const req: MatchReq = { guest: { name: "guest" } };
+    const req: JoinMatchReqBase = { guestName: "guest" };
+    let matchRes: ApiRes<JoinMatchRes>;
     if (participateType === "gameId") {
-      req.gameId = gameId;
+      // req.gameId = gameId;
+      matchRes = await apiClient.joinGameIdMatch(gameId, req);
     } else if (participateType === "ai") {
-      req.useAi = true;
-      req.aiOption = {
-        aiName: ai,
-      };
+      // req.useAi = true;
+      // req.aiOption = {
+      //   aiName: ai,
+      // };
+      matchRes = await apiClient.joinAiMatch({ ...req, aiName: ai });
+    } else {
+      matchRes = await apiClient.joinFreeMatch(req);
     }
-    const matchRes = await apiClient.match(req);
     if (matchRes.success) {
       setMatchRes(matchRes.data);
     }

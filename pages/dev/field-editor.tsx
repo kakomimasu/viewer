@@ -43,8 +43,18 @@ export default function FieldEditor({
       board,
       tiled,
       players: [
-        { id: "", agents: [], point: { areaPoint: 0, wallPoint: 0 } },
-        { id: "", agents: [], point: { areaPoint: 0, wallPoint: 0 } },
+        {
+          id: "",
+          agents: [],
+          point: { areaPoint: 0, wallPoint: 0 },
+          type: "guest",
+        },
+        {
+          id: "",
+          agents: [],
+          point: { areaPoint: 0, wallPoint: 0 },
+          type: "guest",
+        },
       ],
       log: [],
     };

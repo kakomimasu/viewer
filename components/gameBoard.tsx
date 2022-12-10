@@ -248,7 +248,7 @@ export default function GameBoard({
           sx={{
             userSelect: "none",
             display: "grid",
-            position: "absolute",
+            position: "static",
             gridAutoColumns: "50px",
             gridAutoRows: "50px",
             gap: "1px",

@@ -15,9 +15,13 @@ if (typeof window !== "undefined" && firebase.apps.length === 0) {
   };
 
   firebase.initializeApp(firebaseConfig);
-  firebase.auth();
+  const auth = firebase.auth();
   firebase.analytics();
   firebase.firestore();
+
+  if (process.env.NEXT_PUBLIC_APISERVER_HOST?.includes("127.0.0.1")) {
+    auth.useEmulator(`http://127.0.0.1:9099`);
+  }
 }
 
 export default firebase;

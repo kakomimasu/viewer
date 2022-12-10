@@ -30,7 +30,7 @@ const StateProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser({ firebaseUser: null, kkmmUser: null });
       } else {
         const idToken = await user.getIdToken(true);
-        const res = await apiClient.usersShow(user.uid, idToken);
+        const res = await apiClient.getUser(user.uid, idToken);
         if (res.success === true) {
           setUser({ firebaseUser: user, kkmmUser: res.data });
           return;

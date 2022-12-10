@@ -1,5 +1,12 @@
-import ApiClient from "@kakomimasu/client-js";
 export * from "@kakomimasu/client-js";
+import ApiClient from "@kakomimasu/client-js";
+
+export type StreamMatchesReq = {
+  q: string;
+  startIndex?: number;
+  endIndex?: number;
+  allowNewGame?: boolean;
+};
 
 let envApiHost;
 

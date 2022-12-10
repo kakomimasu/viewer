@@ -16,7 +16,12 @@ import GameList from "../../../components/gamelist";
 import { useGameStream } from "../../../src/useGameStream";
 import { UserContext } from "../../../src/userStore";
 
-import { apiClient, Game, User, WsGameReq } from "../../../src/apiClient";
+import {
+  apiClient,
+  Game,
+  StreamMatchesReq,
+  User,
+} from "../../../src/apiClient";
 import Link from "../../../src/link";
 
 const StyledContent = styled(Content)({
@@ -26,7 +31,7 @@ const StyledContent = styled(Content)({
 });
 
 const PieGraph = styled("div")({ height: 300 });
-const wsReq: WsGameReq = {
+const wsReq: StreamMatchesReq = {
   q: "sort:startAtUnixTime-desc type:personal",
 };
 
@@ -102,7 +107,7 @@ const Detail: NextPage<{}> = () => {
       // ログインしているユーザを表示
       setUser(kkmmUser);
     } else {
-      const res = await apiClient.usersShow(id);
+      const res = await apiClient.getUser(id);
       if (res.success === false) {
         setUser(null);
       } else {

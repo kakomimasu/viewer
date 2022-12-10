@@ -46,7 +46,7 @@ function Signup({ user }: { user: firebase.User }) {
       setNameHelperText("入力必須項目です");
       return false;
     }
-    const res = await apiClient.usersSearch(data.name);
+    const res = await apiClient.getUsers(data.name);
     if (res.success) {
       if (res.data.some((user: any) => user.name === data.name)) {
         setNameHelperText("既にこのユーザネームは使用されています");
@@ -64,7 +64,7 @@ function Signup({ user }: { user: firebase.User }) {
   };
 
   const submit = async () => {
-    const res = await apiClient.usersRegist(data, await user.getIdToken());
+    const res = await apiClient.createUser(data, await user.getIdToken());
     if (res.success) {
       location.href = "/";
     }

@@ -7,9 +7,8 @@ import Autocomplete from "@mui/material/Autocomplete";
 
 import {
   apiClient,
+  CreateTournamentReq,
   Tournament,
-  TournamentCreateReq,
-  TournamentType,
   User,
 } from "../../src/apiClient";
 
@@ -33,7 +32,7 @@ const StyledButton = styled(Button)({
 });
 
 export default function Create() {
-  const [data, setData] = useState<TournamentCreateReq>({
+  const [data, setData] = useState<CreateTournamentReq>({
     name: "",
     organizer: "",
     type: "round-robin",
@@ -57,7 +56,7 @@ export default function Create() {
   };
 
   const submit = async () => {
-    const req = await apiClient.tournamentsCreate(data);
+    const req = await apiClient.createTournament(data);
     if (req.success) {
       setTournament(req.data);
     }
@@ -68,7 +67,7 @@ export default function Create() {
     event: React.ChangeEvent<{ value: string }>
   ) => {
     const value = event.target.value;
-    const req = await apiClient.usersSearch(value);
+    const req = await apiClient.getUsers(value);
     let q: typeof addUserInput.q = [];
     if (req.success) q = req.data;
     //console.log(req);
@@ -109,7 +108,7 @@ export default function Create() {
               label="試合形式"
               value={data.type}
               onChange={({ target: { value } }) => {
-                setData({ ...data, type: value as TournamentType });
+                setData({ ...data, type: value as Tournament["type"] });
               }}
               error={!data.type}
               helperText={data.type ? "" : "入力必須項目です"}

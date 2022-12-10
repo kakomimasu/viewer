@@ -13,12 +13,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
-import {
-  apiClient,
-  Game,
-  TournamentRes as Tournament,
-  User,
-} from "../../../src/apiClient";
+import { apiClient, Game, Tournament, User } from "../../../src/apiClient";
 import Link from "../../../src/link";
 
 import Content from "../../../components/content";
@@ -249,7 +244,7 @@ const Page: NextPage<{
                       label="追加ユーザ"
                       onChange={async (event) => {
                         const value = event.target.value;
-                        const req = await apiClient.usersSearch(value);
+                        const req = await apiClient.getUsers(value);
                         if (!req.success) return;
                         setAddUserList(req.data);
                       }}
@@ -262,7 +257,7 @@ const Page: NextPage<{
                 <Button
                   onClick={async () => {
                     if (!addUser) return;
-                    const req = await apiClient.tournamentsAddUser(
+                    const req = await apiClient.addTournamentUser(
                       tournament.id,
                       {
                         user: addUser.id,
@@ -396,7 +391,7 @@ Page.getInitialProps = async (ctx) => {
   let id = ctx.query.id;
   if (id === undefined || Array.isArray(id)) id = "";
 
-  const res = await apiClient.tournamentsGet(id);
+  const res = await apiClient.getTournament(id);
   const tournament = res.success ? res.data : undefined;
   const games: Game[] = [];
   const users: (User | undefined)[] = [];
@@ -406,7 +401,7 @@ Page.getInitialProps = async (ctx) => {
       if (res.success) games.push(res.data);
     }
     for await (const userId of tournament.users) {
-      const res = await apiClient.usersShow(userId);
+      const res = await apiClient.getUser(userId);
       if (res.success) users.push(res.data);
       else users.push(undefined);
     }
