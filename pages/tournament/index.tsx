@@ -17,7 +17,7 @@ export default function Index() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
   const getTournament = async () => {
-    const res = await apiClient.tournamentsGet();
+    const res = await apiClient.getTournaments();
     if (res.success) setTournaments(res.data);
   };
 

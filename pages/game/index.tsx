@@ -16,7 +16,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import GamePanel from "../../components/gamePanel";
 
-import { WsGameReq, Game } from "../../src/apiClient";
+import { StreamMatchesReq, Game } from "../../src/apiClient";
 import { useGameStream } from "../../src/useGameStream";
 import { useGameUsers } from "../../src/useGameUsers";
 import Link, { getGameHref } from "../../src/link";
@@ -31,7 +31,7 @@ const types = [
 const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [gameListPin, ToggleGameListPin] = useReducer((prev) => !prev, false);
   const [gameType, setGameType] = useState<"normal" | "self">("normal");
-  const [req, setReq] = useState<WsGameReq>();
+  const [req, setReq] = useState<StreamMatchesReq>();
   const query = useMemo(
     () => ["sort:startAtUnixTime-desc", `type:${gameType}`],
     [gameType]
@@ -39,7 +39,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   const selectedGameReq = useMemo(() => {
     const q = (id ? [`id:${id}`] : query).join(" ");
     const allowNewGame = !Boolean(id);
-    const req: WsGameReq = {
+    const req: StreamMatchesReq = {
       q,
       endIndex: 1,
       allowNewGame,
@@ -57,7 +57,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     if (gameType) {
       const q = query.join(" ");
       console.log(q);
-      const req: WsGameReq = {
+      const req: StreamMatchesReq = {
         q,
         // endIndex: 1,
         allowNewGame: true,

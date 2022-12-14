@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { EventSourcePolyfill } from "event-source-polyfill";
 
-import { Game, WsGameReq, WsGameRes, host } from "./apiClient";
+import { Game, host, StreamMatchesReq, StreamMatchesRes } from "./apiClient";
 
-export const useGameStream = (req?: WsGameReq, bearerToken?: string) => {
+export const useGameStream = (req?: StreamMatchesReq, bearerToken?: string) => {
   const [games, setGames] = useState<Game[]>([]);
 
   useEffect(() => {
     if (!req) return;
-    const url = new URL("/v1/game/stream", host);
+    const url = new URL("/v1/matches/stream", host);
     url.searchParams.append("q", req.q);
     if (req.allowNewGame !== undefined)
       url.searchParams.append("allowNewGame", String(req.allowNewGame));
@@ -24,7 +24,7 @@ export const useGameStream = (req?: WsGameReq, bearerToken?: string) => {
 
     const res = new EventSourcePolyfill(url.href, { headers });
     res.addEventListener("message", (e) => {
-      const data = JSON.parse(e.data) as WsGameRes;
+      const data = JSON.parse(e.data) as StreamMatchesRes;
       // console.log(data);
 
       if (data.type === "initial") {
