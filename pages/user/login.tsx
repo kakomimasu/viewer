@@ -4,8 +4,17 @@ import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import TextField from "@mui/material/TextField";
+import {
+  User,
+  signOut,
+  GoogleAuthProvider,
+  TwitterAuthProvider,
+  GithubAuthProvider,
+  PhoneAuthProvider,
+  EmailAuthProvider,
+} from "firebase/auth";
 
-import firebase from "../../src/firebase";
+import { auth } from "../../src/firebase";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import Section from "../../components/section";
 import Content from "../../components/content";
@@ -34,7 +43,7 @@ const StyledButton = styled(Button)({
   marginTop: 20,
 });
 
-function Signup({ user }: { user: firebase.User }) {
+function Signup({ user }: { user: User }) {
   const [data, setData] = useState({
     screenName: user.displayName || "",
     name: "",
@@ -89,7 +98,7 @@ function Signup({ user }: { user: firebase.User }) {
           <StyledButton
             color="primary"
             onClick={async () => {
-              await firebase.auth().signOut();
+              await signOut(auth);
             }}
           >
             別のアカウントで登録する
@@ -148,16 +157,16 @@ export default function Login() {
                     signInSuccessWithAuthResult: () => false,
                   },
                   signInOptions: [
-                    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                    GoogleAuthProvider.PROVIDER_ID,
                     //props.firebaseP.auth.FacebookAuthProvider.PROVIDER_ID,
-                    firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-                    firebase.auth.GithubAuthProvider.PROVIDER_ID,
-                    firebase.auth.EmailAuthProvider.PROVIDER_ID,
-                    firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+                    TwitterAuthProvider.PROVIDER_ID,
+                    GithubAuthProvider.PROVIDER_ID,
+                    EmailAuthProvider.PROVIDER_ID,
+                    PhoneAuthProvider.PROVIDER_ID,
                     //firebaseP.auth.AnonymousAuthProvider.PROVIDER_ID
                   ],
                 }}
-                firebaseAuth={firebase.auth()}
+                firebaseAuth={auth}
               />
             ) : (
               <Signup user={firebaseUser} />

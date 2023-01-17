@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
+import { User as firebaseUser, signOut } from "firebase/auth";
 
 import { apiClient, User } from "./apiClient";
-import firebase from "./firebase";
+import { auth } from "./firebase";
 
 type UserContextType =
   | {
@@ -9,7 +10,7 @@ type UserContextType =
       kkmmUser: undefined;
     }
   | { firebaseUser: null; kkmmUser: null }
-  | { firebaseUser: firebase.User; kkmmUser: User | null };
+  | { firebaseUser: firebaseUser; kkmmUser: User | null };
 
 const UserContext = createContext<UserContextType>({
   firebaseUser: undefined,
@@ -25,7 +26,7 @@ const StateProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   useEffect(() => {
-    firebase.auth().onAuthStateChanged(async (user) => {
+    auth.onAuthStateChanged(async (user) => {
       if (user === null) {
         setUser({ firebaseUser: null, kkmmUser: null });
       } else {
@@ -36,7 +37,7 @@ const StateProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         } else {
           if (location.pathname !== "/user/login") {
-            firebase.auth().signOut();
+            signOut(auth);
           } else setUser({ firebaseUser: user, kkmmUser: null });
         }
       }

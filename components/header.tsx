@@ -7,8 +7,9 @@ import Toolbar from "@mui/material/Toolbar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { signOut } from "firebase/auth";
 
-import firebase from "../src/firebase";
+import { auth } from "../src/firebase";
 import Link from "../src/link";
 import { UserContext } from "../src/userStore";
 
@@ -26,7 +27,7 @@ export default function Header() {
 
   const logOut = async () => {
     try {
-      await firebase.auth().signOut();
+      await signOut(auth);
     } catch (error) {
       console.log(`ログアウト時にエラーが発生しました (${error})`);
     }
