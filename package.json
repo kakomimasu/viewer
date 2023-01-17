@@ -28,7 +28,7 @@
     "react-firebaseui": "^6.0.0",
     "react-markdown": "^8.0.4",
     "react-resize-detector": "^7.1.2",
-    "recharts": "^2.2.0",
+    "recharts": "^2.3.2",
     "redoc": "2.0.0"
   },
   "devDependencies": {
