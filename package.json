@@ -15,7 +15,7 @@
     "@emotion/styled": "^11.10.5",
     "@kakomimasu/client-js": "github:kakomimasu/client-js#v1.0.0-beta.12",
     "@mui/icons-material": "^5.11.0",
-    "@mui/lab": "^5.0.0-alpha.114",
+    "@mui/lab": "^5.0.0-alpha.118",
     "@mui/material": "^5.11.7",
     "dayjs": "^1.11.7",
     "event-source-polyfill": "^1.0.31",
