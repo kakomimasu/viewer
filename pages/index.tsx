@@ -44,23 +44,23 @@ export default function Index() {
         <SubSection title="ゲーム">
           <div>
             <Link href="/game" color="inherit">
-              ゲーム一覧はこちらから
+              ゲーム閲覧 はこちらから
             </Link>
             <br />
-            <Link href="/game/detail" color="inherit">
-              最新のゲームビューアはこちらから
+            <Link href="/game/playground" color="inherit">
+              Playground
             </Link>
             <br />
             <a href="/vr/index.html" color="inherit">
-              最新のゲームビューア(VR版)はこちらから
+              最新のゲームビューア(VR版) はこちらから
             </a>
             <br />
             <Link href="/game/create" color="inherit">
-              カスタムゲーム作成はこちらから
+              カスタムゲーム作成 はこちらから
             </Link>
             <br />
             <Link href="/game/manual" color="inherit">
-              人力対戦はこちらから
+              人力対戦 はこちらから
             </Link>
           </div>
         </SubSection>

@@ -12,6 +12,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../src/firebase";
 import Link from "../src/link";
 import { UserContext } from "../src/userStore";
+import { Box } from "@mui/material";
 
 export default function Header() {
   const { firebaseUser, kkmmUser } = useContext(UserContext);
@@ -64,6 +65,11 @@ export default function Header() {
           >
             Scrapbox
           </Button>
+          <Link href="/game/playground" underline="none">
+            <Button variant="contained" color="secondary">
+              Playground
+            </Button>
+          </Link>
         </div>
         {kkmmUser !== undefined && (
           <>
