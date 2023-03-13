@@ -20,7 +20,7 @@
     "@mui/material": "^5.11.7",
     "dayjs": "^1.11.7",
     "event-source-polyfill": "^1.0.31",
-    "firebase": "^9.15.0",
+    "firebase": "^9.17.2",
     "glob": "^9.2.1",
     "next": "12.3.4",
     "react": "17.0.2",
