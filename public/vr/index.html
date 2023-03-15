@@ -165,28 +165,17 @@
             });
           }
           turn.setAttribute("value", getTurnText(game));
-          pointP1.setAttribute("value", game.players[0].point.basepoint + game.players[0].point.wallpoint);
-          pointP2.setAttribute("value", game.players[1].point.basepoint + game.players[1].point.wallpoint);
+          pointP1.setAttribute("value", game.players[0].point.areaPoint + game.players[0].point.wallPoint);
+          pointP2.setAttribute("value", game.players[1].point.areaPoint + game.players[1].point.wallPoint);
           updateTable(game, lastFlatLog);
         }
       }
 
       const gameId = getUrlQueries().id;
-      var socket = new WebSocket("wss://api.kakomimasu.com/v1/ws/game");
-      socket.onopen = (event) => {
-        const q = (
-          gameId
-            ? [`id:${gameId}`]
-            : ["sort:startAtUnixTime-desc", `type:normal`]
-        ).join(" ");
-        console.log(q);
-        const req = {
-          q,
-          endIndex: 1,
-          allowNewGame: gameId ? false : true
-        };
-        socket.send(JSON.stringify(req));
+      const url = getEventSourceUrl();
 
+      const socket = new EventSource(url);
+      socket.onopen = (event) => {
         setInterval(function updateStatus() {
           if (game) {
             if (game.startedAtUnixTime === null) statusText.setAttribute("value", "WAIT");
@@ -203,15 +192,21 @@
           const data = event.data;
           if (!data) return;
           const res = JSON.parse(data);
-          let game;
+          console.log(res);
           if (res.type === "initial") {
             game = res.games[0];
           } else if (res.type === "update") {
-            game = res.game;
-          } else if (res.type === "remove") {
-            game = [];
+            if (!game) {
+              game = res.game;
+            } else {
+              if (game.id === res.game.id) {
+                game = res.game;
+              }
+            }
           } else if (res.type === "add") {
-            game = res.game;
+            if (!gameId) {
+              game = res.game;
+            }
           }
           console.log(game);
           getRoomInfo(game);
@@ -222,8 +217,18 @@
       socket.onerror = (event) => {
         //console.log('ws wrror', event);
       }
-      socket.onclose = (event) => {
-        //console.log('ws wrror');
+     
+      function getEventSourceUrl(gameId) {
+        const url = new URL("https://api.kakomimasu.com/v1/matches/stream");
+        const q = (
+            gameId
+              ? [`id:${gameId}`]
+              : ["sort:startAtUnixTime-desc", `type:normal`]
+          ).join(" ");
+        url.searchParams.append("q", q);
+        const allowNewGame = gameId ? "false" : "true";
+        url.searchParams.append("allowNewGame", allowNewGame);
+        return url;
       }
     </script>
   </body>
