@@ -188,7 +188,6 @@
         }(), 100);
       }
       socket.onmessage = (event) => {
-        console.log("current", game);
         try {
           const data = event.data;
           if (!data) return;
