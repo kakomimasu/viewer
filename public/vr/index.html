@@ -220,7 +220,8 @@
               : ["sort:startAtUnixTime-desc", `type:normal`]
           ).join(" ");
         url.searchParams.append("q", q);
-        url.searchParams.append("allowNewGame", "false");
+        const allowNewGame = gameId ? "true" : "false";
+        url.searchParams.append("allowNewGame", allowNewGame);
         return url;
       }
     </script>
