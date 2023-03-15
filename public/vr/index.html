@@ -165,8 +165,9 @@
             });
           }
           turn.setAttribute("value", getTurnText(game));
-          pointP1.setAttribute("value", game.players[0].point.basepoint + game.players[0].point.wallpoint);
-          pointP2.setAttribute("value", game.players[1].point.basepoint + game.players[1].point.wallpoint);
+          console.log(game);
+          pointP1.setAttribute("value", game.players[0].point.areaPoint + game.players[0].point.wallPoint);
+          pointP2.setAttribute("value", game.players[1].point.areaPoint + game.players[1].point.wallPoint);
           updateTable(game, lastFlatLog);
         }
       }
