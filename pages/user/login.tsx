@@ -15,7 +15,7 @@ import {
 } from "firebase/auth";
 
 import { auth } from "../../src/firebase";
-import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
+import StyledFirebaseAuth from "../../components/FirebaseAuthUI";
 import Section from "../../components/section";
 import Content from "../../components/content";
 

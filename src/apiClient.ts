@@ -20,7 +20,7 @@ if (typeof window !== "undefined") {
     process.env.NEXT_PUBLIC_APISERVER_HOST || "https://api.kakomimasu.com";
 }
 
-console.log("envApiHost", envApiHost);
+// console.log("envApiHost", envApiHost);
 
 export const host: URL = new URL(envApiHost);
 
