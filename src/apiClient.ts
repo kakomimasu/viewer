@@ -9,19 +9,12 @@ export type StreamMatchesReq = {
 };
 
 let envApiHost;
-
-if (typeof window !== "undefined") {
-  envApiHost =
-    process.env.SSR_APISERVER_HOST ||
-    process.env.NEXT_PUBLIC_APISERVER_HOST ||
-    "https://api.kakomimasu.com";
+if (typeof window === "undefined") {
+  envApiHost = process.env.SSR_APISERVER_HOST;
 } else {
-  envApiHost =
-    process.env.NEXT_PUBLIC_APISERVER_HOST || "https://api.kakomimasu.com";
+  envApiHost = process.env.NEXT_PUBLIC_APISERVER_HOST;
 }
-
-// console.log("envApiHost", envApiHost);
+if (!envApiHost) throw Error("envApiHost is not defined");
 
 export const host: URL = new URL(envApiHost);
-
 export const apiClient = new ApiClient(host);
