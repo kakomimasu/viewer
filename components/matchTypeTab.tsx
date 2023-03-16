@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { TextField, Box, MenuItem, Tab } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
+import { useStateWithStorage } from "../src/useStateWithStorage";
 
 const aiList = [
   { label: "AI-1", name: "a1" },
@@ -29,9 +30,18 @@ export const Component: React.FC<{
   disabled: boolean;
   onChange?: (v: MatchType) => void;
 }> = ({ disabled = false, onChange }) => {
-  const [type, setType] = useState<MatchType["type"]>("free");
-  const [aiName, setAiName] = useState<string>(aiList[0].name);
-  const [boardName, setBoardName] = useState<string>();
+  const [type, setType] = useStateWithStorage<MatchType["type"]>(
+    "matchTypeTab:type",
+    "free"
+  );
+  const [aiName, setAiName] = useStateWithStorage<string>(
+    "matchTypeTab:aiName",
+    aiList[0].name
+  );
+  const [boardName, setBoardName] = useStateWithStorage<string | undefined>(
+    "matchTypeTab:boardName",
+    undefined
+  );
   const [gameId, setGameId] = useState<string>("");
 
   const value = useMemo<MatchType>(() => {

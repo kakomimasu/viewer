@@ -1,11 +1,24 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { readFileSync } from "fs";
 import { GetStaticProps, NextPage } from "next";
-import { Box, Button, Paper } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  Paper,
+  Switch,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
 import PlayCircleIcon from "@mui/icons-material/PlayCircleFilled";
 import StopCircleIcon from "@mui/icons-material/StopCircle";
 import NotInterestedIcon from "@mui/icons-material/NotInterested";
 import CancelIcon from "@mui/icons-material/Cancel";
+import CodeIcon from "@mui/icons-material/Code";
+import ArticleIcon from "@mui/icons-material/Article";
+import VerticalSplitIcon from "@mui/icons-material/VerticalSplit";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import RepeatIcon from "@mui/icons-material/Repeat";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { ObjectInspector } from "react-inspector";
 import glob from "glob";
@@ -13,9 +26,10 @@ import glob from "glob";
 import MatchTypeTab, { MatchType } from "../../components/matchTypeTab";
 import { UserContext } from "../../src/userStore";
 
-import { host, JoinMatchRes } from "../../src/apiClient";
-import Link, { getGameHref } from "../../src/link";
+import { host } from "../../src/apiClient";
+import { getGameHref } from "../../src/link";
 import Head from "next/head";
+import { useStateWithStorage } from "../../src/useStateWithStorage";
 
 type Props = {
   sampleCode: string;
@@ -23,9 +37,7 @@ type Props = {
   definitionCode: string;
   clientJs: string[];
 };
-type Log =
-  | { type: "log" | "error" | "info"; data: any[] }
-  | { type: "match"; data: JoinMatchRes };
+type Log = { type: "log" | "error" | "info"; data: any[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const clientCode = readFileSync("editor-util/client.js", "utf-8");
@@ -53,6 +65,20 @@ const Page: NextPage<Props> = ({
   const [code, setCode] = useState<string>(sampleCode);
   const [log, setLog] = useState<Log[]>([]);
   const [worker, setWorker] = useState<Worker>();
+  const [codeAreaHeight, setCodeAreaHeight] = useState<string>("'auto'");
+  const [gameUrl, setGameUrl] = useState<string>();
+
+  const [autoScroll, setAutoScroll] = useStateWithStorage<boolean>(
+    "playground:autoScroll",
+    true
+  );
+  const [switchEditor, setSwitchEditor] = useStateWithStorage<boolean>(
+    "playground:switchEditor",
+    false
+  );
+  const [editorMode, setEditorMode] = useStateWithStorage<
+    "code" | "log" | "code+log"
+  >("playground:editorMode", "code");
 
   const [matchType, setMatchType] = useState<MatchType>();
 
@@ -64,7 +90,7 @@ const Page: NextPage<Props> = ({
       const bottomY = window.innerHeight;
       const boxHeight = bottomY - topY;
 
-      codeArea.style.height = `${boxHeight}px`;
+      setCodeAreaHeight(`${boxHeight}px`);
     };
 
     func();
@@ -76,16 +102,20 @@ const Page: NextPage<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (logRef.current) {
+    if (logRef.current && autoScroll) {
       logRef.current.scrollTo(0, logRef.current.scrollHeight);
     }
-  }, [log]);
+  }, [log, autoScroll]);
 
   const stop = () => {
     if (worker) {
       setLog((prev) => [...prev, { type: "info", data: ["実行停止"] }]);
       worker.terminate();
       setWorker(undefined);
+      setGameUrl(undefined);
+      if (editorMode !== "code+log" && switchEditor) {
+        setEditorMode("code");
+      }
     }
   };
 
@@ -122,7 +152,11 @@ const Page: NextPage<Props> = ({
 
       const worker = new Worker(url, { type: "module" });
       worker.addEventListener("message", (event) => {
-        setLog((prev) => [...prev, event.data]);
+        if (event.data.type === "match") {
+          setGameUrl(getGameHref(event.data.data.gameId));
+        } else {
+          setLog((prev) => [...prev, event.data]);
+        }
       });
       worker.addEventListener("error", (event) => {
         // setLog((prev) => [...prev, event.data]);
@@ -133,6 +167,9 @@ const Page: NextPage<Props> = ({
     };
 
     setLog((prev) => [...prev, { type: "info", data: ["実行開始"] }]);
+    if (editorMode !== "code+log" && switchEditor) {
+      setEditorMode("log");
+    }
   };
 
   const monacoOnMount: OnMount = (_, monaco) => {
@@ -164,6 +201,7 @@ const Page: NextPage<Props> = ({
         alignItems: "center",
         flexDirection: "column",
         height: "100%",
+        p: 1,
       }}
     >
       <Head>
@@ -172,9 +210,8 @@ const Page: NextPage<Props> = ({
       <Box
         sx={{
           display: "flex",
-          gap: 2,
+          gap: 1,
           width: "100%",
-          p: 1,
         }}
       >
         <Paper elevation={4} sx={{ p: 1, flexGrow: 1 }}>
@@ -206,94 +243,216 @@ const Page: NextPage<Props> = ({
             停止
           </Button>
           <Button
-            startIcon={<NotInterestedIcon />}
+            startIcon={<SportsEsportsIcon />}
             color="primary"
-            onClick={logDelete}
+            disabled={gameUrl === undefined}
+            href={gameUrl ?? ""}
+            target="_blank"
           >
-            ログ消去
+            ゲーム詳細へ
           </Button>
         </Paper>
       </Box>
-      <Box
-        id="code-area"
+      <Paper
+        elevation={2}
         sx={{
-          p: 1,
           width: "100%",
+          m: 1,
           display: "flex",
-          gap: 1,
-          "&>*": {
-            border: "2px solid",
-            borderColor: (t) => t.palette.divider,
-            height: "100%",
-            width: "50%",
-          },
+          flexDirection: "column",
         }}
       >
-        <Box>
-          <Editor
-            value={code}
-            onChange={(text) => {
-              setCode(text ?? "");
-            }}
-            onMount={monacoOnMount}
-            language="javascript"
-            options={{
-              ariaLabel: "code",
-            }}
-          />
-        </Box>
         <Box
-          ref={logRef}
           sx={{
-            overflowY: "auto",
-            fontSize: "0.8rem",
-            "&>*": {
-              borderBottom: "solid 1px",
-              borderColor: (t) => t.palette.divider,
-              py: 0.2,
-              px: 1,
+            backgroundColor: "#F0F0F0",
+            display: "grid",
+            gridTemplateColumns:
+              editorMode === "code+log"
+                ? "50% 1fr min-content"
+                : "1fr min-content",
+            "&>div": {
+              alignItems: "center",
+              pl: 1,
+              gap: 1,
+              fontSize: "1em",
             },
           }}
         >
-          {log.map((line, i) => {
-            if (line.type === "match") {
-              const href = getGameHref(line.data.gameId);
-              return (
-                <Box key={i}>
-                  ゲーム閲覧用URL：
-                  <Link href={href} color="inherit" target="_blank">
-                    {new URL(getGameHref(line.data.gameId), location.href).href}
-                  </Link>
-                </Box>
-              );
-            } else {
-              return (
-                <Box key={i} sx={{ display: "flex", gap: 1 }}>
-                  <Box
-                    sx={{
-                      flexShrink: 0,
-                      backgroundColor: (t) => {
-                        if (line.type === "error") return t.palette.error.main;
-                        if (line.type === "info") return t.palette.info.main;
-                        else return t.palette.primary.main;
-                      },
-                      width: "5px",
-                    }}
-                  />
-                  {line.type === "error" && (
-                    <>
-                      <CancelIcon sx={{ fontSize: "1em" }} color="error" />
-                    </>
-                  )}
-                  {line.data.map((data, j) => {
-                    return <ObjectInspector data={data} key={j} />;
-                  })}
-                </Box>
-              );
-            }
-          })}
+          <Box
+            sx={{
+              borderRight: editorMode === "code+log" ? "1px solid" : undefined,
+              borderColor: (t) => t.palette.divider,
+              display: editorMode.includes("code") ? "flex" : "none",
+            }}
+          >
+            <CodeIcon fontSize="small" />
+            <Box>Code</Box>
+          </Box>
+          <Box sx={{ display: editorMode.includes("log") ? "flex" : "none" }}>
+            <ArticleIcon fontSize="small" />
+            <Box>Log</Box>
+          </Box>
+
+          <Box
+            sx={{
+              p: 0.5,
+              display: "flex",
+              "& button": {
+                py: 0.5,
+              },
+            }}
+          >
+            <ToggleButton
+              color="secondary"
+              value="code"
+              sx={{ height: "100%" }}
+              selected={editorMode === "code+log" ? false : switchEditor}
+              disabled={editorMode === "code+log"}
+              onChange={() => setSwitchEditor((prev) => !prev)}
+            >
+              <RepeatIcon fontSize="small" />
+            </ToggleButton>
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              value={editorMode}
+              onChange={(_, v) => v && setEditorMode(v)}
+            >
+              <ToggleButton value="code">
+                <CodeIcon />
+                <Box sx={{ ml: 0.5 }}>Code</Box>
+              </ToggleButton>
+              <ToggleButton value="log">
+                <ArticleIcon />
+                <Box sx={{ ml: 0.5 }}>Log</Box>
+              </ToggleButton>
+              <ToggleButton value="code+log">
+                <VerticalSplitIcon />
+                <Box sx={{ ml: 0.5 }}>Code+Log</Box>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
         </Box>
-      </Box>
+        <Box
+          id="code-area"
+          sx={{
+            display: "grid",
+            gridTemplateColumns: `50% 50%`,
+            gridTemplateAreas:
+              editorMode === "code"
+                ? `"code code"`
+                : editorMode === "log"
+                ? `"log log"`
+                : `"code log"`,
+            gridTemplateRows: `${codeAreaHeight}`,
+          }}
+        >
+          <Box
+            sx={{
+              gridArea: "code",
+              borderRight: editorMode === "code+log" ? "1px solid" : undefined,
+              borderColor: (t) => t.palette.divider,
+              display: editorMode.includes("code") ? "block" : "none",
+            }}
+          >
+            <Editor
+              value={code}
+              onChange={(text) => {
+                setCode(text ?? "");
+              }}
+              onMount={monacoOnMount}
+              language="javascript"
+              options={{
+                ariaLabel: "code",
+              }}
+            />
+          </Box>
+          <Box
+            sx={{
+              display: editorMode.includes("log") ? "flex" : "none",
+              gridArea: "log",
+              height: "100%",
+              flexDirection: "column",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                borderBottom: "1px solid",
+                borderColor: (t) => t.palette.divider,
+                px: 1,
+              }}
+            >
+              <Button
+                startIcon={<NotInterestedIcon />}
+                color="inherit"
+                size="small"
+                variant="text"
+                onClick={logDelete}
+              >
+                ログ消去
+              </Button>
+
+              <FormControlLabel
+                color="secondary"
+                sx={{ ml: 0.5 }}
+                control={
+                  <Switch
+                    size="small"
+                    color="secondary"
+                    checked={autoScroll}
+                    onChange={(_, v) => {
+                      console.log("onchange", v);
+                      setAutoScroll(v);
+                    }}
+                    inputProps={{ "aria-label": "controlled" }}
+                  />
+                }
+                label="自動スクロール"
+              />
+            </Box>
+            <Box ref={logRef} sx={{ height: "100%", overflowY: "auto" }}>
+              {log.map((line, i) => {
+                return (
+                  <Box
+                    key={i}
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      borderBottom: "solid 1px",
+                      borderColor: (t) => t.palette.divider,
+                      py: 0.2,
+                      px: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        flexShrink: 0,
+                        backgroundColor: (t) => {
+                          if (line.type === "error")
+                            return t.palette.error.main;
+                          if (line.type === "info") return t.palette.info.main;
+                          else return t.palette.primary.main;
+                        },
+                        width: "5px",
+                      }}
+                    />
+                    {line.type === "error" && (
+                      <>
+                        <CancelIcon sx={{ fontSize: "1em" }} color="error" />
+                      </>
+                    )}
+                    {line.data.map((data, j) => {
+                      return <ObjectInspector data={data} key={j} />;
+                    })}
+                  </Box>
+                );
+              })}
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
     </Box>
   );
 };
