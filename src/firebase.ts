@@ -21,7 +21,7 @@ if (typeof window !== undefined && getApps().length === 0) {
     if (isSupported) getAnalytics(app);
   });
 
-  if (process.env.NEXT_PUBLIC_APISERVER_HOST?.includes("127.0.0.1")) {
+  if (!process.env.NEXT_PUBLIC_APISERVER_HOST?.includes("api.kakomimasu.com")) {
     connectAuthEmulator(getAuth(app), `http://127.0.0.1:9099`);
   } else {
   }

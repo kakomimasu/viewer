@@ -70,10 +70,9 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     <Box
       sx={{
         display: "flex",
-        height: "calc(2em + 50vw)",
-        maxHeight: "calc(100vh - 64px)",
+        fontSize: { xs: "0.6em", md: "1em" },
         py: 3,
-        pr: 2,
+        pr: 1,
         gap: 1,
       }}
     >
@@ -251,7 +250,14 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
           </Box>
         </Paper>
       </Box>
-      <Box sx={{ width: "100%", height: "100%" }}>
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: { xs: undefined, sm: "fit-content" },
+          height: { xs: undefined, sm: "50vw" },
+          maxHeight: { xs: undefined, sm: "calc(100vh - 64px)" },
+        }}
+      >
         {game && <GamePanel game={game} users={users} />}
       </Box>
     </Box>

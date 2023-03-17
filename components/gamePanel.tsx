@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Box, Skeleton, Button } from "@mui/material";
+import { Box, Skeleton, Button, Paper } from "@mui/material";
 import Countdown from "react-countdown";
 
 import GameBoard from "./gameBoard";
@@ -9,6 +9,7 @@ import datas from "./player_datas";
 import { Game } from "../src/apiClient";
 import { useGameUsers } from "../src/useGameUsers";
 import Link, { getUserHref, getVRGameHref } from "../src/link";
+import Turn from "./Turn";
 
 export default function GamePanel({
   game,
@@ -17,14 +18,6 @@ export default function GamePanel({
   game: Game;
   users: ReturnType<typeof useGameUsers>;
 }) {
-  const turn = useMemo(() => {
-    if (game.board) {
-      const nTurn = game.board.nTurn;
-      const turn = game.turn;
-      return nTurn - turn;
-    }
-  }, [game.board, game.turn]);
-
   const nextTurnTime = useMemo(() => {
     if (game.startedAtUnixTime) {
       const nextTurnAtUnixTime =
@@ -50,8 +43,29 @@ export default function GamePanel({
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "auto minmax(max-content,1fr) 2fr",
-        gridTemplateRows: "2em 1fr 1fr 1.4fr",
+        gridTemplateColumns: {
+          sm: "minmax(auto,2fr) 1fr 1fr", // PC用
+          xs: "1fr 1fr", // Mobile用
+        },
+        gridTemplateRows: {
+          sm: "2em max-content 1fr minmax(100px,1.4fr)",
+          xs: "2em max-content 2fr 1fr max-content",
+        },
+        gridTemplateAreas: {
+          sm: [
+            `"header header header"`,
+            `"board timer turn"`,
+            `"board lank lank"`,
+            `"board graph graph"`,
+          ].join(""),
+          xs: [
+            `"header header"`,
+            `"timer turn"`,
+            `"board board"`,
+            `"graph graph"`,
+            `"lank lank"`,
+          ].join(""),
+        },
         gap: 1,
         width: "100%",
         height: "100%",
@@ -59,6 +73,7 @@ export default function GamePanel({
     >
       <Box
         sx={{
+          gridArea: "header",
           gridColumn: "1 / -1",
           gridRow: "1",
           display: "flex",
@@ -107,10 +122,11 @@ export default function GamePanel({
           </Button>
         </Box>
       </Box>
-      <Box
+      <Paper
+        elevation={2}
         sx={{
-          gridColumn: "1",
-          gridRow: "2 / -1",
+          gridArea: "board",
+          overflow: "hidden",
           height: "100%",
           width: "100%",
           aspectRatio: game.board
@@ -123,29 +139,23 @@ export default function GamePanel({
         ) : (
           <Skeleton variant="rectangular" width="inherit" height="inherit" />
         )}
-      </Box>
-      <Box
-        sx={{
-          gridColumn: "2 / -1",
-          gridRow: "4",
-        }}
-      >
+      </Paper>
+      <Paper elevation={2} sx={{ gridArea: "graph", p: 1 }}>
         {game ? (
           <PointsGraph game={game} users={users} />
         ) : (
           <Skeleton variant="rectangular" width="100%" height="100%" />
         )}
-      </Box>
-      <Box
+      </Paper>
+      <Paper
         sx={{
-          gridColumn: "3 / -1",
-          gridRow: "2 / 4",
+          gridArea: "lank",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
+          p: 1,
         }}
       >
-        <Box sx={{ textAlign: "center", fontSize: "0.8em" }}>順位</Box>
         <Box>
           {game ? (
             game.players
@@ -231,24 +241,21 @@ export default function GamePanel({
             <Skeleton variant="rectangular" width="100%" height="5em" />
           )}
         </Box>
-      </Box>
-      <Box
+      </Paper>
+      <Paper
         sx={{
-          gridColumn: "2",
-          gridRow: "2",
+          gridArea: "turn",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Box sx={{ fontSize: "0.8em" }}>残りターン</Box>
-        <Box sx={{ fontSize: "3em" }}>{turn || "-"}</Box>
-      </Box>
-      <Box
+        <Turn game={game} />
+      </Paper>
+      <Paper
         sx={{
-          gridColumn: "2",
-          gridRow: "3",
+          gridArea: "timer",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -281,7 +288,7 @@ export default function GamePanel({
             "-"
           )}
         </Box>
-      </Box>
+      </Paper>
     </Box>
   );
 }
