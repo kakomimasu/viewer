@@ -188,12 +188,12 @@ export default function GameBoard({
       <>
         {[1, board.height + 2].map((y) => {
           return new Array(board.width).fill(0).map((_, i) => {
-            const x = i + 1;
+            const x = i;
             return (
               <Box
                 key={`index-${x}-${y}`}
                 sx={{
-                  gridColumn: x + 1,
+                  gridColumn: x + 2,
                   gridRow: y,
                   display: "flex",
                   justifyContent: "center",
@@ -208,13 +208,13 @@ export default function GameBoard({
         })}
         {[1, board.width + 2].map((x) => {
           return new Array(board.width).fill(0).map((_, i) => {
-            const y = i + 1;
+            const y = i;
             return (
               <Box
                 key={`index-${x}-${y}`}
                 sx={{
                   gridColumn: x,
-                  gridRow: y + 1,
+                  gridRow: y + 2,
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
