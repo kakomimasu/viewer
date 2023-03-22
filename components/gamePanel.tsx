@@ -132,6 +132,7 @@ export default function GamePanel({
           aspectRatio: game.board
             ? `${game.board?.width} / ${game.board?.height}`
             : "1",
+          p: 1,
         }}
       >
         {game.board ? (
@@ -141,7 +142,7 @@ export default function GamePanel({
         )}
       </Paper>
       <Paper elevation={2} sx={{ gridArea: "graph", p: 1 }}>
-        {game ? (
+        {game.board ? (
           <PointsGraph game={game} users={users} />
         ) : (
           <Skeleton variant="rectangular" width="100%" height="100%" />
