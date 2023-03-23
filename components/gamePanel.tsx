@@ -43,13 +43,17 @@ export default function GamePanel({
     <Box
       sx={{
         display: "grid",
+        maxHeight: {
+          sm: "calc(100vh - 64px)",
+          xs: undefined,
+        },
         gridTemplateColumns: {
           sm: "minmax(auto,2fr) 1fr 1fr", // PC用
           xs: "1fr 1fr", // Mobile用
         },
         gridTemplateRows: {
           sm: "2em max-content 1fr minmax(100px,1.4fr)",
-          xs: "2em max-content 2fr 1fr max-content",
+          xs: "2em max-content minmax(max-content,2fr) minmax(max-content,1fr) max-content",
         },
         gridTemplateAreas: {
           sm: [

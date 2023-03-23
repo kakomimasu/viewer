@@ -11,6 +11,7 @@ const aiList = [
   { label: "AI-5", name: "a5" },
   { label: "None", name: "none" },
 ] as const;
+type AiName = typeof aiList[number]["name"];
 
 export type MatchType =
   | {
@@ -18,7 +19,7 @@ export type MatchType =
     }
   | {
       type: "ai";
-      aiName: string;
+      aiName: AiName;
       boardName?: string;
     }
   | {
@@ -34,7 +35,7 @@ export const Component: React.FC<{
     "matchTypeTab:type",
     "free"
   );
-  const [aiName, setAiName] = useStateWithStorage<string>(
+  const [aiName, setAiName] = useStateWithStorage<AiName>(
     "matchTypeTab:aiName",
     aiList[0].name
   );

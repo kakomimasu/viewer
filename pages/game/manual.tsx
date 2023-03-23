@@ -6,16 +6,18 @@ import React, {
   useMemo,
 } from "react";
 import { NextPage } from "next";
+import Head from "next/head";
 import {
   TextField,
   Box,
   MenuItem,
-  Tab,
-  IconButton,
   Button,
+  Paper,
+  Dialog,
+  DialogTitle,
 } from "@mui/material";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
+import TuneIcon from "@mui/icons-material/Tune";
 
 import {
   apiClient,
@@ -25,13 +27,13 @@ import {
   StreamMatchesReq,
   ActionMatchReq,
   JoinMatchReqBase,
-} from "../../../src/apiClient";
-import { useGameUsers } from "../../../src/useGameUsers";
-import { useGameStream } from "../../../src/useGameStream";
+} from "../../src/apiClient";
+import { useGameUsers } from "../../src/useGameUsers";
+import { useGameStream } from "../../src/useGameStream";
 
-import datas from "../../../components/player_datas";
-import GamePanel from "../../../components/gamePanel";
-import Content from "../../../components/content";
+import datas from "../../components/player_datas";
+import GamePanel from "../../components/gamePanel";
+import MatchTypeTab, { MatchType } from "../../components/matchTypeTab";
 
 type NextActionType = [-1 | 0 | 1, -1 | 0 | 1];
 const NextActions: Record<
@@ -56,15 +58,6 @@ const NextActions: Record<
   DOWNLEFT: [-1, 1],
   NONE: [0, 0],
 };
-
-const aiList = [
-  { label: "AI-1", name: "a1" },
-  { label: "AI-2", name: "a2" },
-  { label: "AI-3", name: "a3" },
-  { label: "AI-4", name: "a4" },
-  { label: "AI-5", name: "a5" },
-  { label: "None", name: "none" },
-] as const;
 
 type AgentData = { index: number; nextAction: NextActionType };
 
@@ -226,19 +219,14 @@ const useGamepads = () => {
   return gamepads;
 };
 
-type ParticipateType = "free" | "gameId" | "ai";
 const localStorageKey = "controllerSettings";
 
-const Page: NextPage<{ id?: string }> = ({ id }) => {
-  const [participateType, setParticipateType] =
-    useState<ParticipateType>("free");
-  const [gameId, setGameId] = useState<string>("");
-  const [ai, setAi] = useState<typeof aiList[number]["name"]>(aiList[0].name);
-
+const Page: NextPage = () => {
+  const [matchType, setMatchType] = useState<MatchType>();
   const [matchRes, setMatchRes] = useState<JoinMatchRes>();
   const query = useMemo<StreamMatchesReq | undefined>(() => {
     if (!matchRes) {
-      if (participateType === "free") {
+      if (matchType?.type === "free") {
         return {
           q: "sort:startAtUnixTime-desc type:normal is:waiting",
           allowNewGame: true,
@@ -247,7 +235,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     } else {
       return { q: `id:${matchRes.gameId}` };
     }
-  }, [matchRes, participateType]);
+  }, [matchRes, matchType]);
   const selectedGame = useGameStream(query);
   const game = useMemo<Game | undefined>(() => selectedGame[0], [selectedGame]);
   const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
@@ -453,22 +441,21 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   const joinGame = useCallback(async () => {
     const req: JoinMatchReqBase = { guestName: "guest" };
     let matchRes: ApiRes<JoinMatchRes>;
-    if (participateType === "gameId") {
-      // req.gameId = gameId;
-      matchRes = await apiClient.joinGameIdMatch(gameId, req);
-    } else if (participateType === "ai") {
-      // req.useAi = true;
-      // req.aiOption = {
-      //   aiName: ai,
-      // };
-      matchRes = await apiClient.joinAiMatch({ ...req, aiName: ai });
+    if (matchType?.type === "gameId") {
+      matchRes = await apiClient.joinGameIdMatch(matchType.gameId, req);
+    } else if (matchType?.type === "ai") {
+      matchRes = await apiClient.joinAiMatch({
+        ...req,
+        aiName: matchType.aiName,
+        boardName: matchType.boardName,
+      });
     } else {
       matchRes = await apiClient.joinFreeMatch(req);
     }
     if (matchRes.success) {
       setMatchRes(matchRes.data);
     }
-  }, [gameId, participateType, ai]);
+  }, [matchType]);
 
   const changeAgentController = useCallback(
     (
@@ -496,74 +483,12 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     []
   );
 
-  const matchTypeTabs = useMemo(() => {
-    const isMatchStarted = Boolean(matchRes);
-    return (
-      <TabContext value={participateType}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <TabList
-            textColor="secondary"
-            indicatorColor="secondary"
-            centered
-            onChange={(_, v) => {
-              setParticipateType(v);
-            }}
-          >
-            <Tab
-              label="フリーマッチ参加"
-              value="free"
-              disabled={isMatchStarted}
-            />
-            <Tab
-              label="ゲームIDで参加"
-              value="gameId"
-              disabled={isMatchStarted}
-            />
-            <Tab label="対AI戦" value="ai" disabled={isMatchStarted} />
-          </TabList>
-        </Box>
-        <TabPanel value="gameId">
-          <TextField
-            fullWidth
-            label="ゲームID"
-            value={gameId}
-            disabled={isMatchStarted}
-            onChange={({ target: { value } }) => {
-              setGameId(value);
-            }}
-            onKeyDown={(e) => {
-              e.stopPropagation();
-            }}
-          />
-        </TabPanel>
-        <TabPanel value="ai">
-          <TextField
-            fullWidth
-            select
-            label="対戦AI"
-            value={ai}
-            disabled={Boolean(matchRes)}
-            onChange={({ target: { value } }) => {
-              setAi(value as typeof ai);
-            }}
-          >
-            {aiList.map((ai) => {
-              return (
-                <MenuItem key={ai.name} value={ai.name}>
-                  {ai.label}
-                </MenuItem>
-              );
-            })}
-          </TextField>
-        </TabPanel>
-      </TabContext>
-    );
-  }, [ai, gameId, matchRes, participateType]);
-
   const participateButton = useMemo(() => {
     let buttonDiasbled = false;
     if (matchRes) buttonDiasbled = true;
-    else if (participateType === "gameId" && !gameId) buttonDiasbled = true;
+    // ゲームIDが入力されていない場合は参加ボタンを無効化
+    else if (matchType?.type === "gameId" && !matchType.gameId)
+      buttonDiasbled = true;
 
     return (
       <Box
@@ -579,44 +504,52 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
         </Button>
       </Box>
     );
-  }, [gameId, participateType, joinGame, matchRes]);
+  }, [matchType, joinGame, matchRes]);
+
+  const [controllerSettingDialogOpened, setControllerSettingDialogOpened] =
+    useState<boolean>(false);
 
   const controllerSetting = useMemo(() => {
     return (
-      <Box
-        sx={{
-          border: "3px solid",
-          borderColor: "#BBB",
-          borderRadius: 1,
-          p: 1.5,
-        }}
-      >
-        <Box
-          component="h4"
-          sx={{ m: 0, display: "flex", alignItems: "center" }}
+      <Box>
+        <Button
+          color="primary"
+          sx={{ height: "100%" }}
+          startIcon={<TuneIcon />}
+          onClick={() => {
+            setControllerSettingDialogOpened(true);
+          }}
         >
           コントローラ設定
-          <IconButton
-            color="secondary"
-            onClick={resetControllerSettings}
-            size="small"
+        </Button>
+        <Dialog
+          open={controllerSettingDialogOpened}
+          onClose={() => {
+            setControllerSettingDialogOpened(false);
+          }}
+        >
+          <DialogTitle
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
           >
-            <RestartAltIcon />
-          </IconButton>
-        </Box>
-        <Box sx={{ mx: 1, display: "flex" }}>
+            <Box>コントローラ設定</Box>
+            <Button
+              onClick={resetControllerSettings}
+              startIcon={<RestartAltIcon />}
+            >
+              初期設定に戻す
+            </Button>
+          </DialogTitle>
+
           <Box
             sx={{
               display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "space-evenly",
-              m: 1,
-              gap: 1,
-              width: "100%",
-              "& > *": {
-                display: "flex",
-                minWidth: "15em",
-              },
+              flexDirection: "column",
+              p: 2,
+              gap: 2,
             }}
           >
             {new Array(6).fill(0).map((_, i) => {
@@ -647,10 +580,15 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
               );
             })}
           </Box>
-        </Box>
+        </Dialog>
       </Box>
     );
-  }, [controllerList, changeAgentController, resetControllerSettings]);
+  }, [
+    controllerList,
+    changeAgentController,
+    resetControllerSettings,
+    controllerSettingDialogOpened,
+  ]);
 
   const agentViewer = useMemo(() => {
     return (
@@ -659,7 +597,8 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
           display: "flex",
           flexDirection: "row",
           justifyContent: "center",
-          gap: "0 1em",
+          flexWrap: "wrap",
+          gap: 1,
         }}
       >
         {axisList.map((axis, i) => {
@@ -682,38 +621,32 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
 
   const gamePanel = useMemo(() => {
     if (query && game) {
-      return (
-        <Box
-          sx={{
-            height: "calc(2em + 50vw)",
-            maxHeight: "calc(100vh - 64px)",
-          }}
-        >
-          <GamePanel game={game} users={users} />
-        </Box>
-      );
+      return <GamePanel game={game} users={users} />;
     } else return;
   }, [game, users, query]);
 
   return (
-    <Content title="手動ゲーム参加">
-      <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
-        {matchTypeTabs}
-        {participateButton}
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, m: 1 }}>
+      <Head>
+        <title>手動ゲーム参加 - 囲みマス</title>
+      </Head>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "1fr max-content max-content",
+          gap: 1,
+        }}
+      >
+        <Paper>
+          <MatchTypeTab disabled={Boolean(matchRes)} onChange={setMatchType} />
+        </Paper>
         {controllerSetting}
-        {agentViewer}
-        {gamePanel}
-      </div>
-    </Content>
+        {participateButton}
+      </Box>
+      {agentViewer}
+      {gamePanel}
+    </Box>
   );
-};
-Page.getInitialProps = async (ctx) => {
-  const id = ctx.query.id;
-  if (Array.isArray(id)) {
-    return { id: id[0] };
-  } else {
-    return { id };
-  }
 };
 
 export default Page;
