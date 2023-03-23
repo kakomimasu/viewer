@@ -115,8 +115,8 @@ export default function GameBoard({
           }}
         >
           {players.map((p, pIdx) => {
-            return p.agents.map((a, aIdx) => {
-              if (a.x < 0) return <></>;
+            return p.agents.flatMap((a, aIdx) => {
+              if (a.x < 0) return [];
 
               const getAgentTransform = () => {
                 if (!board) return;
@@ -156,120 +156,118 @@ export default function GameBoard({
                 }
                 return history.reverse();
               };
+              return [
+                <Box
+                  sx={{
+                    position: "absolute",
+                    width: cellSize,
+                    height: cellSize,
+                    zIndex: 1,
 
-              return (
-                <>
+                    top,
+                    left,
+
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+
+                    transitionProperty: "top, left",
+                    transitionDuration: "0.4s",
+                  }}
+                  key={`agent-${pIdx}-${aIdx}`}
+                >
+                  <Image
+                    src={agentData.agentUrl}
+                    width={cellSize * 0.8}
+                    height={cellSize * 0.8}
+                    alt={`agent player:${pIdx} n:${aIdx}`}
+                  />
                   <Box
                     sx={{
                       position: "absolute",
-                      width: cellSize,
-                      height: cellSize,
-                      zIndex: 1,
-
-                      top,
-                      left,
-
+                      fontSize: "12px",
+                      top: "3px",
+                      left: "3px",
+                      width: "1em",
+                      height: "1em",
+                      borderRadius: "50%",
+                      backgroundColor: "yellow",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-
-                      transitionProperty: "top, left",
-                      transitionDuration: "0.4s",
+                      p: "0.5em",
                     }}
-                    key={`agent-${pIdx}-${aIdx}`}
                   >
-                    <Image
-                      src={agentData.agentUrl}
-                      width={cellSize * 0.8}
-                      height={cellSize * 0.8}
-                      alt={`agent player:${pIdx} n:${aIdx}`}
-                    />
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        fontSize: "12px",
-                        top: "3px",
-                        left: "3px",
-                        width: "1em",
-                        height: "1em",
-                        borderRadius: "50%",
-                        backgroundColor: "yellow",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        p: "0.5em",
-                      }}
-                    >
-                      {aIdx + 1}
-                    </Box>
+                    {aIdx + 1}
                   </Box>
+                </Box>,
+                <Box
+                  key={`detail-${pIdx}-${aIdx}`}
+                  sx={{
+                    position: "absolute",
+                    width: cellSize,
+                    height: cellSize,
+                    zIndex: 3,
+
+                    top,
+                    left,
+
+                    "&:hover > *": {
+                      display: "block",
+                    },
+                  }}
+                >
                   <Box
                     sx={{
+                      // agentの詳細を表示するcss
+                      display: "none",
                       position: "absolute",
-                      width: cellSize,
-                      height: cellSize,
-                      zIndex: 3,
-
-                      top,
-                      left,
-
-                      "&:hover > *": {
-                        display: "block",
-                      },
+                      backgroundColor: "rgba(0, 0, 0, .7)",
+                      color: "white",
+                      top: "50%",
+                      left: "50%",
+                      textAlign: "center",
+                      borderRadius: "10px",
+                      p: 1,
+                      filter: "drop-shadow(0 0 5px rgba(0, 0, 0, .7))",
+                      width: "max-content",
+                      lineHeight: "1.2",
+                      border: `solid 4px ${agentData.colors[1]}`,
+                      transform: getAgentTransform(),
                     }}
                   >
+                    <span>
+                      {user ? user.screenName : userId}
+                      {" : "}
+                      {aIdx + 1}
+                    </span>
+                    <br />
+                    <span>行動履歴</span>
                     <Box
                       sx={{
-                        // agentの詳細を表示するcss
-                        display: "none",
-                        position: "absolute",
-                        backgroundColor: "rgba(0, 0, 0, .7)",
-                        color: "white",
-                        top: "50%",
-                        left: "50%",
-                        textAlign: "center",
-                        borderRadius: "10px",
-                        p: 1,
-                        filter: "drop-shadow(0 0 5px rgba(0, 0, 0, .7))",
-                        width: "max-content",
-                        lineHeight: "1.2",
-                        border: `solid 4px ${agentData.colors[1]}`,
-                        transform: getAgentTransform(),
+                        width: "13em",
+                        height: "10em",
+                        overflowY: "scroll",
                       }}
                     >
-                      <span>
-                        {user ? user.screenName : userId}
-                        {" : "}
-                        {aIdx + 1}
-                      </span>
-                      <br />
-                      <span>行動履歴</span>
-                      <Box
-                        sx={{
-                          width: "13em",
-                          height: "10em",
-                          overflowY: "scroll",
-                        }}
-                      >
-                        {agentHistory().map((e, i) => {
-                          return (
-                            <div
-                              key={i}
-                              style={{
-                                textDecoration: e.res ? "line-through" : "none",
-                              }}
-                            >
-                              T{e.turn}：
-                              {e.type !== "停留" && `x:${e.x} , y:${e.y}に`}
-                              {e.type}
-                            </div>
-                          );
-                        })}
-                      </Box>
+                      {agentHistory().map((e, i) => {
+                        return (
+                          <div
+                            key={i}
+                            style={{
+                              textDecoration: e.res ? "line-through" : "none",
+                            }}
+                          >
+                            T{e.turn}：
+                            {e.type !== "停留" && `x:${e.x} , y:${e.y}に`}
+                            {e.type}
+                          </div>
+                        );
+                      })}
                     </Box>
                   </Box>
-                </>
-              );
+                </Box>,
+              ];
             });
           })}
           {edgeCells}
@@ -294,7 +292,7 @@ export default function GameBoard({
                   return `hsl(60,100%,${l}%)`;
                 }
               };
-              const isConflict = log
+              const nConflict = log
                 ? (() => {
                     const lastActLog = log
                       .slice(-1)[0]
@@ -302,12 +300,13 @@ export default function GameBoard({
                         if (e.actions) return [...e.actions];
                         else return [];
                       });
-                    const isConflict = lastActLog?.some(
-                      (a) => a.res > 0 && a.res < 3 && a.x === x && a.y === y
-                    );
-                    return isConflict;
+                    const isConflict =
+                      lastActLog?.filter(
+                        (a) => a.res > 0 && a.res < 3 && a.x === x && a.y === y
+                      ) ?? [];
+                    return isConflict.length;
                   })()
-                : false;
+                : 0;
 
               return (
                 <Box
@@ -319,7 +318,12 @@ export default function GameBoard({
                     aspectRatio: "1",
                     backgroundColor: bgColor(),
                     outline: "1px solid #555555",
-                    animation: isConflict ? `${flash} 1s linear infinite` : "",
+                    animation:
+                      nConflict > 0
+                        ? `${flash} ${
+                            1 - (0.6 / board.nAgent) * nConflict
+                          }s linear infinite`
+                        : "",
                     height: "100%",
                     width: "100%",
                   }}
