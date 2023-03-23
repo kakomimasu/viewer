@@ -489,6 +489,16 @@ const Page: NextPage = () => {
     []
   );
 
+  const nextTiles = useMemo(() => {
+    if (!game || !matchRes) return;
+    return axisList.map((axis, agentId) => {
+      const agent = game.players[matchRes.index].agents[agentId];
+      const x = agent.x + axis[0];
+      const y = agent.y + axis[1];
+      return { x, y };
+    });
+  }, [game, matchRes, axisList]);
+
   const participateButton = useMemo(() => {
     let disableJoin = false;
     if (matchRes) disableJoin = true;
@@ -648,9 +658,9 @@ const Page: NextPage = () => {
 
   const gamePanel = useMemo(() => {
     if (query && game) {
-      return <GamePanel game={game} users={users} />;
+      return <GamePanel game={game} users={users} nextTiles={nextTiles} />;
     } else return;
-  }, [game, users, query]);
+  }, [game, users, query, nextTiles]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1, m: 1 }}>

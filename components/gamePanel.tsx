@@ -14,10 +14,11 @@ import Turn from "./Turn";
 export default function GamePanel({
   game,
   users,
+  ...other
 }: {
   game: Game;
   users: ReturnType<typeof useGameUsers>;
-}) {
+} & Pick<React.ComponentProps<typeof GameBoard>, "nextTiles">) {
   const nextTurnTime = useMemo(() => {
     if (game.startedAtUnixTime) {
       const nextTurnAtUnixTime =
@@ -140,7 +141,7 @@ export default function GamePanel({
         }}
       >
         {game.board ? (
-          <GameBoard game={game} users={users} />
+          <GameBoard game={game} users={users} {...other} />
         ) : (
           <Skeleton variant="rectangular" width="inherit" height="inherit" />
         )}
