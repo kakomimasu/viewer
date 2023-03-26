@@ -14,10 +14,11 @@ import Turn from "./Turn";
 export default function GamePanel({
   game,
   users,
+  ...other
 }: {
   game: Game;
   users: ReturnType<typeof useGameUsers>;
-}) {
+} & Pick<React.ComponentProps<typeof GameBoard>, "nextTiles">) {
   const nextTurnTime = useMemo(() => {
     if (game.startedAtUnixTime) {
       const nextTurnAtUnixTime =
@@ -43,13 +44,17 @@ export default function GamePanel({
     <Box
       sx={{
         display: "grid",
+        maxHeight: {
+          sm: "calc(100vh - 64px)",
+          xs: undefined,
+        },
         gridTemplateColumns: {
           sm: "minmax(auto,2fr) 1fr 1fr", // PC用
           xs: "1fr 1fr", // Mobile用
         },
         gridTemplateRows: {
           sm: "2em max-content 1fr minmax(100px,1.4fr)",
-          xs: "2em max-content 2fr 1fr max-content",
+          xs: "2em max-content minmax(max-content,2fr) minmax(max-content,1fr) max-content",
         },
         gridTemplateAreas: {
           sm: [
@@ -132,16 +137,17 @@ export default function GamePanel({
           aspectRatio: game.board
             ? `${game.board?.width} / ${game.board?.height}`
             : "1",
+          p: 1,
         }}
       >
         {game.board ? (
-          <GameBoard game={game} users={users} />
+          <GameBoard game={game} users={users} {...other} />
         ) : (
           <Skeleton variant="rectangular" width="inherit" height="inherit" />
         )}
       </Paper>
       <Paper elevation={2} sx={{ gridArea: "graph", p: 1 }}>
-        {game ? (
+        {game.board ? (
           <PointsGraph game={game} users={users} />
         ) : (
           <Skeleton variant="rectangular" width="100%" height="100%" />

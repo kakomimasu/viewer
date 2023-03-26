@@ -6,16 +6,19 @@ import React, {
   useMemo,
 } from "react";
 import { NextPage } from "next";
+import Head from "next/head";
 import {
   TextField,
   Box,
   MenuItem,
-  Tab,
-  IconButton,
   Button,
+  Paper,
+  Dialog,
+  DialogTitle,
 } from "@mui/material";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import TuneIcon from "@mui/icons-material/Tune";
 
 import {
   apiClient,
@@ -23,15 +26,16 @@ import {
   JoinMatchRes,
   ApiRes,
   StreamMatchesReq,
-  ActionMatchReq,
   JoinMatchReqBase,
-} from "../../../src/apiClient";
-import { useGameUsers } from "../../../src/useGameUsers";
-import { useGameStream } from "../../../src/useGameStream";
+} from "../../src/apiClient";
+import { useGameUsers } from "../../src/useGameUsers";
+import { useGameStream } from "../../src/useGameStream";
 
-import datas from "../../../components/player_datas";
-import GamePanel from "../../../components/gamePanel";
-import Content from "../../../components/content";
+import datas from "../../components/player_datas";
+import GamePanel from "../../components/gamePanel";
+import MatchTypeTab, { MatchType } from "../../components/matchTypeTab";
+import { useStateWithStorage } from "../../src/useStateWithStorage";
+import { getGameHref } from "../../src/link";
 
 type NextActionType = [-1 | 0 | 1, -1 | 0 | 1];
 const NextActions: Record<
@@ -57,19 +61,10 @@ const NextActions: Record<
   NONE: [0, 0],
 };
 
-const aiList = [
-  { label: "AI-1", name: "a1" },
-  { label: "AI-2", name: "a2" },
-  { label: "AI-3", name: "a3" },
-  { label: "AI-4", name: "a4" },
-  { label: "AI-5", name: "a5" },
-  { label: "None", name: "none" },
-] as const;
-
 type AgentData = { index: number; nextAction: NextActionType };
 
 type Gamepads = ReturnType<typeof navigator["getGamepads"]>;
-type Controller = { label: string; helperText?: string; agentIndex: number };
+type Controller = { label: string; helperText?: string; agentId: number };
 
 const ManualAgent = ({
   playerIndex,
@@ -226,19 +221,17 @@ const useGamepads = () => {
   return gamepads;
 };
 
-type ParticipateType = "free" | "gameId" | "ai";
 const localStorageKey = "controllerSettings";
 
-const Page: NextPage<{ id?: string }> = ({ id }) => {
-  const [participateType, setParticipateType] =
-    useState<ParticipateType>("free");
-  const [gameId, setGameId] = useState<string>("");
-  const [ai, setAi] = useState<typeof aiList[number]["name"]>(aiList[0].name);
-
-  const [matchRes, setMatchRes] = useState<JoinMatchRes>();
+const Page: NextPage = () => {
+  const [matchType, setMatchType] = useState<MatchType>();
+  const [matchRes, setMatchRes] = useStateWithStorage<JoinMatchRes | undefined>(
+    "game/manual:matchRes",
+    undefined
+  );
   const query = useMemo<StreamMatchesReq | undefined>(() => {
     if (!matchRes) {
-      if (participateType === "free") {
+      if (matchType?.type === "free") {
         return {
           q: "sort:startAtUnixTime-desc type:normal is:waiting",
           allowNewGame: true,
@@ -247,18 +240,18 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     } else {
       return { q: `id:${matchRes.gameId}` };
     }
-  }, [matchRes, participateType]);
+  }, [matchRes, matchType]);
   const selectedGame = useGameStream(query);
   const game = useMemo<Game | undefined>(() => selectedGame[0], [selectedGame]);
   const playerIds = useMemo(() => game?.players.map((p) => p.id) || [], [game]);
   const users = useGameUsers(playerIds);
   const [controllerList, setControllerList] = useState<Controller[]>([
-    { label: "WSADキー", agentIndex: 0 },
-    { label: "Arrowキー", agentIndex: 1 },
-    { label: "GamePad 1", agentIndex: 2 },
-    { label: "GamePad 2", agentIndex: 3 },
-    { label: "GamePad 3", agentIndex: 4 },
-    { label: "GamePad 4", agentIndex: 5 },
+    { label: "WSADキー", agentId: 0 },
+    { label: "Arrowキー", agentId: 1 },
+    { label: "GamePad 1", agentId: 2 },
+    { label: "GamePad 2", agentId: 3 },
+    { label: "GamePad 3", agentId: 4 },
+    { label: "GamePad 4", agentId: 5 },
   ]);
   const [axisList, setAxisList] = useState<NextActionType[]>([
     [0, 0],
@@ -272,7 +265,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     const dataStr = localStorage.getItem(localStorageKey);
     setControllerList((prev) => {
       const indexList = dataStr ? JSON.parse(dataStr) : [];
-      return prev.map((c, i) => ({ ...c, agentIndex: indexList[i] ?? i }));
+      return prev.map((c, i) => ({ ...c, agentId: indexList[i] ?? i }));
     });
   }, []);
   useEffect(() => {
@@ -283,7 +276,8 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     readControllerSettings();
   }, [readControllerSettings]);
   useEffect(() => {
-    const list = controllerList.map(({ agentIndex }) => agentIndex);
+    console.log("change controllerList", controllerList);
+    const list = controllerList.map(({ agentId }) => agentId);
     localStorage.setItem(localStorageKey, JSON.stringify(list));
   }, [controllerList]);
 
@@ -316,7 +310,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
 
   useEffect(() => {
     if (dirWSAD[0] === 0 && dirWSAD[1] === 0) return;
-    const index = controllerList[0].agentIndex;
+    const index = controllerList[0].agentId;
     if (index < 0) return;
     setAxisList((prev) => {
       if (prev[index] === dirWSAD) return prev;
@@ -328,7 +322,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
 
   useEffect(() => {
     if (dirArrow[0] === 0 && dirArrow[1] === 0) return;
-    const index = controllerList[1].agentIndex;
+    const index = controllerList[1].agentId;
     if (index < 0) return;
     setAxisList((prev) => {
       if (prev[index] === dirArrow) return prev;
@@ -341,7 +335,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   const changeController = useCallback(
     (i: number, dir: NextActionType) => {
       rawGamepadAxis.current[i] = dir;
-      const axisListIndex = controllerList[i + 2].agentIndex;
+      const axisListIndex = controllerList[i + 2].agentId;
       if (axisListIndex < 0) return;
 
       if (gamepadChangeTime.current[i] === undefined) {
@@ -395,100 +389,99 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   }, [gamepads, changeController]);
 
   useEffect(() => {
-    if (!matchRes || !game || !game.gaming || !game.board || !game.tiled)
-      return;
+    if (!matchRes || !game || !game.gaming) return;
     const board = game.board;
     const tiled = game.tiled;
     if (!board || !tiled) return;
 
-    const actions: ActionMatchReq["actions"] = axisList.flatMap(
-      (axis, agentId) => {
-        const agent = game.players[matchRes.index].agents[agentId] || {
-          x: -1,
-          y: -1,
-        };
-        if (agent.x < 0) return [];
+    const enableAgents = controllerList
+      .filter((c) => c.agentId >= 0)
+      .map((c) => c.agentId);
+
+    const actions = enableAgents.map((agentId, i) => {
+      const agent = game.players[matchRes.index].agents[agentId];
+      if (agent.x < 0) {
+        // エージェントが配置されていない場合は既定の場所に配置
+        // TODO: 既定の場所が配置できない場合はどうする？
+        const playerIndex = matchRes.index;
+        let x = playerIndex === 0 ? 1 : board.width - 2;
+
+        const y = Math.floor(
+          ((board.height - 1) / (enableAgents.length - 1)) * i
+        );
+        const action = { agentId, x, y, type: "PUT" } as const;
+        return action;
+      } else {
+        // エージェントが配置済みの場合は移動
+        const axis = axisList[agentId];
         const x = agent.x + axis[0];
         const y = agent.y + axis[1];
         const nextTile = tiled[y * board.width + x];
-        if (!nextTile) return [];
+        if (!nextTile) return { agentId, type: "NONE" } as const;
         const type =
           nextTile.player !== matchRes.index && nextTile.type === 1
             ? "REMOVE"
             : "MOVE";
-        return [{ agentId, x, y, type }];
+        return { agentId, x, y, type } as const;
       }
-    );
+    });
     apiClient.setAction(game.id, { actions }, matchRes.pic);
   }, [controllerList, game, matchRes, axisList]);
 
   useEffect(() => {
-    if (!game || !matchRes || !game.gaming || !game.board) return;
-    const board = game.board;
-    if (game.turn === 1) {
-      const playerIndex = matchRes.index;
-      let x = playerIndex === 0 ? 1 : board.width - 2;
-      const actions: ActionMatchReq["actions"] = controllerList
-        .filter((c) => c.agentIndex >= 0)
-        .map((c, i, array) => {
-          const y = Math.floor(((board.height - 1) / (array.length - 1)) * i);
-          return { agentId: c.agentIndex, x, y, type: "PUT" };
-        });
-      const res = apiClient.setAction(
-        matchRes.gameId,
-        { actions },
-        matchRes.pic
-      );
-      console.log(res);
-    }
-  }, [game, matchRes, controllerList]);
-
-  useEffect(() => {
     if (!game) return;
-    if (game.turn >= 3) {
-      setAxisList(new Array(6).fill(NextActions.NONE));
+    if (!matchRes) return;
+    // 配置されているエージェントのAxisを初期化
+    const agents = game.players[matchRes.index].agents;
+    if (game.gaming) {
+      setAxisList((prev) => {
+        const axies = new Array(6).fill(0).map((_, i) => {
+          if (agents[i].x >= 0) return NextActions.NONE;
+          else return prev[i];
+        });
+        return axies;
+      });
     }
-  }, [game]);
+  }, [game, matchRes]);
 
   const joinGame = useCallback(async () => {
     const req: JoinMatchReqBase = { guestName: "guest" };
     let matchRes: ApiRes<JoinMatchRes>;
-    if (participateType === "gameId") {
-      // req.gameId = gameId;
-      matchRes = await apiClient.joinGameIdMatch(gameId, req);
-    } else if (participateType === "ai") {
-      // req.useAi = true;
-      // req.aiOption = {
-      //   aiName: ai,
-      // };
-      matchRes = await apiClient.joinAiMatch({ ...req, aiName: ai });
+    if (matchType?.type === "gameId") {
+      matchRes = await apiClient.joinGameIdMatch(matchType.gameId, req);
+    } else if (matchType?.type === "ai") {
+      matchRes = await apiClient.joinAiMatch({
+        ...req,
+        aiName: matchType.aiName,
+        boardName: matchType.boardName,
+      });
     } else {
       matchRes = await apiClient.joinFreeMatch(req);
     }
     if (matchRes.success) {
       setMatchRes(matchRes.data);
     }
-  }, [gameId, participateType, ai]);
+  }, [matchType, setMatchRes]);
 
   const changeAgentController = useCallback(
     (
       e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-      agentIndex: number
+      agentId: number
     ) => {
       setControllerList((prev) => {
         const list = [...prev];
 
-        const oldController = list.find((c) => c.agentIndex === agentIndex);
+        const oldController = list.find((c) => c.agentId === agentId);
         const newControllerIndex = parseInt(e.target.value);
 
         if (newControllerIndex >= 0) {
           const newController = list[newControllerIndex];
           if (oldController) {
-            oldController.agentIndex = newController.agentIndex;
+            oldController.agentId = newController.agentId;
           }
-          newController.agentIndex = agentIndex;
+          newController.agentId = agentId;
         } else if (oldController) {
-          oldController.agentIndex = -1;
+          oldController.agentId = -1;
         }
         return list;
       });
@@ -496,132 +489,109 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
     []
   );
 
-  const matchTypeTabs = useMemo(() => {
-    const isMatchStarted = Boolean(matchRes);
-    return (
-      <TabContext value={participateType}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <TabList
-            textColor="secondary"
-            indicatorColor="secondary"
-            centered
-            onChange={(_, v) => {
-              setParticipateType(v);
-            }}
-          >
-            <Tab
-              label="フリーマッチ参加"
-              value="free"
-              disabled={isMatchStarted}
-            />
-            <Tab
-              label="ゲームIDで参加"
-              value="gameId"
-              disabled={isMatchStarted}
-            />
-            <Tab label="対AI戦" value="ai" disabled={isMatchStarted} />
-          </TabList>
-        </Box>
-        <TabPanel value="gameId">
-          <TextField
-            fullWidth
-            label="ゲームID"
-            value={gameId}
-            disabled={isMatchStarted}
-            onChange={({ target: { value } }) => {
-              setGameId(value);
-            }}
-            onKeyDown={(e) => {
-              e.stopPropagation();
-            }}
-          />
-        </TabPanel>
-        <TabPanel value="ai">
-          <TextField
-            fullWidth
-            select
-            label="対戦AI"
-            value={ai}
-            disabled={Boolean(matchRes)}
-            onChange={({ target: { value } }) => {
-              setAi(value as typeof ai);
-            }}
-          >
-            {aiList.map((ai) => {
-              return (
-                <MenuItem key={ai.name} value={ai.name}>
-                  {ai.label}
-                </MenuItem>
-              );
-            })}
-          </TextField>
-        </TabPanel>
-      </TabContext>
-    );
-  }, [ai, gameId, matchRes, participateType]);
+  const nextTiles = useMemo(() => {
+    if (!game || !matchRes) return;
+    return axisList.map((axis, agentId) => {
+      const agent = game.players[matchRes.index].agents[agentId];
+      const x = agent.x + axis[0];
+      const y = agent.y + axis[1];
+      return { x, y };
+    });
+  }, [game, matchRes, axisList]);
 
   const participateButton = useMemo(() => {
-    let buttonDiasbled = false;
-    if (matchRes) buttonDiasbled = true;
-    else if (participateType === "gameId" && !gameId) buttonDiasbled = true;
+    let disableJoin = false;
+    if (matchRes) disableJoin = true;
+    // ゲームIDが入力されていない場合は参加ボタンを無効化
+    else if (matchType?.type === "gameId" && !matchType.gameId)
+      disableJoin = true;
+
+    const disableQuit = matchRes === undefined;
 
     return (
       <Box
         sx={{
           display: "flex",
-          flexDirection: "row",
-          gap: 3,
-          justifyContent: "center",
+          flexDirection: "column",
+          gap: 1,
+          justifyContent: "space-between",
         }}
       >
-        <Button onClick={joinGame} disabled={buttonDiasbled}>
+        <Button onClick={joinGame} disabled={disableJoin}>
           参加する
+        </Button>
+        <Button
+          color="error"
+          disabled={disableQuit}
+          onClick={() => {
+            setMatchRes(undefined);
+          }}
+        >
+          参加をやめる
+        </Button>
+
+        <Button
+          startIcon={<SportsEsportsIcon />}
+          color="primary"
+          disabled={matchRes === undefined}
+          href={getGameHref(matchRes?.gameId)}
+          target="_blank"
+        >
+          ゲーム詳細へ
         </Button>
       </Box>
     );
-  }, [gameId, participateType, joinGame, matchRes]);
+  }, [matchType, joinGame, matchRes, setMatchRes]);
+
+  const [controllerSettingDialogOpened, setControllerSettingDialogOpened] =
+    useState<boolean>(false);
 
   const controllerSetting = useMemo(() => {
     return (
-      <Box
-        sx={{
-          border: "3px solid",
-          borderColor: "#BBB",
-          borderRadius: 1,
-          p: 1.5,
-        }}
-      >
-        <Box
-          component="h4"
-          sx={{ m: 0, display: "flex", alignItems: "center" }}
+      <Box>
+        <Button
+          color="primary"
+          sx={{ height: "100%" }}
+          startIcon={<TuneIcon />}
+          onClick={() => {
+            setControllerSettingDialogOpened(true);
+          }}
         >
           コントローラ設定
-          <IconButton
-            color="secondary"
-            onClick={resetControllerSettings}
-            size="small"
+        </Button>
+        <Dialog
+          open={controllerSettingDialogOpened}
+          onClose={() => {
+            setControllerSettingDialogOpened(false);
+          }}
+        >
+          <DialogTitle
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
           >
-            <RestartAltIcon />
-          </IconButton>
-        </Box>
-        <Box sx={{ mx: 1, display: "flex" }}>
+            <Box>コントローラ設定</Box>
+            <Button
+              onClick={resetControllerSettings}
+              startIcon={<RestartAltIcon />}
+            >
+              初期設定に戻す
+            </Button>
+          </DialogTitle>
+
           <Box
             sx={{
               display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "space-evenly",
-              m: 1,
-              gap: 1,
-              width: "100%",
-              "& > *": {
-                display: "flex",
-                minWidth: "15em",
-              },
+              flexDirection: "column",
+              p: 2,
+              gap: 2,
             }}
           >
             {new Array(6).fill(0).map((_, i) => {
               const controllerIndex = controllerList.findIndex(
-                (c) => c.agentIndex === i
+                (c) => c.agentId === i
               );
               return (
                 <TextField
@@ -647,10 +617,15 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
               );
             })}
           </Box>
-        </Box>
+        </Dialog>
       </Box>
     );
-  }, [controllerList, changeAgentController, resetControllerSettings]);
+  }, [
+    controllerList,
+    changeAgentController,
+    resetControllerSettings,
+    controllerSettingDialogOpened,
+  ]);
 
   const agentViewer = useMemo(() => {
     return (
@@ -659,11 +634,12 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
           display: "flex",
           flexDirection: "row",
           justifyContent: "center",
-          gap: "0 1em",
+          flexWrap: "wrap",
+          gap: 1,
         }}
       >
         {axisList.map((axis, i) => {
-          const c = controllerList.find((c) => c.agentIndex === i);
+          const c = controllerList.find((c) => c.agentId === i);
           return (
             <ManualAgent
               key={i}
@@ -682,38 +658,34 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
 
   const gamePanel = useMemo(() => {
     if (query && game) {
-      return (
-        <Box
-          sx={{
-            height: "calc(2em + 50vw)",
-            maxHeight: "calc(100vh - 64px)",
-          }}
-        >
-          <GamePanel game={game} users={users} />
-        </Box>
-      );
+      return <GamePanel game={game} users={users} nextTiles={nextTiles} />;
     } else return;
-  }, [game, users, query]);
+  }, [game, users, query, nextTiles]);
 
   return (
-    <Content title="手動ゲーム参加">
-      <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
-        {matchTypeTabs}
-        {participateButton}
-        {controllerSetting}
-        {agentViewer}
-        {gamePanel}
-      </div>
-    </Content>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, m: 1 }}>
+      <Head>
+        <title>手動ゲーム参加 - 囲みマス</title>
+      </Head>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "1fr max-content max-content",
+          gap: 1,
+        }}
+      >
+        <Paper>
+          <MatchTypeTab disabled={Boolean(matchRes)} onChange={setMatchType} />
+        </Paper>
+        <Paper sx={{ display: "flex", gap: 1, p: 1 }}>
+          {controllerSetting}
+          {participateButton}
+        </Paper>
+      </Box>
+      {agentViewer}
+      {gamePanel}
+    </Box>
   );
-};
-Page.getInitialProps = async (ctx) => {
-  const id = ctx.query.id;
-  if (Array.isArray(id)) {
-    return { id: id[0] };
-  } else {
-    return { id };
-  }
 };
 
 export default Page;
