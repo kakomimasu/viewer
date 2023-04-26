@@ -80,10 +80,11 @@ async function matching() {
 
   await func.init(game, match);
 
-  while (game.ending === false) {
+  while (true) {
     const res = await apiClient.getMatch(match.gameId);
     if (res.success) {
-      // console.log("while", info.turn, res.data.turn);
+      if (res.data.status === "ended") break;
+
       if (game.turn !== res.data.turn) {
 
         const actions = await func.turn(game) ?? [];
@@ -111,10 +112,10 @@ export function getAgents() {
 
 /** @param idx {number} */
 export function idx2xy(idx) {
-  if (!game.board) return { x: -1, y: -1 };
+  if (!game.field) return { x: -1, y: -1 };
   return {
-    x: idx % game.board.width,
-    y: Math.floor(idx / game.board.width),
+    x: idx % game.field.width,
+    y: Math.floor(idx / game.field.width),
   };
 }
 /** 
@@ -122,6 +123,6 @@ export function idx2xy(idx) {
  * @param y {number}
 */
 export function xy2idx(x, y) {
-  if (!game.board) return -1;
-  return y * game.board.width + x;
+  if (!game.field) return -1;
+  return y * game.field.width + x;
 }

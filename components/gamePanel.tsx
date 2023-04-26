@@ -35,10 +35,11 @@ export default function GamePanel({
   ]);
 
   const status = useMemo(() => {
-    if (game.ending) return { label: "終了", color: "red" };
-    else if (game.gaming) return { label: "ゲーム中", color: "green" };
+    if (game.status === "ended") return { label: "終了", color: "red" };
+    else if (game.status === "gaming")
+      return { label: "ゲーム中", color: "green" };
     else return { label: "待機中", color: "yellow" };
-  }, [game.ending, game.gaming]);
+  }, [game.status]);
 
   return (
     <Box
@@ -134,20 +135,20 @@ export default function GamePanel({
           overflow: "hidden",
           height: "100%",
           width: "100%",
-          aspectRatio: game.board
-            ? `${game.board?.width} / ${game.board?.height}`
+          aspectRatio: game.field
+            ? `${game.field.width} / ${game.field.height}`
             : "1",
           p: 1,
         }}
       >
-        {game.board ? (
+        {game.field ? (
           <GameBoard game={game} users={users} {...other} />
         ) : (
           <Skeleton variant="rectangular" width="inherit" height="inherit" />
         )}
       </Paper>
       <Paper elevation={2} sx={{ gridArea: "graph", p: 1 }}>
-        {game.board ? (
+        {game.field ? (
           <PointsGraph game={game} users={users} />
         ) : (
           <Skeleton variant="rectangular" width="100%" height="100%" />

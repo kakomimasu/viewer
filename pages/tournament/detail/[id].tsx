@@ -70,7 +70,7 @@ const Page: NextPage<{
       const url = `/game/detail/` + game.id;
       let pointText = "";
       let resultText = "-";
-      if (game.gaming || game.ending) {
+      if (["gaming", "ended"].includes(game.status)) {
         const p = game.players;
         const mPlayer = p.find((e) => e.id === mUserId);
         const oPlayer = p.find((e) => e.id === oUserId);
@@ -117,7 +117,7 @@ const Page: NextPage<{
       result: [number, number, number];
     }[] = [];
     for (const game of games) {
-      if (!game.ending) continue;
+      if (game.status !== "ended") continue;
       const userResult = getUserResult(game);
       console.log(userResult);
       const isDraw = userResult[0].point === userResult[1].point;

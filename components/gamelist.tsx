@@ -62,8 +62,8 @@ const GameList = (props: {
   const users = useGameUsers(playerIds);
 
   const getStatusClass = (game: Game) => {
-    if (game.ending) return <Ending />;
-    else if (game.gaming) return <Gaming />;
+    if (game.status === "ended") return <Ending />;
+    else if (game.status === "gaming") return <Gaming />;
     else return <Waiting />;
   };
 

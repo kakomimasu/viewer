@@ -63,7 +63,7 @@ const NextActions: Record<
 
 type AgentData = { index: number; nextAction: NextActionType };
 
-type Gamepads = ReturnType<typeof navigator["getGamepads"]>;
+type Gamepads = ReturnType<(typeof navigator)["getGamepads"]>;
 type Controller = { label: string; helperText?: string; agentId: number };
 
 const ManualAgent = ({
@@ -389,10 +389,9 @@ const Page: NextPage = () => {
   }, [gamepads, changeController]);
 
   useEffect(() => {
-    if (!matchRes || !game || !game.gaming) return;
-    const board = game.board;
-    const tiled = game.tiled;
-    if (!board || !tiled) return;
+    if (!matchRes || !game || game.status !== "gaming") return;
+    const field = game.field;
+    if (!field) return;
 
     const enableAgents = controllerList
       .filter((c) => c.agentId >= 0)
@@ -404,10 +403,10 @@ const Page: NextPage = () => {
         // エージェントが配置されていない場合は既定の場所に配置
         // TODO: 既定の場所が配置できない場合はどうする？
         const playerIndex = matchRes.index;
-        let x = playerIndex === 0 ? 1 : board.width - 2;
+        let x = playerIndex === 0 ? 1 : field.width - 2;
 
         const y = Math.floor(
-          ((board.height - 1) / (enableAgents.length - 1)) * i
+          ((field.height - 1) / (enableAgents.length - 1)) * i
         );
         const action = { agentId, x, y, type: "PUT" } as const;
         return action;
@@ -416,7 +415,7 @@ const Page: NextPage = () => {
         const axis = axisList[agentId];
         const x = agent.x + axis[0];
         const y = agent.y + axis[1];
-        const nextTile = tiled[y * board.width + x];
+        const nextTile = field.tiles[y * field.width + x];
         if (!nextTile) return { agentId, type: "NONE" } as const;
         const type =
           nextTile.player !== matchRes.index && nextTile.type === 1
@@ -433,7 +432,7 @@ const Page: NextPage = () => {
     if (!matchRes) return;
     // 配置されているエージェントのAxisを初期化
     const agents = game.players[matchRes.index].agents;
-    if (game.gaming) {
+    if (game.status === "gaming") {
       setAxisList((prev) => {
         const axies = new Array(6).fill(0).map((_, i) => {
           if (agents[i].x >= 0) return NextActions.NONE;
