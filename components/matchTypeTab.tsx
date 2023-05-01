@@ -8,10 +8,9 @@ const aiList = [
   { label: "AI-2", name: "a2" },
   { label: "AI-3", name: "a3" },
   { label: "AI-4", name: "a4" },
-  { label: "AI-5", name: "a5" },
   { label: "None", name: "none" },
 ] as const;
-type AiName = typeof aiList[number]["name"];
+type AiName = (typeof aiList)[number]["name"];
 
 export type MatchType =
   | {
