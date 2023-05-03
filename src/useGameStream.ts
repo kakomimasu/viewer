@@ -23,9 +23,10 @@ export const useGameStream = (req?: StreamMatchesReq, bearerToken?: string) => {
     }
 
     const res = new EventSourcePolyfill(url.href, { headers });
+    console.log(res);
     res.addEventListener("message", (e) => {
       const data = JSON.parse(e.data) as StreamMatchesRes;
-      // console.log(data);
+      console.log(data);
 
       if (data.type === "initial") {
         setGames(data.games);

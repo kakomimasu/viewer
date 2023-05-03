@@ -10,7 +10,7 @@ import { useGameUsers } from "../src/useGameUsers";
 import datas from "./player_datas";
 
 type Props = {
-  game: Pick<Game, "board" | "tiled" | "players" | "log">;
+  game: Pick<Game, "nAgent" | "field" | "players" | "log">;
   users: ReturnType<typeof useGameUsers>;
   nextTiles?: { x: number; y: number }[];
 };
@@ -23,28 +23,28 @@ const flash = keyframes({
   "50%": { backgroundColor: "#00ff00" },
 });
 
-export default function GameBoard({
-  game: { board, tiled, players, log },
+export default function Gamefield({
+  game: { field, players, log, nAgent },
   users,
   nextTiles,
 }: Props) {
   const { width, height, ref } = useResizeDetector();
 
   const scale = useMemo(() => {
-    if (!width || !height || !board) return 1;
-    const idealWidth = (board.width + 2) * 50 + (board.width + 1) * 1;
-    const idealHeight = (board.height + 2) * 50 + (board.height + 1) * 1;
+    if (!width || !height || !field) return 1;
+    const idealWidth = (field.width + 2) * 50 + (field.width + 1) * 1;
+    const idealHeight = (field.height + 2) * 50 + (field.height + 1) * 1;
     const scaleX = width / idealWidth;
     const scaleY = height / idealHeight;
     return Math.min(scaleX, scaleY);
-  }, [width, height, board]);
+  }, [width, height, field]);
 
   const edgeCells = useMemo(() => {
-    if (!board?.height) return;
+    if (!field?.height) return;
     return (
       <>
-        {[1, board.height + 2].map((y) => {
-          return new Array(board.width).fill(0).map((_, i) => {
+        {[1, field.height + 2].map((y) => {
+          return new Array(field.width).fill(0).map((_, i) => {
             const x = i;
             return (
               <Box
@@ -63,8 +63,8 @@ export default function GameBoard({
             );
           });
         })}
-        {[1, board.width + 2].map((x) => {
-          return new Array(board.width).fill(0).map((_, i) => {
+        {[1, field.width + 2].map((x) => {
+          return new Array(field.width).fill(0).map((_, i) => {
             const y = i;
             return (
               <Box
@@ -85,7 +85,7 @@ export default function GameBoard({
         })}
       </>
     );
-  }, [board?.height, board?.width]);
+  }, [field?.height, field?.width]);
 
   return (
     <Box
@@ -99,7 +99,7 @@ export default function GameBoard({
       }}
       ref={ref}
     >
-      {board && (
+      {field && (
         <Box
           id="field"
           sx={{
@@ -119,9 +119,9 @@ export default function GameBoard({
               if (a.x < 0) return [];
 
               const getAgentTransform = () => {
-                if (!board) return;
-                const w = board.width;
-                const h = board.height;
+                if (!field) return;
+                const w = field.width;
+                const h = field.height;
                 const transX = a.x < w / 2 ? "0%" : "-100%";
                 const transY = a.y < h / 2 ? "0%" : "-100%";
                 return `translate(${transX},${transY})`;
@@ -272,12 +272,11 @@ export default function GameBoard({
           })}
           {edgeCells}
           {(() => {
-            return board.points.map((point, i) => {
-              const tile: NonNullable<typeof tiled>[number] = (tiled &&
-                tiled[i]) || { type: 0, player: null };
-              const y = Math.floor(i / board.width);
-              const x = i % board.width;
-              // const point = board.points[i];
+            return field.points.map((point, i) => {
+              const tile: NonNullable<(typeof field)["tiles"]>[number] =
+                (field && field.tiles[i]) || { type: 0, player: null };
+              const y = Math.floor(i / field.width);
+              const x = i % field.width;
               const isAbs =
                 point < 0 && tile.player !== null && tile.type === 0;
 
@@ -311,6 +310,10 @@ export default function GameBoard({
               return (
                 <Box
                   key={i}
+                  {...{
+                    // field-editorに必要
+                    "data-cell": `${i}-${x}-${y}`,
+                  }}
                   sx={{
                     position: "relative",
                     gridColumn: x + 2,
@@ -321,7 +324,7 @@ export default function GameBoard({
                     animation:
                       nConflict > 0
                         ? `${flash} ${
-                            1 - (0.6 / board.nAgent) * nConflict
+                            1 - (0.6 / nAgent) * nConflict
                           }s linear infinite`
                         : "",
                     height: "100%",

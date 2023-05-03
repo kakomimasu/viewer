@@ -35,13 +35,18 @@ export default function FieldEditor({
     const value = event.target.value;
     const board = boards.find((b) => b.name === value);
     if (!board) return;
-    const tiled = new Array(board.height * board.width);
-    for (let i = 0; i < tiled.length; i++) {
-      tiled[i] = { type: 0, player: null };
+    const tiles = new Array(board.height * board.width);
+    for (let i = 0; i < tiles.length; i++) {
+      tiles[i] = { type: 0, player: null };
     }
     const game: GameProp = {
-      board,
-      tiled,
+      field: {
+        width: board.width,
+        height: board.height,
+        points: board.points,
+        tiles,
+      },
+      nAgent: board.nAgent ?? 4,
       players: [
         {
           id: "",
@@ -61,72 +66,62 @@ export default function FieldEditor({
     setGame(game);
   };
 
-  useEffect(() => {
-    if (!game) return;
-    const divs = document.querySelectorAll("#game-board #field>.tile");
-    if (!divs) return;
+  const onMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (!game?.field) return;
 
-    for (let i = 0; i < divs.length; i++) {
-      const tile = divs[i] as HTMLElement;
-      const style = getComputedStyle(tile);
-      const x = parseInt(style.gridColumnStart) - 2;
-      const y = parseInt(style.gridRowStart) - 2;
+    // クリックした部分の要素からタイルdivを取得
+    const elements = document.elementsFromPoint(event.clientX, event.clientY);
+    let i: number, x: number, y: number;
+    for (const e of elements) {
+      const cell = (e as HTMLElement).dataset.cell;
+      if (!cell) continue;
+      [i, x, y] = cell.split("-").map((e) => parseInt(e));
 
-      tile.oncontextmenu = () => false;
-      tile.onmousedown = (e) => {
-        if (!game.tiled) return;
-        const tiled = [...game.tiled];
-        const players = [...game.players];
+      const tiled = [...game.field.tiles];
+      const players = [...game.players];
 
-        const isAgent = (x: number, y: number) => {
-          if (game.players) {
-            const agent = game.players
-              .map((e, i) =>
-                e.agents.map((e_, j) => {
-                  return { agent: e_, player: i, n: j };
-                })
-              )
-              .flat()
-              .find((e) => e.agent.x === x && e.agent.y === y);
-            return agent;
-          } else return undefined;
-        };
+      const agent = game.players
+        .map((e, i) =>
+          e.agents.map((e_, j) => {
+            return { agent: e_, player: i, n: j };
+          })
+        )
+        .flat()
+        .find((e) => e.agent.x === x && e.agent.y === y);
 
-        switch (e.button) {
-          case 0: {
-            // a = [no,p1base,p2base,p1wall,p2wall]
-            let t = tiled[i];
-            const tPlayer = t.player === null ? -1 : t.player;
-            let a = t.type * 2 + tPlayer + 1;
-            console.log(a, t);
-            a = (a + 1) % 5;
-            let tPlayer_: number | null = (a - 1) % 2;
-            tPlayer_ = tPlayer_ === -1 ? null : tPlayer_;
-            t = { type: Math.trunc((a - 1) / 2) as 0 | 1, player: tPlayer_ };
-            console.log(a, t);
-            tiled[i] = t;
+      switch (event.button) {
+        case 0: {
+          let t = tiled[i];
+          const tPlayer = t.player === null ? -1 : t.player;
+          let a = t.type * 2 + tPlayer + 1;
+          console.log(a, t);
+          a = (a + 1) % 5;
+          let tPlayer_: number | null = (a - 1) % 2;
+          tPlayer_ = tPlayer_ === -1 ? null : tPlayer_;
+          t = { type: Math.trunc((a - 1) / 2) as 0 | 1, player: tPlayer_ };
+          console.log(a, t);
+          tiled[i] = t;
 
-            const agent = isAgent(x, y);
-            if (agent) {
-              players[agent.player].agents.splice(agent.n, 1);
-            }
-            break;
+          if (agent) {
+            players[agent.player].agents.splice(agent.n, 1);
           }
-          case 2: {
-            const t = tiled[i];
-            if (t.type === 1) {
-              const a = isAgent(x, y);
-              if (a) players[a.player].agents.splice(a.n, 1);
-              else if (t.player !== null)
-                players[t.player].agents.push({ x, y });
-            }
-            break;
-          }
+          break;
         }
-        setGame({ ...game, tiled, players });
-      };
+        case 2: {
+          const t = tiled[i];
+          if (t.type === 1) {
+            const a = agent;
+            if (a) players[a.player].agents.splice(a.n, 1);
+            else if (t.player !== null) players[t.player].agents.push({ x, y });
+          }
+          break;
+        }
+      }
+      const field = { ...game.field, tiles: tiled };
+      setGame({ ...game, field, players });
+      break;
     }
-  });
+  };
 
   return (
     <Content title="フィールド説明用エディタ">
@@ -150,7 +145,8 @@ export default function FieldEditor({
         </TextField>
         {game && (
           <Box
-            id="game-board"
+            onContextMenu={(e) => e.preventDefault()}
+            onMouseDown={onMouseDown}
             sx={{
               height: "calc(100vh - 64px)",
             }}

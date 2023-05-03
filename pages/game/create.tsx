@@ -234,12 +234,17 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
         (() => {
           const board = boards?.find((b) => b.name === data.boardName);
           if (!board) return;
-          const tiled = new Array(board.height * board.width);
-          for (let i = 0; i < tiled.length; i++)
-            tiled[i] = { type: 0, player: null };
+          const tiles = new Array(board.height * board.width);
+          for (let i = 0; i < tiles.length; i++)
+            tiles[i] = { type: 0, player: null };
           const game: React.ComponentProps<typeof GameBoard>["game"] = {
-            board,
-            tiled,
+            field: {
+              width: board.width,
+              height: board.height,
+              points: board.points,
+              tiles,
+            },
+            nAgent: board.nAgent ?? 4,
             players: [
               {
                 id: "",

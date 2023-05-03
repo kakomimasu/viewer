@@ -6,7 +6,7 @@ type Props = { game: Game };
 
 const MatchTimer: React.FC<Props> = ({ game }) => {
   const data = useMemo(() => {
-    if (game.board === null) {
+    if (game.field === null) {
       return {
         turn: "-",
         nTurn: "",
@@ -14,10 +14,10 @@ const MatchTimer: React.FC<Props> = ({ game }) => {
     } else {
       return {
         turn: `${game.turn}`,
-        nTurn: `/${game.board.nTurn}`,
+        nTurn: `/${game.totalTurn}`,
       };
     }
-  }, [game.board, game.turn]);
+  }, [game.field, game.turn, game.totalTurn]);
 
   return (
     <Box>

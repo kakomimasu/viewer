@@ -73,7 +73,7 @@ const Detail: NextPage<{}> = () => {
     const result = [0, 0, 0]; // 勝ち、負け、引き分け
     if (user) {
       games.forEach((g) => {
-        if (g.ending === false) return;
+        if (g.status !== "ended") return;
         const players = g.players.map((p) => {
           return {
             id: p.id,

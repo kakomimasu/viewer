@@ -14,7 +14,7 @@ onturn((game) => {
       // 配置されていないとき
 
       // ランダムなマスを選択
-      const idx = Math.floor(Math.random() * game.tiled.length);
+      const idx = Math.floor(Math.random() * game.field.tiles.length);
       const { x, y } = idx2xy(idx);
 
       actions.push({
