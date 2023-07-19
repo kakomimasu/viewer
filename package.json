@@ -16,7 +16,7 @@
     "@kakomimasu/client-js": "github:kakomimasu/client-js#v1.0.0-beta.13",
     "@monaco-editor/react": "^4.4.6",
     "@mui/icons-material": "^5.11.11",
-    "@mui/lab": "^5.0.0-alpha.123",
+    "@mui/lab": "^5.0.0-alpha.129",
     "@mui/material": "^5.11.13",
     "dayjs": "^1.11.7",
     "event-source-polyfill": "^1.0.31",
