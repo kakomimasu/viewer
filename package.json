@@ -31,7 +31,7 @@
     "react-inspector": "^6.0.1",
     "react-markdown": "^8.0.7",
     "react-resize-detector": "^8.0.4",
-    "recharts": "^2.4.3",
+    "recharts": "^2.7.2",
     "redoc": "2.0.0"
   },
   "devDependencies": {
