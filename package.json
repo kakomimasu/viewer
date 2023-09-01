@@ -21,7 +21,7 @@
     "dayjs": "^1.11.7",
     "event-source-polyfill": "^1.0.31",
     "firebase": "^9.17.2",
-    "firebaseui": "^6.0.2",
+    "firebaseui": "^6.1.0",
     "glob": "^9.3.0",
     "next": "12.3.4",
     "react": "17.0.2",
