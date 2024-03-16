@@ -44,10 +44,10 @@ const Detail: NextPage<{}> = () => {
     } else return id_;
   })();
 
-  const { kkmmUser } = useContext(UserContext);
+  const authedUser = useContext(UserContext);
 
   const [user, setUser] = useState<User | undefined | null>(undefined);
-  const myGames = useGameStream(wsReq, kkmmUser?.bearerToken);
+  const myGames = useGameStream(wsReq, authedUser?.bearerToken);
 
   const [games, setGames] = useState<Game[]>([]);
   const updateGames = useCallback(async () => {
@@ -102,10 +102,10 @@ const Detail: NextPage<{}> = () => {
   }, [user, games]);
 
   const getUser = useCallback(async () => {
-    if (kkmmUser === undefined) return;
+    if (authedUser === undefined) return;
     if (id === undefined) {
       // ログインしているユーザを表示
-      setUser(kkmmUser);
+      setUser(authedUser);
     } else {
       const res = await apiClient.getUser(id);
       if (res.success === false) {
@@ -115,14 +115,14 @@ const Detail: NextPage<{}> = () => {
         setUser(user);
       }
     }
-  }, [id, kkmmUser]);
+  }, [id, authedUser]);
   useEffect(() => {
     getUser();
   }, [getUser]);
 
   const isSelf = useMemo(
-    () => typeof kkmmUser?.bearerToken === "string",
-    [kkmmUser?.bearerToken]
+    () => typeof authedUser?.bearerToken === "string",
+    [authedUser?.bearerToken]
   );
 
   return (
