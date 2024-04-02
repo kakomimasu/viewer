@@ -64,7 +64,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
   }>({ value: "", q: fixedUsers });
   const [usersHelperText, setUsersHelperText] = useState("");
 
-  const { kkmmUser } = useContext(UserContext);
+  const kkmmUser = useContext(UserContext).user;
 
   const submit = async () => {
     const sendData = { ...data };

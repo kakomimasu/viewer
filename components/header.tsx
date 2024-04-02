@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import Image from "next/image";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
@@ -15,10 +15,11 @@ import { signOut } from "firebase/auth";
 import { auth } from "../src/firebase";
 import Link from "../src/link";
 import { UserContext } from "../src/userStore";
+import { apiClient, host } from "../src/apiClient";
 import { Box, Divider, IconButton, ListItemIcon } from "@mui/material";
 
 export default function Header() {
-  const { firebaseUser, kkmmUser } = useContext(UserContext);
+  const user = useContext(UserContext).user;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
     null
@@ -35,11 +36,20 @@ export default function Header() {
 
   const logOut = async () => {
     try {
-      await signOut(auth);
+      console.log("ログアウト");
+      document.cookie = "site-session=; max-age=0";
+      // await signOut(auth);
     } catch (error) {
       console.log(`ログアウト時にエラーが発生しました (${error})`);
     }
   };
+
+  const addSuccessUrl = (url: string) => {
+    console.log(window);
+    return url + "?success_url=http://localhost:3000";
+  };
+
+  // console.log(host);
 
   return (
     <AppBar position="sticky">
@@ -133,52 +143,58 @@ export default function Header() {
             </Link>
           </Box>
         </Box>
-        {kkmmUser !== undefined && (
+        {user ? (
           <>
-            {kkmmUser ? (
-              <>
-                <div
-                  aria-controls="user-icon"
-                  onClick={accountMenuOpen}
-                  style={{ cursor: "pointer" }}
+            <div
+              aria-controls="user-icon"
+              onClick={accountMenuOpen}
+              style={{ cursor: "pointer" }}
+            >
+              <Avatar src={user["avaterUrl"] ?? ""} />
+            </div>
+            <Menu
+              id="user-icon"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={accountMenuClose}
+            >
+              <Link href="/user/detail" color="inherit" underline="none">
+                <MenuItem onClick={accountMenuClose}>
+                  <ListItemIcon>
+                    <PersonIcon fontSize="small" />
+                  </ListItemIcon>
+                  マイページ
+                </MenuItem>
+              </Link>
+              <Divider />
+              <Link
+                href={addSuccessUrl(host.href + "v1/oauth/signout")}
+                color="inherit"
+                underline="none"
+              >
+                <MenuItem
+                  onClick={() => {
+                    // logOut();
+                    accountMenuClose();
+                  }}
                 >
-                  <Avatar src={firebaseUser.photoURL ?? ""} />
-                </div>
-                <Menu
-                  id="user-icon"
-                  anchorEl={anchorEl}
-                  keepMounted
-                  open={Boolean(anchorEl)}
-                  onClose={accountMenuClose}
-                >
-                  <Link href="/user/detail" color="inherit" underline="none">
-                    <MenuItem onClick={accountMenuClose}>
-                      <ListItemIcon>
-                        <PersonIcon fontSize="small" />
-                      </ListItemIcon>
-                      マイページ
-                    </MenuItem>
-                  </Link>
-                  <Divider />
-                  <MenuItem
-                    onClick={() => {
-                      logOut();
-                      accountMenuClose();
-                    }}
-                  >
-                    <ListItemIcon>
-                      <LogoutIcon fontSize="small" />
-                    </ListItemIcon>
-                    Log Out
-                  </MenuItem>
-                </Menu>
-              </>
-            ) : (
-              <Button href="/user/login" variant="outlined" color="inherit">
-                login
-              </Button>
-            )}
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  Log Out
+                </MenuItem>
+              </Link>
+            </Menu>
           </>
+        ) : (
+          <Button
+            href={addSuccessUrl(host.href + "v1/oauth/signin")}
+            variant="outlined"
+            color="inherit"
+          >
+            login
+          </Button>
         )}
       </Toolbar>
     </AppBar>
