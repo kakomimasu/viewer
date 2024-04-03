@@ -23,7 +23,7 @@ const flash = keyframes({
   "50%": { backgroundColor: "#00ff00" },
 });
 
-export default function Gamefield({
+export default function GameBoard({
   game: { field, players, log, nAgent },
   users,
   nextTiles,

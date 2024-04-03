@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useCallback, useContext, useState, useEffect } from "react";
 import Image from "next/image";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
@@ -44,12 +44,22 @@ export default function Header() {
     }
   };
 
-  const addSuccessUrl = (url: string) => {
-    console.log(window);
-    return url + "?success_url=http://localhost:3000";
-  };
-
-  // console.log(host);
+  const [origin, setOrigin] = useState("");
+  useEffect(() => {
+    console.log("effect", window.location.origin);
+    setOrigin(window.location.origin);
+  }, []);
+  const addSuccessUrl = useCallback(
+    (url: string) => {
+      console.log(origin);
+      if (origin) {
+        return url + "?success_url=" + origin;
+      } else {
+        return url;
+      }
+    },
+    [origin]
+  );
 
   return (
     <AppBar position="sticky">
