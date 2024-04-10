@@ -59,7 +59,7 @@ const Page: NextPage<Props> = ({
   definitionCode,
   clientJs,
 }) => {
-  const { kkmmUser } = useContext(UserContext);
+  const kkmmUser = useContext(UserContext).user;
 
   const logRef = useRef<HTMLDivElement>(null);
   const [code, setCode] = useState<string>(sampleCode);
