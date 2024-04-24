@@ -3,6 +3,9 @@ on:
   push:
   pull_request:
     branches: [main]
+env:
+  NEXT_PUBLIC_APISERVER_HOST: http://localhost:8880
+
 jobs:
   test:
     timeout-minutes: 60
@@ -19,11 +22,11 @@ jobs:
         with:
           repository: kakomimasu/server
           ref: main
-          path: server
+          path: ../server
       - name: Install server dependancies
-        run: cd server && deno task cache
+        run: cd ../server && deno task cache
       - name: Init server database
-        run: cd server && deno task db:init
+        run: cd ../server && deno task db:init
 
       - name: Install dependencies
         run: npm ci
