@@ -38,7 +38,7 @@ jobs:
         run: cd viewer && npx playwright install --with-deps
 
       - name: Start server
-        run: cd server && deno task start
+        run: cd server && deno task start &
 
       - name: Wait for server to start
         run: |
@@ -86,7 +86,7 @@ jobs:
         run: cd viewer && npm run build
 
       - name: Start Viewer
-        run: cd viewer && npm run start
+        run: cd viewer && npm run start &
 
       # - uses: JarvusInnovations/background-action@v1
       #   name: Viewer E2E & VRT Test
