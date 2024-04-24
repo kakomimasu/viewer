@@ -21,7 +21,7 @@ import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { ObjectInspector } from "react-inspector";
-import glob from "glob";
+import { glob } from "glob";
 
 import MatchTypeTab, { MatchType } from "../../components/matchTypeTab";
 import { UserContext } from "../../src/userStore";
