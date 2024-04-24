@@ -12,29 +12,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: viewer
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       # Server setup
-      - uses: denoland/setup-deno@v1
+
       - name: Clone server repo
         uses: actions/checkout@v4
         with:
           repository: kakomimasu/server
           ref: main
-          path: ../server
+          path: server
+      - uses: denoland/setup-deno@v1
       - name: Install server dependancies
-        run: cd ../server && deno task cache
+        run: cd server && deno task cache
       - name: Init server database
-        run: cd ../server && deno task db:init
+        run: cd server && deno task db:init
 
       - name: Install dependencies
-        run: npm ci
+        run: cd viewer && npm ci
       - name: Build Viewer
-        run: npm run build
+        run: cd viewer && npm run build
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: cd viewer && npx playwright install --with-deps
 
       - uses: JarvusInnovations/background-action@v1
         name: Viewer E2E & VRT Test
@@ -78,7 +81,7 @@ jobs:
         name: Viewer E2E & VRT Test
         with:
           run: |
-            npm run start
+            cd viewer && npm run start
 
           # PORT=$API_PORT node test/server.js &
           # PORT=2121 node test/server.js &
@@ -116,7 +119,7 @@ jobs:
       #   run: cd server && deno task start
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: cd viewer && npx playwright test
       - uses: actions/upload-artifact@v4
         if: always()
         with:
