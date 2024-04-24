@@ -37,84 +37,94 @@ jobs:
       - name: Install Playwright Browsers
         run: cd viewer && npx playwright install --with-deps
 
-      - uses: JarvusInnovations/background-action@v1
-        name: Viewer E2E & VRT Test
-        with:
-          run: |
-            cd server && deno task start
+      - name: Start server
+        run: cd server && deno task start
 
-          # PORT=$API_PORT node test/server.js &
-          # PORT=2121 node test/server.js &
-          # PORT=3232 node test/server.js &
-          # your step-level and job-level environment variables are available to your commands as-is
-          # npm install will count towards the wait-for timeout
-          # whenever possible, move unrelated scripts to a different step
-          # to background multiple processes: add & to the end of the command
+      - name: Wait for server to start
+        run: |
+          timeout 60s bash -c 'until curl -s http://localhost:8880; do sleep 1; done'
 
-          wait-on: |
-            http://localhost:8880
-          # http-get://localhost:2121
-          # tcp:localhost:3232
-          # file://very-important-secrets.txt
-          # IMPORTANT: to use environment variables in wait-on, you must use this form: ${{ env.VAR }}
-          # See wait-on section below for all resource types and prefixes
+      # - uses: JarvusInnovations/background-action@v1
+      #   name: Viewer E2E & VRT Test
+      #   with:
+      #     run: |
+      #       cd server && deno task start
 
-          tail: true # true = stderr,stdout
-          # This will allow you to monitor the progress live
+      #     # PORT=$API_PORT node test/server.js &
+      #     # PORT=2121 node test/server.js &
+      #     # PORT=3232 node test/server.js &
+      #     # your step-level and job-level environment variables are available to your commands as-is
+      #     # npm install will count towards the wait-for timeout
+      #     # whenever possible, move unrelated scripts to a different step
+      #     # to background multiple processes: add & to the end of the command
 
-          log-output-resume: stderr
-          # Eliminates previously output stderr log entries from post-run output
+      #     wait-on: |
+      #       http://localhost:8880
+      #     # http-get://localhost:2121
+      #     # tcp:localhost:3232
+      #     # file://very-important-secrets.txt
+      #     # IMPORTANT: to use environment variables in wait-on, you must use this form: ${{ env.VAR }}
+      #     # See wait-on section below for all resource types and prefixes
 
-          wait-for: 5m
+      #     tail: true # true = stderr,stdout
+      #     # This will allow you to monitor the progress live
 
-          log-output: stderr,stdout # same as true
+      #     log-output-resume: stderr
+      #     # Eliminates previously output stderr log entries from post-run output
 
-          log-output-if: failure
-          # failure = exit-early or timeout
+      #     wait-for: 5m
 
-          working-directory: backend
-          # sets the working directory (cwd) for the shell running commands
+      #     log-output: stderr,stdout # same as true
+
+      #     log-output-if: failure
+      #     # failure = exit-early or timeout
+
+      #     working-directory: backend
+      #     # sets the working directory (cwd) for the shell running commands
 
       - name: Build Viewer
         run: cd viewer && npm run build
 
-      - uses: JarvusInnovations/background-action@v1
-        name: Viewer E2E & VRT Test
-        with:
-          run: |
-            cd viewer && npm run start
+      - name: Start Viewer
+        run: cd viewer && npm run start
 
-          # PORT=$API_PORT node test/server.js &
-          # PORT=2121 node test/server.js &
-          # PORT=3232 node test/server.js &
-          # your step-level and job-level environment variables are available to your commands as-is
-          # npm install will count towards the wait-for timeout
-          # whenever possible, move unrelated scripts to a different step
-          # to background multiple processes: add & to the end of the command
+      # - uses: JarvusInnovations/background-action@v1
+      #   name: Viewer E2E & VRT Test
+      #   with:
+      #     run: |
+      #       cd viewer && npm run start
 
-          wait-on: |
-            http://localhost:3000
-          # http-get://localhost:2121
-          # tcp:localhost:3232
-          # file://very-important-secrets.txt
-          # IMPORTANT: to use environment variables in wait-on, you must use this form: ${{ env.VAR }}
-          # See wait-on section below for all resource types and prefixes
+      #     # PORT=$API_PORT node test/server.js &
+      #     # PORT=2121 node test/server.js &
+      #     # PORT=3232 node test/server.js &
+      #     # your step-level and job-level environment variables are available to your commands as-is
+      #     # npm install will count towards the wait-for timeout
+      #     # whenever possible, move unrelated scripts to a different step
+      #     # to background multiple processes: add & to the end of the command
 
-          tail: true # true = stderr,stdout
-          # This will allow you to monitor the progress live
+      #     wait-on: |
+      #       http://localhost:3000
+      #     # http-get://localhost:2121
+      #     # tcp:localhost:3232
+      #     # file://very-important-secrets.txt
+      #     # IMPORTANT: to use environment variables in wait-on, you must use this form: ${{ env.VAR }}
+      #     # See wait-on section below for all resource types and prefixes
 
-          log-output-resume: stderr
-          # Eliminates previously output stderr log entries from post-run output
+      #     tail: true # true = stderr,stdout
+      #     # This will allow you to monitor the progress live
 
-          wait-for: 5m
+      #     log-output-resume: stderr
+      #     # Eliminates previously output stderr log entries from post-run output
 
-          log-output: stderr,stdout # same as true
+      #     wait-for: 5m
 
-          log-output-if: failure
-          # failure = exit-early or timeout
+      #     log-output: stderr,stdout # same as true
 
-          working-directory: backend
-          # sets the working directory (cwd) for the shell running commands
+      #     log-output-if: failure
+      #     # failure = exit-early or timeout
+
+      #     working-directory: backend
+      #     # sets the working directory (cwd) for the shell running commands
 
       # - name: Start server
       #   run: cd server && deno task start
