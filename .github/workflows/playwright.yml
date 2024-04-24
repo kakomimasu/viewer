@@ -33,8 +33,6 @@ jobs:
 
       - name: Install dependencies
         run: cd viewer && npm ci
-      - name: Build Viewer
-        run: cd viewer && npm run build
 
       - name: Install Playwright Browsers
         run: cd viewer && npx playwright install --with-deps
@@ -76,6 +74,9 @@ jobs:
 
           working-directory: backend
           # sets the working directory (cwd) for the shell running commands
+
+      - name: Build Viewer
+        run: cd viewer && npm run build
 
       - uses: JarvusInnovations/background-action@v1
         name: Viewer E2E & VRT Test
