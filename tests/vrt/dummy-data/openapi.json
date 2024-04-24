@@ -1,0 +1,173 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Kakomimasu API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/matches/{gameId}/players": {
+      "post": {
+        "description": "指定したゲームIDのゲームに参加できます。\u003Cbr\u003E`guestName`を指定してゲスト参加する場合、認証情報は要りません。",
+        "summary": "ゲーム参加(ID指定)",
+        "tags": [
+          "Matches API"
+        ],
+        "security": [
+          {
+
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/MatchesRequestBase"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DryRunRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MatchesJoin"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MatchesRequestBase": {
+        "type": "object",
+        "properties": {
+          "spec": {
+            "type": "string",
+            "description": "プレイヤーの紹介文\u003Cbr\u003Eゲームの進行には影響しません。"
+          },
+          "guestName": {
+            "type": "string",
+            "description": "アカウントを作成せずに参加する際のプレイヤー名\u003Cbr\u003E認証情報がある場合、そちらが優先されます。"
+          }
+        },
+        "example": {
+          "spec": "機械学習で強化しました。",
+          "guestName": "John Doe"
+        }
+      },
+      "DryRunRequest": {
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "type": "boolean",
+            "description": "`true`にするとAPIのテストができます。"
+          }
+        }
+      }
+    },
+    "responses": {
+      "400": {
+        "description": "パラメータやリクエストの不備",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "errorCode",
+                "message"
+              ],
+              "properties": {
+                "errorCode": {
+                  "type": "integer",
+                  "description": "エラーコード"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "エラーメッセージ"
+                }
+              },
+              "example": {
+                "errorCode": 6,
+                "message": "invalid request"
+              }
+            }
+          }
+        }
+      },
+      "MatchesJoin": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "userId",
+                "spec",
+                "gameId",
+                "index",
+                "pic"
+              ],
+              "properties": {
+                "userId": {
+                  "type": "string",
+                  "description": "参加プレイヤーのユーザID"
+                },
+                "spec": {
+                  "type": "string",
+                  "description": "参加プレイヤーの紹介文"
+                },
+                "gameId": {
+                  "type": "string",
+                  "description": "参加したゲームID"
+                },
+                "index": {
+                  "type": "integer",
+                  "description": "参加したゲームのインデックス\u003Cbr\u003Eゲーム詳細を取得した際の`players`配列内の自分のインデックスを表しています。"
+                },
+                "pic": {
+                  "type": "string",
+                  "description": "行動送信時に必要となるトークン(プレイヤー識別コード)"
+                }
+              },
+              "example": {
+                "userId": "0cYf1k3rxI8dBoOw5qpgqtXmUnEK",
+                "spec": "",
+                "gameId": "833b167a-d40b-49e5-b0e2-9d3de3e8d532",
+                "index": 0,
+                "pic": "012345"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "[マイページ](https://kakomimasu.com/user/detail)にて取得したBearerTokenを使用します。"
+      }
+    }
+  }
+}

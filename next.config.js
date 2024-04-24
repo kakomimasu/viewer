@@ -3,5 +3,8 @@ module.exports = {
   reactStrictMode: true,
   images: {
     domains: ["img.shields.io", "i.imgur.com"]
+  },
+  experimental: {
+    testProxy: true,
   }
 }
