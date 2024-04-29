@@ -14,7 +14,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 import Link from "../src/link";
 import { UserContext } from "../src/userStore";
-import { apiClient, host } from "../src/apiClient";
+import { host } from "../src/apiClient";
 import { Box, Divider, IconButton, ListItemIcon } from "@mui/material";
 
 export default function Header() {
@@ -93,7 +93,8 @@ export default function Header() {
             }}
           >
             <Image
-              layout="fill"
+              width={101}
+              height={36}
               src="/img/kakomimasu-logo.svg"
               alt="囲みマスロゴ"
             />
@@ -107,7 +108,8 @@ export default function Header() {
             }}
           >
             <Image
-              layout="fill"
+              width={36}
+              height={36}
               src="/img/kakomimasu-icon2.png"
               alt="囲みマスロゴ"
             />

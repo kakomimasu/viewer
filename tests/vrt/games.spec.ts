@@ -31,7 +31,7 @@ test("/game", async ({ page, next }) => {
   await page.goto(`/game`);
 
   // gameBoardがリサイズ中になることがあるためタイムアウト
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000);
 
   await expect(page).toHaveScreenshot({ fullPage: true });
 });
@@ -58,11 +58,11 @@ test("/game/manual", async ({ page, browserName }) => {
 test("/game/playground", async ({ page }) => {
   await page.goto(`/game/playground`);
 
-  // monacoエディタがloadingになることがあるためタイムアウト
-  await page.waitForTimeout(500);
-
   // 対AI戦にする（フリーマッチだと参加待ちのゲームがあると表示されてしまうため）
   await page.getByRole("tab", { name: "対AI戦" }).click();
+
+  // monacoエディタがloadingになることがあるためタイムアウト
+  await page.waitForTimeout(1000);
 
   await expect(page).toHaveScreenshot({ fullPage: true });
 });

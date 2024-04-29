@@ -17,7 +17,7 @@ test("フィールド説明用エディタが正しく動作するかの確認",
 
   const cell = page.locator("div[data-cell='0-0-0']");
   const box = await cell.boundingBox();
-  console.log(box);
+  // console.log(box);
   expect(box, "セルのBBoxを取得").toBeTruthy();
   if (box === null) return;
 

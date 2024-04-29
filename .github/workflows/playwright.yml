@@ -17,9 +17,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      # Server setup
 
-      - name: Clone server repo
+      # Server setup
+      - name: Clone kakomimasu/server
         uses: actions/checkout@v4
         with:
           repository: kakomimasu/server
@@ -44,90 +44,11 @@ jobs:
         run: |
           timeout 60s bash -c 'until curl -s http://localhost:8880; do sleep 1; done'
 
-      # - uses: JarvusInnovations/background-action@v1
-      #   name: Viewer E2E & VRT Test
-      #   with:
-      #     run: |
-      #       cd server && deno task start
-
-      #     # PORT=$API_PORT node test/server.js &
-      #     # PORT=2121 node test/server.js &
-      #     # PORT=3232 node test/server.js &
-      #     # your step-level and job-level environment variables are available to your commands as-is
-      #     # npm install will count towards the wait-for timeout
-      #     # whenever possible, move unrelated scripts to a different step
-      #     # to background multiple processes: add & to the end of the command
-
-      #     wait-on: |
-      #       http://localhost:8880
-      #     # http-get://localhost:2121
-      #     # tcp:localhost:3232
-      #     # file://very-important-secrets.txt
-      #     # IMPORTANT: to use environment variables in wait-on, you must use this form: ${{ env.VAR }}
-      #     # See wait-on section below for all resource types and prefixes
-
-      #     tail: true # true = stderr,stdout
-      #     # This will allow you to monitor the progress live
-
-      #     log-output-resume: stderr
-      #     # Eliminates previously output stderr log entries from post-run output
-
-      #     wait-for: 5m
-
-      #     log-output: stderr,stdout # same as true
-
-      #     log-output-if: failure
-      #     # failure = exit-early or timeout
-
-      #     working-directory: backend
-      #     # sets the working directory (cwd) for the shell running commands
-
       - name: Build Viewer
         run: cd viewer && npm run build
 
       - name: Start Viewer
         run: cd viewer && npm run start &
-
-      # - uses: JarvusInnovations/background-action@v1
-      #   name: Viewer E2E & VRT Test
-      #   with:
-      #     run: |
-      #       cd viewer && npm run start
-
-      #     # PORT=$API_PORT node test/server.js &
-      #     # PORT=2121 node test/server.js &
-      #     # PORT=3232 node test/server.js &
-      #     # your step-level and job-level environment variables are available to your commands as-is
-      #     # npm install will count towards the wait-for timeout
-      #     # whenever possible, move unrelated scripts to a different step
-      #     # to background multiple processes: add & to the end of the command
-
-      #     wait-on: |
-      #       http://localhost:3000
-      #     # http-get://localhost:2121
-      #     # tcp:localhost:3232
-      #     # file://very-important-secrets.txt
-      #     # IMPORTANT: to use environment variables in wait-on, you must use this form: ${{ env.VAR }}
-      #     # See wait-on section below for all resource types and prefixes
-
-      #     tail: true # true = stderr,stdout
-      #     # This will allow you to monitor the progress live
-
-      #     log-output-resume: stderr
-      #     # Eliminates previously output stderr log entries from post-run output
-
-      #     wait-for: 5m
-
-      #     log-output: stderr,stdout # same as true
-
-      #     log-output-if: failure
-      #     # failure = exit-early or timeout
-
-      #     working-directory: backend
-      #     # sets the working directory (cwd) for the shell running commands
-
-      # - name: Start server
-      #   run: cd server && deno task start
 
       - name: Run Playwright tests
         run: cd viewer && npx playwright test
