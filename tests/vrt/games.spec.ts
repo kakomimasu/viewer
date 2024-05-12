@@ -61,8 +61,8 @@ test("/game/playground", async ({ page }) => {
   // 対AI戦にする（フリーマッチだと参加待ちのゲームがあると表示されてしまうため）
   await page.getByRole("tab", { name: "対AI戦" }).click();
 
-  // monacoエディタがloadingになることがあるためタイムアウト
-  await page.waitForTimeout(1000);
+  // monacoエディタがloading、スクロールバーが表示されたままになることがあるためタイムアウト
+  await page.waitForTimeout(2000);
 
   await expect(page).toHaveScreenshot({ fullPage: true });
 });
