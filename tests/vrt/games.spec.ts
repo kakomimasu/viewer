@@ -1,6 +1,10 @@
 import { test, expect } from "next/experimental/testmode/playwright";
 import { gameDummySSEData } from "../utils";
 
+test.beforeEach(async ({ page }) => {
+  await page.waitForFunction(() => document.fonts.ready);
+});
+
 test("/game", async ({ page, next }) => {
   next.onFetch((req) => {
     if (

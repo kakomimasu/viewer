@@ -36,6 +36,8 @@ export default class MyDocument extends Document {
               display: "flex",
               flexDirection: "column",
             },
+            fontFamily:
+              "Roboto,Helvetica,Noto Sans,Droid Sans,Hiragino Kaku Gothic ProN,Hiragino Sans,Meiryo,Arial Unicode MS,sans-serif",
           }}
         >
           <CssBaseline />

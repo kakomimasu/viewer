@@ -1,6 +1,10 @@
 import { test, expect } from "next/experimental/testmode/playwright";
 import { User } from "@kakomimasu/client-js";
 
+test.beforeEach(async ({ page }) => {
+  await page.waitForFunction(() => document.fonts.ready);
+});
+
 test("/user/detail/:id", async ({ page, next }) => {
   const id = "1";
 

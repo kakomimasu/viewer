@@ -26,6 +26,10 @@ const mockGetOpenapi = (next: NextFixture, path: string) => {
   });
 };
 
+test.beforeEach(async ({ page }) => {
+  await page.waitForFunction(() => document.fonts.ready);
+});
+
 test("/docs", async ({ page }) => {
   await page.goto("/docs");
 
