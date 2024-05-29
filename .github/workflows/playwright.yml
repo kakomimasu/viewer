@@ -1,0 +1,60 @@
+name: Playwright Tests
+on:
+  push:
+  pull_request:
+    branches: [main]
+env:
+  NEXT_PUBLIC_APISERVER_HOST: http://localhost:8880
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: viewer
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      # Server setup
+      - name: Clone kakomimasu/server
+        uses: actions/checkout@v4
+        with:
+          repository: kakomimasu/server
+          ref: main
+          path: server
+      - uses: denoland/setup-deno@v1
+      - name: Install server dependancies
+        run: cd server && deno task cache
+      - name: Init server database
+        run: cd server && deno task db:init
+
+      - name: Install dependencies
+        run: cd viewer && npm ci
+
+      - name: Install Playwright Browsers
+        run: cd viewer && npx playwright install --with-deps
+
+      - name: Start server
+        run: cd server && deno task start &
+
+      - name: Wait for server to start
+        run: |
+          timeout 60s bash -c 'until curl -s http://localhost:8880; do sleep 1; done'
+
+      - name: Build Viewer
+        run: cd viewer && npm run build
+
+      - name: Start Viewer
+        run: cd viewer && npm run start &
+
+      - name: Run Playwright tests
+        run: cd viewer && npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: viewer/playwright-report/
+          retention-days: 30

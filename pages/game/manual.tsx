@@ -393,12 +393,14 @@ const Page: NextPage = () => {
     const field = game.field;
     if (!field) return;
 
+    const agents = game.players[matchRes.index].agents;
+
     const enableAgents = controllerList
-      .filter((c) => c.agentId >= 0)
+      .filter((c) => c.agentId >= 0 && agents.length > c.agentId)
       .map((c) => c.agentId);
 
     const actions = enableAgents.map((agentId, i) => {
-      const agent = game.players[matchRes.index].agents[agentId];
+      const agent = agents[agentId];
       if (agent.x < 0) {
         // エージェントが配置されていない場合は既定の場所に配置
         // TODO: 既定の場所が配置できない場合はどうする？
@@ -435,7 +437,9 @@ const Page: NextPage = () => {
     if (game.status === "gaming") {
       setAxisList((prev) => {
         const axies = new Array(6).fill(0).map((_, i) => {
-          if (agents[i].x >= 0) return NextActions.NONE;
+          // 配置されていたら初期化
+          if (agents[i]?.x >= 0) return NextActions.NONE;
+          // 配置されていなかったらもう一度PUTを試みる
           else return prev[i];
         });
         return axies;
@@ -491,7 +495,9 @@ const Page: NextPage = () => {
   const nextTiles = useMemo(() => {
     if (!game || !matchRes) return;
     return axisList.map((axis, agentId) => {
-      const agent = game.players[matchRes.index].agents[agentId];
+      const agents = game.players[matchRes.index].agents;
+      if (agents.length <= agentId) return null;
+      const agent = agents[agentId];
       const x = agent.x + axis[0];
       const y = agent.y + axis[1];
       return { x, y };

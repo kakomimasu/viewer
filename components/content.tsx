@@ -18,7 +18,7 @@ const Content = (props: Props) => {
       }}
     >
       <Head>
-        <title>{props.title} - 囲みマス</title>
+        <title>{`${props.title} - 囲みマス`}</title>
       </Head>
       <h1>{props.title}</h1>
       {props.children}

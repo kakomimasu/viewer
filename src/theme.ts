@@ -10,6 +10,10 @@ declare module "@mui/material/styles" {
 }
 
 export default createTheme({
+  typography: {
+    fontFamily:
+      "Roboto,Helvetica,Noto Sans,Droid Sans,Hiragino Kaku Gothic ProN,Hiragino Sans,Meiryo,Arial Unicode MS,sans-serif",
+  },
   palette: {
     // Material Design Color(https://material.io/resources/color/#!/?view.left=1&view.right=1&primary.color=FBD5A8&secondary.color=58AFDA)
     primary: {

@@ -12,7 +12,7 @@ import datas from "./player_datas";
 type Props = {
   game: Pick<Game, "nAgent" | "field" | "players" | "log">;
   users: ReturnType<typeof useGameUsers>;
-  nextTiles?: { x: number; y: number }[];
+  nextTiles?: ({ x: number; y: number } | null)[];
 };
 
 const cellSize = 50;
@@ -354,6 +354,7 @@ export default function Gamefield({
             });
           })()}
           {nextTiles?.map((tile, aIdx) => {
+            if (!tile) return <></>;
             return (
               <Box
                 key={`tile-${tile.x}-${tile.y}`}

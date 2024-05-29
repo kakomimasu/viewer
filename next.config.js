@@ -2,6 +2,16 @@
 module.exports = {
   reactStrictMode: true,
   images: {
-    domains: ["img.shields.io", "i.imgur.com"]
+    dangerouslyAllowSVG: true,
+    remotePatterns: [
+      { protocol: "https", hostname: "img.shields.io", pathname: "/badge/*" },
+      {
+        protocol: "https",
+        hostname: "i.imgur.com", pathname: "/*"
+      }
+    ],
+  },
+  experimental: {
+    testProxy: true,
   }
 }
