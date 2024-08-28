@@ -179,7 +179,8 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
             setData({ ...data, nPlayer: parseInt(value) });
           }}
         >
-          <MenuItem value={2}>2</MenuItem>;
+          <MenuItem value={2}>2</MenuItem>
+          <MenuItem value={3}>3</MenuItem>
         </StyledTextField>
         <StyledAutoComplete
           multiple
