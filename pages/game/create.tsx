@@ -55,6 +55,9 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     nPlayer: parseInt((query["n-player"] as string) || "2"),
     playerIdentifiers: fixedUsers,
     tournamentId: (query["tournament-id"] as string) || "",
+    totalTurn: undefined as number | undefined,
+    operationSec: undefined as number | undefined,
+    transitionSec: undefined as number | undefined,
   });
   const [btnStatus, setBtnStatus] = useState(false);
   const [game, setGame] = useState<Game>();
@@ -63,6 +66,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     q: string[];
   }>({ value: "", q: fixedUsers });
   const [usersHelperText, setUsersHelperText] = useState("");
+  const [selectedBoard, setSelectedBoard] = useState<Board>();
 
   const kkmmUser = useContext(UserContext).user;
 
@@ -130,12 +134,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
 
   return (
     <Content title="ゲーム作成">
-      <Form
-        autoComplete="off"
-        onChange={() => {
-          console.log("form onchange");
-        }}
-      >
+      <Form autoComplete="off">
         <StyledTextField
           required
           name="name"
@@ -157,6 +156,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
           defaultValue=""
           onChange={({ target: { value } }) => {
             setData({ ...data, boardName: value });
+            setSelectedBoard(boards.find((b) => b.name === value));
           }}
           error={!data.boardName}
           helperText={data.boardName ? "" : "入力必須項目です"}
@@ -179,8 +179,55 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
             setData({ ...data, nPlayer: parseInt(value) });
           }}
         >
-          <MenuItem value={2}>2</MenuItem>;
+          <MenuItem value={2}>2</MenuItem>
+          <MenuItem value={3}>3</MenuItem>
+          <MenuItem value={4}>4</MenuItem>
         </StyledTextField>
+        <StyledTextField
+          name="totalTurn"
+          label="ターン数"
+          placeholder="3"
+          type="number"
+          value={data.totalTurn}
+          onChange={({ target: { value } }) => {
+            let totalTurn = parseInt(value);
+            if (totalTurn < 1) totalTurn = 1;
+            setData({ ...data, totalTurn });
+          }}
+          helperText={`指定なしでボードの既定ターン数（${
+            selectedBoard?.totalTurn ?? 30
+          }ターン）になります。`}
+        />
+        <StyledTextField
+          name="operationSec"
+          label="行動ステップ時間"
+          placeholder="3"
+          type="number"
+          value={data.operationSec}
+          onChange={({ target: { value } }) => {
+            let operationSec = parseInt(value);
+            if (operationSec < 1) operationSec = 1;
+            setData({ ...data, operationSec });
+          }}
+          helperText={`行動ステップ時間（1ターンのうち行動を受け付けている時間）。指定なしでボードの既定秒数（${
+            selectedBoard?.operationSec ?? 1
+          }秒）になります。`}
+        />
+        <StyledTextField
+          name="transitionSec"
+          label="遷移ステップ時間"
+          placeholder="3"
+          type="number"
+          value={data.transitionSec}
+          onChange={({ target: { value } }) => {
+            let transitionSec = parseInt(value);
+            if (transitionSec < 1) transitionSec = 1;
+            setData({ ...data, transitionSec });
+          }}
+          helperText={`遷移ステップ時間（1ターンのうち行動を受け付けていない時間）。指定なしでボードの既定秒数（${
+            selectedBoard?.transitionSec ?? 1
+          }秒）になります。`}
+        />
         <StyledAutoComplete
           multiple
           id="tags-standard"
