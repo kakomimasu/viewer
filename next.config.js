@@ -10,6 +10,7 @@ module.exports = {
         hostname: "i.imgur.com", pathname: "/*"
       }
     ],
+    unoptimized: true,
   },
   experimental: {
     testProxy: true,
