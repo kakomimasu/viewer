@@ -53,6 +53,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     name: (query.name as string) || "",
     boardName: "",
     nPlayer: parseInt((query["n-player"] as string) || "2"),
+    nAgent: undefined as number | undefined,
     playerIdentifiers: fixedUsers,
     tournamentId: (query["tournament-id"] as string) || "",
     totalTurn: undefined as number | undefined,
@@ -183,6 +184,21 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
           <MenuItem value={3}>3</MenuItem>
           <MenuItem value={4}>4</MenuItem>
         </StyledTextField>
+        <StyledTextField
+          name="totalTurn"
+          label="エージェント数"
+          placeholder="3"
+          type="number"
+          value={data.nAgent}
+          onChange={({ target: { value } }) => {
+            let nAgent = parseInt(value);
+            if (nAgent < 1) nAgent = 1;
+            setData({ ...data, nAgent });
+          }}
+          helperText={`指定なしでボードの既定エージェント数（${
+            selectedBoard?.nAgent ?? 4
+          }体）になります。`}
+        />
         <StyledTextField
           name="totalTurn"
           label="ターン数"
