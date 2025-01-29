@@ -25,7 +25,9 @@ jobs:
           repository: kakomimasu/server
           ref: main
           path: server
-      - uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.0.2
       - name: Install server dependancies
         run: cd server && deno task cache
       - name: Init server database
