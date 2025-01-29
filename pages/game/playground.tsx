@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { readFileSync } from "fs";
+import path from "node:path";
 import { GetStaticProps, NextPage } from "next";
 import {
   Box,
@@ -40,12 +41,24 @@ type Props = {
 type Log = { type: "log" | "error" | "info"; data: any[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const clientCode = readFileSync("editor-util/client.js", "utf-8");
-  const sampleCode = readFileSync("editor-util/sample.js", "utf-8");
-  const definitionCode = readFileSync("editor-util/client.d.ts", "utf-8");
+  const clientCode = readFileSync(
+    path.join(process.cwd(), "editor-util/client.js"),
+    "utf-8"
+  );
+  const sampleCode = readFileSync(
+    path.join(process.cwd(), "editor-util/sample.js"),
+    "utf-8"
+  );
+  const definitionCode = readFileSync(
+    path.join(process.cwd(), "editor-util/client.d.ts"),
+    "utf-8"
+  );
 
   const paths = await glob(
-    "node_modules/@kakomimasu/client-js/types/**/*.d.ts"
+    path.join(
+      process.cwd(),
+      "node_modules/@kakomimasu/client-js/types/**/*.d.ts"
+    )
   );
   const clientJs = paths.map((path) => readFileSync(path, "utf-8"));
   return {
