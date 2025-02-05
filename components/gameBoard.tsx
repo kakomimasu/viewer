@@ -209,7 +209,7 @@ export default function Gamefield({
     const idealHeight = (field.height + 2) * 50 + (field.height + 1) * 1;
     const scaleX = width / idealWidth;
     const scaleY = height / idealHeight;
-    return Math.min(scaleX, scaleY);
+    return Math.min(scaleX, scaleY).toFixed(3);
   }, [width, height, field]);
 
   const edgeCells = useMemo(() => {
@@ -301,124 +301,127 @@ export default function Gamefield({
     });
   }, [field, nAgent, log]);
 
+  const main = useMemo(() => {
+    return (
+      <>
+        {edgeCells}
+        {cells}
+        {players.map((p, pIdx) => {
+          return p.agents.flatMap((a, aIdx) => {
+            if (a.x < 0) return [];
+
+            const getAgentTransform = () => {
+              if (!field) return;
+              const w = field.width;
+              const h = field.height;
+              const transX = a.x < w / 2 ? "0%" : "-100%";
+              const transY = a.y < h / 2 ? "0%" : "-100%";
+              return `translate(${transX},${transY})`;
+            };
+
+            const top = (a.y + 1) * cellSize + a.y + 1;
+            const left = (a.x + 1) * cellSize + a.x + 1;
+            const agentData = datas[pIdx];
+
+            const userId = p.id;
+            const user = users.get(userId);
+            const agentHistory = () => {
+              // if (!log) return [];
+
+              const history = [];
+              for (let i = 0; i < log.length; i++) {
+                const act = log[i].players[pIdx].actions?.find(
+                  (e) => e.agentId === aIdx
+                );
+                let type = "";
+                if (act) {
+                  if (act.type === 1) type = "配置";
+                  else if (act.type === 3) type = "移動";
+                  else if (act.type === 4) type = "除去";
+                  else type = "停留";
+                } else {
+                  type = "停留";
+                }
+                history.push({ ...act, type, turn: i });
+              }
+              return history.reverse();
+            };
+            return [
+              <StyledAgent style={{ top, left }} key={`agent-${pIdx}-${aIdx}`}>
+                <Image
+                  src={agentData.agentUrl}
+                  width={cellSize * 0.8}
+                  height={cellSize * 0.8}
+                  alt={`agent player:${pIdx} n:${aIdx}`}
+                />
+                <StyledAgentIdBadge>{aIdx + 1}</StyledAgentIdBadge>
+              </StyledAgent>,
+              <StyledAgentDetailContainer
+                key={`detail-${pIdx}-${aIdx}`}
+                style={{ top, left }}
+              >
+                <StyledAgentDetail
+                  style={{
+                    border: `solid 4px ${agentData.colors[1]}`,
+                    transform: getAgentTransform(),
+                  }}
+                >
+                  <span>
+                    {user ? user.screenName : userId}
+                    {" : "}
+                    {aIdx + 1}
+                  </span>
+                  <br />
+                  <span>行動履歴</span>
+                  <StyledAgentDetailHistoryList>
+                    {agentHistory().map((e, i) => {
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            textDecoration: e.res ? "line-through" : "none",
+                          }}
+                        >
+                          T{e.turn}：
+                          {e.type !== "停留" && `x:${e.x} , y:${e.y}に`}
+                          {e.type}
+                        </div>
+                      );
+                    })}
+                  </StyledAgentDetailHistoryList>
+                </StyledAgentDetail>
+              </StyledAgentDetailContainer>,
+            ];
+          });
+        })}
+        {nextTiles?.map((tile, aIdx) => {
+          if (!tile) return <></>;
+          return (
+            <StyledNextTileContainer
+              key={`tile-${tile.x}-${tile.y}`}
+              style={{
+                gridRow: tile.y + 2,
+                gridColumn: tile.x + 2,
+              }}
+            >
+              <StyledNextTile>{aIdx + 1}</StyledNextTile>
+            </StyledNextTileContainer>
+          );
+        })}
+      </>
+    );
+  }, [cells, edgeCells, field, log, players, users, nextTiles]);
+
   return (
     <StyledFieldContainer ref={ref}>
-      {field && (
-        <StyledField
-          id="field"
-          style={{
-            transform: `scale(${scale})`,
-          }}
-        >
-          {edgeCells}
-          {cells}
-          {players.map((p, pIdx) => {
-            return p.agents.flatMap((a, aIdx) => {
-              if (a.x < 0) return [];
-
-              const getAgentTransform = () => {
-                if (!field) return;
-                const w = field.width;
-                const h = field.height;
-                const transX = a.x < w / 2 ? "0%" : "-100%";
-                const transY = a.y < h / 2 ? "0%" : "-100%";
-                return `translate(${transX},${transY})`;
-              };
-
-              const top = (a.y + 1) * cellSize + a.y + 1;
-              const left = (a.x + 1) * cellSize + a.x + 1;
-              const agentData = datas[pIdx];
-
-              const userId = p.id;
-              const user = users.get(userId);
-              const agentHistory = () => {
-                // if (!log) return [];
-
-                const history = [];
-                for (let i = 0; i < log.length; i++) {
-                  const act = log[i].players[pIdx].actions?.find(
-                    (e) => e.agentId === aIdx
-                  );
-                  let type = "";
-                  if (act) {
-                    if (act.type === 1) type = "配置";
-                    else if (act.type === 3) type = "移動";
-                    else if (act.type === 4) type = "除去";
-                    else type = "停留";
-                  } else {
-                    type = "停留";
-                  }
-                  history.push({ ...act, type, turn: i });
-                }
-                return history.reverse();
-              };
-              return [
-                <StyledAgent
-                  style={{ top, left }}
-                  key={`agent-${pIdx}-${aIdx}`}
-                >
-                  <Image
-                    src={agentData.agentUrl}
-                    width={cellSize * 0.8}
-                    height={cellSize * 0.8}
-                    alt={`agent player:${pIdx} n:${aIdx}`}
-                  />
-                  <StyledAgentIdBadge>{aIdx + 1}</StyledAgentIdBadge>
-                </StyledAgent>,
-                <StyledAgentDetailContainer
-                  key={`detail-${pIdx}-${aIdx}`}
-                  style={{ top, left }}
-                >
-                  <StyledAgentDetail
-                    style={{
-                      border: `solid 4px ${agentData.colors[1]}`,
-                      transform: getAgentTransform(),
-                    }}
-                  >
-                    <span>
-                      {user ? user.screenName : userId}
-                      {" : "}
-                      {aIdx + 1}
-                    </span>
-                    <br />
-                    <span>行動履歴</span>
-                    <StyledAgentDetailHistoryList>
-                      {agentHistory().map((e, i) => {
-                        return (
-                          <div
-                            key={i}
-                            style={{
-                              textDecoration: e.res ? "line-through" : "none",
-                            }}
-                          >
-                            T{e.turn}：
-                            {e.type !== "停留" && `x:${e.x} , y:${e.y}に`}
-                            {e.type}
-                          </div>
-                        );
-                      })}
-                    </StyledAgentDetailHistoryList>
-                  </StyledAgentDetail>
-                </StyledAgentDetailContainer>,
-              ];
-            });
-          })}
-          {nextTiles?.map((tile, aIdx) => {
-            if (!tile) return <></>;
-            return (
-              <StyledNextTileContainer
-                key={`tile-${tile.x}-${tile.y}`}
-                style={{
-                  gridRow: tile.y + 2,
-                  gridColumn: tile.x + 2,
-                }}
-              >
-                <StyledNextTile>{aIdx + 1}</StyledNextTile>
-              </StyledNextTileContainer>
-            );
-          })}
-        </StyledField>
-      )}
+      <StyledField
+        id="field"
+        style={{
+          transform: `scale(${scale})`,
+        }}
+      >
+        {main}
+      </StyledField>
     </StyledFieldContainer>
   );
 }
