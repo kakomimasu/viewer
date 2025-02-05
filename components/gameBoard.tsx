@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import Image from "next/image";
-import { keyframes } from "@mui/material/styles";
-import { Box } from "@mui/material";
+import { keyframes, styled } from "@mui/material/styles";
 import { useResizeDetector } from "react-resize-detector";
 
 import { type Game } from "../src/apiClient";
@@ -22,6 +21,180 @@ const flash = keyframes({
   "0%,100%": {},
   "50%": { backgroundColor: "#00ff00" },
 });
+
+const StyledFieldContainer = styled("div")({
+  height: "100%",
+  width: "100%",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+});
+
+const StyledField = styled("div")({
+  userSelect: "none",
+  display: "grid",
+  position: "static",
+  gridAutoColumns: "50px",
+  gridAutoRows: "50px",
+  gap: "1px",
+  lineHeight: "1",
+  fontSize: `15px`,
+});
+
+const StyledEdgeCell = styled("div")({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  fontWeight: "bold",
+});
+
+const StyledCell = styled("div")({
+  position: "relative",
+  aspectRatio: "1",
+  outline: "1px solid #555555",
+  height: "100%",
+  width: "100%",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "end",
+  justifyContent: "end",
+  padding: "4px",
+  "& .is-abs-text": {
+    textDecoration: "line-through",
+    color: "red",
+    fontSize: "80%",
+  },
+});
+const StyledAgent = styled("div")({
+  position: "absolute",
+  width: cellSize,
+  height: cellSize,
+  zIndex: 1,
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  transitionProperty: "top, left",
+  transitionDuration: "0.4s",
+});
+
+const StyledAgentIdBadge = styled("div")({
+  position: "absolute",
+  fontSize: "12px",
+  top: "3px",
+  left: "3px",
+  width: "1em",
+  height: "1em",
+  borderRadius: "50%",
+  backgroundColor: "yellow",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  p: "0.5em",
+});
+
+const StyledAgentDetailContainer = styled("div")({
+  position: "absolute",
+  width: cellSize,
+  height: cellSize,
+  zIndex: 3,
+
+  "&:hover > *": {
+    display: "block",
+  },
+});
+
+const StyledAgentDetail = styled("div")({
+  // agentの詳細を表示するcss
+  display: "none",
+  position: "absolute",
+  backgroundColor: "rgba(0, 0, 0, .7)",
+  color: "white",
+  top: "50%",
+  left: "50%",
+  textAlign: "center",
+  borderRadius: "10px",
+  padding: "4px",
+  filter: "drop-shadow(0 0 5px rgba(0, 0, 0, .7))",
+  width: "max-content",
+  lineHeight: "1.2",
+});
+
+const StyledAgentDetailHistoryList = styled("div")({
+  width: "13em",
+  height: "10em",
+  overflowY: "scroll",
+});
+
+const StyledNextTileContainer = styled("div")({
+  width: cellSize,
+  height: cellSize,
+  zIndex: 2,
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+const StyledNextTile = styled("div")({
+  position: "relative",
+  borderRadius: "50%",
+  border: "1px solid",
+  backgroundColor: "yellow",
+  backgroundClip: "content-box",
+  opacity: 0.8,
+  width: "50%",
+  height: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+function Cell({
+  point,
+  i,
+  nAgent,
+  x,
+  y,
+  bgColor,
+  nConflict,
+  isAbs,
+}: {
+  i: number;
+  x: number;
+  y: number;
+  point: number;
+  nAgent: number;
+  bgColor: string;
+  nConflict: number;
+  isAbs: boolean;
+}) {
+  const animation = useMemo(() => {
+    return nConflict > 0
+      ? `${flash} ${1 - (0.6 / nAgent) * nConflict}s linear infinite`
+      : "";
+  }, [nConflict, nAgent]);
+
+  return (
+    <StyledCell
+      {...{
+        // field-editorに必要
+        "data-cell": `${i}-${x}-${y}`,
+      }}
+      style={{
+        gridColumn: x + 2,
+        gridRow: y + 2,
+        backgroundColor: bgColor,
+        animation,
+      }}
+    >
+      <div className={isAbs ? "is-abs-text" : ""}>{point}</div>
+      {isAbs && <span>{Math.abs(point)}</span>}
+    </StyledCell>
+  );
+}
 
 export default function Gamefield({
   game: { field, players, log, nAgent },
@@ -47,19 +220,15 @@ export default function Gamefield({
           return new Array(field.width).fill(0).map((_, i) => {
             const x = i;
             return (
-              <Box
+              <StyledEdgeCell
                 key={`index-${x}-${y}`}
-                sx={{
+                style={{
                   gridColumn: x + 2,
                   gridRow: y,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontWeight: "bold",
                 }}
               >
                 {x}
-              </Box>
+              </StyledEdgeCell>
             );
           });
         })}
@@ -67,19 +236,15 @@ export default function Gamefield({
           return new Array(field.width).fill(0).map((_, i) => {
             const y = i;
             return (
-              <Box
+              <StyledEdgeCell
                 key={`index-${x}-${y}`}
-                sx={{
+                style={{
                   gridColumn: x,
                   gridRow: y + 2,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontWeight: "bold",
                 }}
               >
                 {y}
-              </Box>
+              </StyledEdgeCell>
             );
           });
         })}
@@ -87,33 +252,66 @@ export default function Gamefield({
     );
   }, [field?.height, field?.width]);
 
+  const cells = useMemo(() => {
+    if (!field) return <></>;
+
+    const lastErrActLog =
+      log?.slice(-1)[0]?.players.flatMap((e) => {
+        if (e.actions)
+          return [...e.actions.filter((a) => a.res > 0 && a.res < 3)];
+        else return [];
+      }) ?? [];
+
+    return field.points.map((point, i) => {
+      const tile = field.tiles[i];
+      const y = Math.floor(i / field.width);
+      const x = i % field.width;
+      const isAbs = point < 0 && tile.player !== null && tile.type === 0;
+
+      const bgColor = () => {
+        if (tile.player !== null) {
+          return datas[tile.player].colors[tile.type];
+        } else if (point < 0) {
+          const l = 100 - (Math.abs(point) * 50) / 16;
+          return `hsl(0,0%,${l}%)`;
+        } else if (point > 0) {
+          const l = 100 - (Math.abs(point) * 50) / 16;
+          return `hsl(60,100%,${l}%)`;
+        } else {
+          return "";
+        }
+      };
+      const nConflict = lastErrActLog.filter(
+        (a) => a.x === x && a.y === y
+      ).length;
+
+      return (
+        <Cell
+          key={i}
+          point={point}
+          nAgent={nAgent}
+          x={x}
+          y={y}
+          bgColor={bgColor()}
+          nConflict={nConflict}
+          i={i}
+          isAbs={isAbs}
+        />
+      );
+    });
+  }, [field, nAgent, log]);
+
   return (
-    <Box
-      sx={{
-        height: "100%",
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-      ref={ref}
-    >
+    <StyledFieldContainer ref={ref}>
       {field && (
-        <Box
+        <StyledField
           id="field"
-          sx={{
-            userSelect: "none",
-            display: "grid",
-            position: "static",
-            gridAutoColumns: "50px",
-            gridAutoRows: "50px",
-            gap: "1px",
-            lineHeight: "1",
-            fontSize: `15px`,
+          style={{
             transform: `scale(${scale})`,
           }}
         >
+          {edgeCells}
+          {cells}
           {players.map((p, pIdx) => {
             return p.agents.flatMap((a, aIdx) => {
               if (a.x < 0) return [];
@@ -138,10 +336,8 @@ export default function Gamefield({
 
                 const history = [];
                 for (let i = 0; i < log.length; i++) {
-                  const act = structuredClone(
-                    log[i].players[pIdx].actions?.find(
-                      (e) => e.agentId === aIdx
-                    )
+                  const act = log[i].players[pIdx].actions?.find(
+                    (e) => e.agentId === aIdx
                   );
                   let type = "";
                   if (act) {
@@ -157,23 +353,8 @@ export default function Gamefield({
                 return history.reverse();
               };
               return [
-                <Box
-                  sx={{
-                    position: "absolute",
-                    width: cellSize,
-                    height: cellSize,
-                    zIndex: 1,
-
-                    top,
-                    left,
-
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-
-                    transitionProperty: "top, left",
-                    transitionDuration: "0.4s",
-                  }}
+                <StyledAgent
+                  style={{ top, left }}
                   key={`agent-${pIdx}-${aIdx}`}
                 >
                   <Image
@@ -182,56 +363,14 @@ export default function Gamefield({
                     height={cellSize * 0.8}
                     alt={`agent player:${pIdx} n:${aIdx}`}
                   />
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      fontSize: "12px",
-                      top: "3px",
-                      left: "3px",
-                      width: "1em",
-                      height: "1em",
-                      borderRadius: "50%",
-                      backgroundColor: "yellow",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      p: "0.5em",
-                    }}
-                  >
-                    {aIdx + 1}
-                  </Box>
-                </Box>,
-                <Box
+                  <StyledAgentIdBadge>{aIdx + 1}</StyledAgentIdBadge>
+                </StyledAgent>,
+                <StyledAgentDetailContainer
                   key={`detail-${pIdx}-${aIdx}`}
-                  sx={{
-                    position: "absolute",
-                    width: cellSize,
-                    height: cellSize,
-                    zIndex: 3,
-
-                    top,
-                    left,
-
-                    "&:hover > *": {
-                      display: "block",
-                    },
-                  }}
+                  style={{ top, left }}
                 >
-                  <Box
-                    sx={{
-                      // agentの詳細を表示するcss
-                      display: "none",
-                      position: "absolute",
-                      backgroundColor: "rgba(0, 0, 0, .7)",
-                      color: "white",
-                      top: "50%",
-                      left: "50%",
-                      textAlign: "center",
-                      borderRadius: "10px",
-                      p: 1,
-                      filter: "drop-shadow(0 0 5px rgba(0, 0, 0, .7))",
-                      width: "max-content",
-                      lineHeight: "1.2",
+                  <StyledAgentDetail
+                    style={{
                       border: `solid 4px ${agentData.colors[1]}`,
                       transform: getAgentTransform(),
                     }}
@@ -243,13 +382,7 @@ export default function Gamefield({
                     </span>
                     <br />
                     <span>行動履歴</span>
-                    <Box
-                      sx={{
-                        width: "13em",
-                        height: "10em",
-                        overflowY: "scroll",
-                      }}
-                    >
+                    <StyledAgentDetailHistoryList>
                       {agentHistory().map((e, i) => {
                         return (
                           <div
@@ -264,134 +397,28 @@ export default function Gamefield({
                           </div>
                         );
                       })}
-                    </Box>
-                  </Box>
-                </Box>,
+                    </StyledAgentDetailHistoryList>
+                  </StyledAgentDetail>
+                </StyledAgentDetailContainer>,
               ];
             });
           })}
-          {edgeCells}
-          {(() => {
-            return field.points.map((point, i) => {
-              const tile: NonNullable<(typeof field)["tiles"]>[number] =
-                (field && field.tiles[i]) || { type: 0, player: null };
-              const y = Math.floor(i / field.width);
-              const x = i % field.width;
-              const isAbs =
-                point < 0 && tile.player !== null && tile.type === 0;
-
-              const bgColor = () => {
-                if (tile.player !== null) {
-                  return datas[tile.player].colors[tile.type];
-                } else if (point < 0) {
-                  const l = 100 - (Math.abs(point) * 50) / 16;
-                  return `hsl(0,0%,${l}%)`;
-                } else if (point > 0) {
-                  const l = 100 - (Math.abs(point) * 50) / 16;
-                  return `hsl(60,100%,${l}%)`;
-                }
-              };
-              const nConflict = log
-                ? (() => {
-                    const lastActLog = log
-                      .slice(-1)[0]
-                      ?.players.flatMap((e) => {
-                        if (e.actions) return [...e.actions];
-                        else return [];
-                      });
-                    const isConflict =
-                      lastActLog?.filter(
-                        (a) => a.res > 0 && a.res < 3 && a.x === x && a.y === y
-                      ) ?? [];
-                    return isConflict.length;
-                  })()
-                : 0;
-
-              return (
-                <Box
-                  key={i}
-                  {...{
-                    // field-editorに必要
-                    "data-cell": `${i}-${x}-${y}`,
-                  }}
-                  sx={{
-                    position: "relative",
-                    gridColumn: x + 2,
-                    gridRow: y + 2,
-                    aspectRatio: "1",
-                    backgroundColor: bgColor(),
-                    outline: "1px solid #555555",
-                    animation:
-                      nConflict > 0
-                        ? `${flash} ${
-                            1 - (0.6 / nAgent) * nConflict
-                          }s linear infinite`
-                        : "",
-                    height: "100%",
-                    width: "100%",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      right: "0.2em",
-                      bottom: "0.2em",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        textDecoration: isAbs ? "line-through" : undefined,
-                        color: isAbs ? "red" : undefined,
-                        fontSize: isAbs ? "80%" : undefined,
-                      }}
-                    >
-                      {point}
-                    </Box>
-                    {isAbs && <span>{Math.abs(point)}</span>}
-                  </Box>
-                </Box>
-              );
-            });
-          })()}
           {nextTiles?.map((tile, aIdx) => {
             if (!tile) return <></>;
             return (
-              <Box
+              <StyledNextTileContainer
                 key={`tile-${tile.x}-${tile.y}`}
-                sx={{
-                  width: cellSize,
-                  height: cellSize,
+                style={{
                   gridRow: tile.y + 2,
                   gridColumn: tile.x + 2,
-                  zIndex: 2,
-                  pointerEvents: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
                 }}
               >
-                <Box
-                  sx={{
-                    position: "relative",
-                    borderRadius: "50%",
-                    border: "1px solid",
-                    backgroundColor: "yellow",
-                    backgroundClip: "content-box",
-                    opacity: 0.8,
-                    width: "50%",
-                    height: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {aIdx + 1}
-                </Box>
-              </Box>
+                <StyledNextTile>{aIdx + 1}</StyledNextTile>
+              </StyledNextTileContainer>
             );
           })}
-        </Box>
+        </StyledField>
       )}
-    </Box>
+    </StyledFieldContainer>
   );
 }
