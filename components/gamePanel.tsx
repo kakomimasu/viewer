@@ -1,6 +1,5 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Skeleton, Button, Paper } from "@mui/material";
-import Countdown from "react-countdown";
 
 import GameBoard from "./gameBoard";
 import PointsGraph from "./pointsGraph";
@@ -10,6 +9,44 @@ import { Game } from "../src/apiClient";
 import { useGameUsers } from "../src/useGameUsers";
 import Link, { getUserHref, getVRGameHref } from "../src/link";
 import Turn from "./Turn";
+
+/**
+ * 次のターンまでの時間をカウントダウンするコンポーネント
+ * requestAnimationFrameを使って負荷低減
+ */
+function Countdown({ targetUnixTime }: { targetUnixTime: number }) {
+  const [diff, setDiff] = useState("0.0");
+  const [seconds, milliseconds] = useMemo(() => {
+    const [seconds, milliseconds] = diff.split(".");
+    return [seconds, milliseconds];
+  }, [diff]);
+
+  useEffect(() => {
+    let ref: number;
+    const countDown = () => {
+      const d = (targetUnixTime - Date.now()) / 1000;
+      if (d < 0) {
+        setDiff("0.0");
+        return;
+      }
+      const str = d.toFixed(1);
+      setDiff(str);
+
+      ref = requestAnimationFrame(countDown);
+    };
+    ref = requestAnimationFrame(countDown);
+
+    return () => cancelAnimationFrame(ref);
+  }, [targetUnixTime]);
+
+  return (
+    <>
+      <span>{seconds}</span>.
+      <span style={{ fontSize: "0.7em" }}>{milliseconds}</span>
+      <span style={{ fontSize: "0.5em" }}>秒</span>
+    </>
+  );
+}
 
 export default function GamePanel({
   game,
@@ -271,29 +308,7 @@ export default function GamePanel({
       >
         <Box sx={{ fontSize: "0.8em" }}>次のターンまで</Box>
         <Box sx={{ fontSize: "3em" }}>
-          {nextTurnTime ? (
-            <Countdown
-              key={nextTurnTime}
-              date={nextTurnTime}
-              intervalDelay={0}
-              precision={1}
-              renderer={({ seconds, milliseconds }) => {
-                return (
-                  <>
-                    <Box component="span">{seconds}</Box>.
-                    <Box component="span" sx={{ fontSize: "0.7em" }}>
-                      {(milliseconds.toString() + "0").slice(0, 1)}
-                    </Box>
-                    <Box component="span" sx={{ fontSize: "0.5em" }}>
-                      秒
-                    </Box>
-                  </>
-                );
-              }}
-            />
-          ) : (
-            "-"
-          )}
+          {nextTurnTime ? <Countdown targetUnixTime={nextTurnTime} /> : "-"}
         </Box>
       </Paper>
     </Box>
