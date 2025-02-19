@@ -38,7 +38,7 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "kakomimasu"
-          entrypoint: "jsr:@deno/nextjs-start"
+          entrypoint: "./.next/standalone/server.js"
           root: "."
           
           
