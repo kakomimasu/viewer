@@ -38,7 +38,7 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "viewer2"
-          entrypoint: "./server.cjs"
-          root: ".next/standalone"
+          entrypoint: "./.next/standalone/server.cjs"
+          root: "."
           
           
