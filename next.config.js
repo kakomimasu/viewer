@@ -14,5 +14,6 @@ module.exports = {
   },
   experimental: {
     testProxy: true,
-  }
+  },
+  output: 'standalone',
 }
