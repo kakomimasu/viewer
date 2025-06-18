@@ -1,9 +1,11 @@
 name: Deploy
 on:
   push:
-    branches: main
+    branches:
+      - main
   pull_request:
-    branches: main
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -40,5 +42,3 @@ jobs:
           project: "viewer2"
           entrypoint: "jsr:@deno/nextjs-start"
           root: "."
-          
-          
