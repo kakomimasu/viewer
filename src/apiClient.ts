@@ -1,5 +1,5 @@
 export * from "@kakomimasu/client-js";
-import ApiClient from "@kakomimasu/client-js";
+import { ApiClient } from "@kakomimasu/client-js";
 
 export type StreamMatchesReq = {
   q: string;
@@ -17,4 +17,4 @@ if (typeof window === "undefined") {
 if (!envApiHost) throw Error("envApiHost is not defined");
 
 export const host: URL = new URL(envApiHost);
-export const apiClient = new ApiClient(host);
+export const apiClient = new ApiClient({ baseUrl: new URL("v1", host).href });

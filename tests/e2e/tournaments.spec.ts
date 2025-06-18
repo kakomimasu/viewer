@@ -1,21 +1,18 @@
 import { test, expect } from "@playwright/test";
-import ApiClient from "@kakomimasu/client-js";
+import { ApiClient } from "@kakomimasu/client-js";
 import { tournamentDummyData } from "../utils";
 
-export const apiClient = new ApiClient("http://localhost:8880");
+export const apiClient = new ApiClient({ baseUrl: "http://localhost:8880" });
 
 test("トーナメントページの遷移を確認", async ({ page }) => {
   const tournament = await apiClient.createTournament(tournamentDummyData(1));
-
-  expect(tournament.success).toBeTruthy();
-  if (tournament.success === false) return;
 
   // 大会一覧ページに遷移
   await page.goto("/tournament");
 
   const createdCard = page
     .locator(".MuiCardContent-root", {
-      hasText: tournament.data.name,
+      hasText: tournament.name,
     })
     .first();
   createdCard.click();
@@ -23,7 +20,7 @@ test("トーナメントページの遷移を確認", async ({ page }) => {
   // 大会詳細ページに遷移したかの確認
   await expect(page.getByRole("heading", { name: "大会詳細" })).toBeVisible();
 
-  await apiClient.deleteTournament(tournament.data.id);
+  await apiClient.deleteTournament(tournament.id);
 });
 
 test("大会が正常に作成出来ているかの確認", async ({ page }) => {

@@ -10,9 +10,12 @@ export const useGameUsers = (inPlayerIds: string[]) => {
     const addUsers: Map<string, User | null> = new Map();
     for await (const playerId of playerIdsSet) {
       if (!users.has(playerId)) {
-        const res = await apiClient.getUser(playerId);
-        const user = res.success ? res.data : null;
-        addUsers.set(playerId, user);
+        try {
+          const res = await apiClient.getUser(playerId);
+          addUsers.set(playerId, res);
+        } catch (e) {
+          addUsers.set(playerId, null);
+        }
       }
     }
     if (addUsers.size > 0) {

@@ -1,5 +1,3 @@
-declare module "https://cdn.jsdelivr.net/gh/kakomimasu/client-js@main/esm/mod.js" {
-  import ApiClient from "@kakomimasu/client-js";
+declare module "https://esm.sh/jsr/@kakomimasu/client-js@0.1.0" {
   export * from "@kakomimasu/client-js";
-  export = ApiClient;
 }

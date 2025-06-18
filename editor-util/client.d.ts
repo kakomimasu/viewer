@@ -1,4 +1,8 @@
-import { Game, JoinMatchRes, ActionMatchReq } from "@kakomimasu/client-js";
+import {
+  Game,
+  JoinMatchResponse,
+  SetActionRequest,
+} from "@kakomimasu/client-js";
 
 declare global {
   const option: {
@@ -9,8 +13,8 @@ declare global {
 
   const DIR: [number, number][];
 
-  function oninit(fn: (game: Game, match: JoinMatchRes) => void): void;
-  function onturn(fn: (game: Game) => ActionMatchReq["actions"]): void;
+  function oninit(fn: (game: Game, match: JoinMatchResponse) => void): void;
+  function onturn(fn: (game: Game) => SetActionRequest["actions"]): void;
 
   function getAgents(): Game["players"][number]["agents"];
   function idx2xy(idx: number): { x: number; y: number };

@@ -23,10 +23,9 @@ import TuneIcon from "@mui/icons-material/Tune";
 import {
   apiClient,
   Game,
-  JoinMatchRes,
-  ApiRes,
+  JoinMatchResponse,
+  MatchesRequestBase,
   StreamMatchesReq,
-  JoinMatchReqBase,
 } from "../../src/apiClient";
 import { useGameUsers } from "../../src/useGameUsers";
 import { useGameStream } from "../../src/useGameStream";
@@ -225,10 +224,9 @@ const localStorageKey = "controllerSettings";
 
 const Page: NextPage = () => {
   const [matchType, setMatchType] = useState<MatchType>();
-  const [matchRes, setMatchRes] = useStateWithStorage<JoinMatchRes | undefined>(
-    "game/manual:matchRes",
-    undefined
-  );
+  const [matchRes, setMatchRes] = useStateWithStorage<
+    JoinMatchResponse | undefined
+  >("game/manual:matchRes", undefined);
   const query = useMemo<StreamMatchesReq | undefined>(() => {
     if (!matchRes) {
       if (matchType?.type === "free") {
@@ -426,7 +424,9 @@ const Page: NextPage = () => {
         return { agentId, x, y, type } as const;
       }
     });
-    apiClient.setAction(game.id, { actions }, matchRes.pic);
+    apiClient
+      .setAction(game.id, { actions }, { authMethods: { PIC: matchRes.pic } })
+      .catch((e) => {});
   }, [controllerList, game, matchRes, axisList]);
 
   useEffect(() => {
@@ -448,22 +448,22 @@ const Page: NextPage = () => {
   }, [game, matchRes]);
 
   const joinGame = useCallback(async () => {
-    const req: JoinMatchReqBase = { guestName: "guest" };
-    let matchRes: ApiRes<JoinMatchRes>;
-    if (matchType?.type === "gameId") {
-      matchRes = await apiClient.joinGameIdMatch(matchType.gameId, req);
-    } else if (matchType?.type === "ai") {
-      matchRes = await apiClient.joinAiMatch({
-        ...req,
-        aiName: matchType.aiName,
-        boardName: matchType.boardName,
-      });
-    } else {
-      matchRes = await apiClient.joinFreeMatch(req);
-    }
-    if (matchRes.success) {
-      setMatchRes(matchRes.data);
-    }
+    const req: MatchesRequestBase = { guestName: "guest" };
+    let matchRes: JoinMatchResponse;
+    try {
+      if (matchType?.type === "gameId") {
+        matchRes = await apiClient.joinGameIdMatch(matchType.gameId, req);
+      } else if (matchType?.type === "ai") {
+        matchRes = await apiClient.joinAiMatch({
+          ...req,
+          aiName: matchType.aiName,
+          boardName: matchType.boardName,
+        });
+      } else {
+        matchRes = await apiClient.joinFreeMatch(req);
+      }
+      setMatchRes(matchRes);
+    } catch (e) {}
   }, [matchType, setMatchRes]);
 
   const changeAgentController = useCallback(

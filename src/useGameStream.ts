@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { EventSourcePolyfill } from "event-source-polyfill";
 
-import { Game, host, StreamMatchesReq, StreamMatchesRes } from "./apiClient";
+import {
+  Game,
+  host,
+  StreamMatchesReq,
+  MatchesStreamGet200Response as StreamMatchesRes,
+} from "./apiClient";
 
 export const useGameStream = (req?: StreamMatchesReq, bearerToken?: string) => {
   const [games, setGames] = useState<Game[]>([]);

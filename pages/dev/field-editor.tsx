@@ -18,12 +18,10 @@ type GameProp = React.ComponentProps<typeof GameBoard>["game"];
 
 export const getStaticProps: GetStaticProps<{ boards: Board[] }> = async () => {
   const res = await apiClient.getBoards();
-  if (res.success) {
-    return {
-      props: { boards: res.data },
-      revalidate: 10,
-    };
-  } else throw new Error(res.data.message);
+  return {
+    props: { boards: res },
+    revalidate: 10,
+  };
 };
 
 export default function FieldEditor({

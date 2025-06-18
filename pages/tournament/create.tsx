@@ -7,7 +7,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 
 import {
   apiClient,
-  CreateTournamentReq,
+  CreateTournamentRequest,
   Tournament,
   User,
 } from "../../src/apiClient";
@@ -32,7 +32,7 @@ const StyledButton = styled(Button)({
 });
 
 export default function Create() {
-  const [data, setData] = useState<CreateTournamentReq>({
+  const [data, setData] = useState<CreateTournamentRequest>({
     name: "",
     organizer: "",
     type: "round-robin",
@@ -56,20 +56,23 @@ export default function Create() {
   };
 
   const submit = async () => {
-    const req = await apiClient.createTournament(data);
-    if (req.success) {
-      setTournament(req.data);
-    }
-    console.log(req);
+    try {
+      const req = await apiClient.createTournament(data);
+      setTournament(req);
+      console.log(req);
+    } catch (e) {}
   };
 
   const addHandleChange = async (
     event: React.ChangeEvent<{ value: string }>
   ) => {
     const value = event.target.value;
-    const req = await apiClient.getUsers(value);
+
     let q: typeof addUserInput.q = [];
-    if (req.success) q = req.data;
+    try {
+      const req = await apiClient.getUsers(value);
+      q = req;
+    } catch (e) {}
     //console.log(req);
     //if (req.errorCode) req = [];
     setAddUserInput({ value, helperText: "", q });

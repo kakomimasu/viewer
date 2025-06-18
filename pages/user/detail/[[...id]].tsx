@@ -52,11 +52,14 @@ const UserDeleteButton = ({ user }: { user: AuthedUser }) => {
   const handleClose = () => setDialogOpen(false);
 
   const buttonClick = async () => {
-    const res = await apiClient.deleteUserMe({}, `Bearer ${user.bearerToken}`);
-    if (res.success) {
+    try {
+      await apiClient.deleteUserMe(
+        {},
+        { authMethods: { Bearer: `Bearer ${user.bearerToken}` } }
+      );
       setDialogOpen(false);
       window.location.href = "/";
-    }
+    } catch (e) {}
   };
 
   return (
@@ -92,13 +95,13 @@ const UserBearerTokenArea = ({ user }: { user: AuthedUser }) => {
   const handleClose = () => setDialogOpen(false);
 
   const buttonClick = async () => {
-    const res = await apiClient.regenerateUserMeToken(
-      `Bearer ${user.bearerToken}`
-    );
-    if (res.success) {
-      setUser(res.data);
+    try {
+      const res = await apiClient.regenerateUserMeToken({
+        authMethods: { Bearer: `Bearer ${user.bearerToken}` },
+      });
+      setUser(res);
       setDialogOpen(false);
-    }
+    } catch (e) {}
   };
 
   return (
@@ -162,8 +165,10 @@ const Detail: NextPage<{}> = () => {
     const games: Game[] = [];
     if (user) {
       for (const gameId of user.gameIds) {
-        const res = await apiClient.getMatch(gameId);
-        if (res.success) games.push(res.data);
+        try {
+          const res = await apiClient.getMatch(gameId);
+          games.push(res);
+        } catch (e) {}
       }
     }
     setGames(games);
@@ -215,12 +220,12 @@ const Detail: NextPage<{}> = () => {
       // ログインしているユーザを表示
       setUser(kkmmUser);
     } else {
-      const res = await apiClient.getUser(id);
-      if (res.success === false) {
-        setUser(null);
-      } else {
-        const user = res.data;
+      try {
+        const res = await apiClient.getUser(id);
+        const user = res;
         setUser(user);
+      } catch (e) {
+        setUser(null);
       }
     }
   }, [id, kkmmUser]);

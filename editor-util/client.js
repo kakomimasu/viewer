@@ -20,7 +20,7 @@ function sleep(msec) {
   });
 }
 
-import ApiClient from "https://cdn.jsdelivr.net/gh/kakomimasu/client-js@v1.0.0-beta.15/esm/mod.js";
+import { ApiClient } from "https://esm.sh/jsr/@kakomimasu/client-js@0.1.0";
 
 const func = {
   init: async (game, match) => { },
@@ -40,9 +40,11 @@ const DIR = [
   [-1, -1],
 ];
 
-const apiClient = new ApiClient(option.apiHost);
+const apiClient = new ApiClient({
+  baseUrl: option.apiHost + "v1"
+});
 
-/** @type {import("@kakomimasu/client-js").JoinMatchRes}  */
+/** @type {import("@kakomimasu/client-js").JoinMatchResponse}  */
 let match;
 /** @type {import("@kakomimasu/client-js").Game}  */
 let game;
@@ -51,56 +53,58 @@ matching();
 
 async function matching() {
   const matchParam = { guestName: "ゲスト" };
-  const auth = option.bearerToken && `Bearer ${option.bearerToken}`;
+  const auth = option.bearerToken && `${option.bearerToken}`;
 
   let matchRes;
-  if (option.matchType.type === "ai") {
-    matchRes = await apiClient.joinAiMatch({ ...matchParam, aiName: option.matchType.aiName, boardName: option.matchType.boardName }, auth);
-  } else if (option.matchType.type === "gameId") {
-    matchRes = await apiClient.joinGameIdMatch(option.matchType.gameId, matchParam, auth)
-  } else {
-    matchRes = await apiClient.joinFreeMatch(matchParam, auth);
-  }
-
-  if (!matchRes.success) {
-    console.log(matchRes.data);
+  try {
+    if (option.matchType.type === "ai") {
+      matchRes = await apiClient.joinAiMatch({ ...matchParam, aiName: option.matchType.aiName, boardName: option.matchType.boardName }, { authMethods: { Bearer: auth } });
+    } else if (option.matchType.type === "gameId") {
+      matchRes = await apiClient.joinGameIdMatch(option.matchType.gameId, matchParam, { authMethods: { Bearer: auth } })
+    } else {
+      matchRes = await apiClient.joinFreeMatch(matchParam, { authMethods: { Bearer: auth } });
+    }
+  } catch (e) {
+    console.error(e.toString());
     throw Error("Match Error");
   }
-  match = matchRes.data;
+  match = matchRes;
   postMessage({ method: "match", data: match });
   // console.log("match!");
 
   do {
-    let gameRes = await apiClient.getMatch(match.gameId);
-    if (gameRes.success) game = gameRes.data;
-    else throw Error("Get Match Error");
-
+    try {
+      let gameRes = await apiClient.getMatch(match.gameId);
+      game = gameRes;
+    } catch (e) {
+      throw Error("Get Match Error");
+    }
     await sleep(100);
   } while (game.startedAtUnixTime === null);
 
   await func.init(game, match);
 
   while (true) {
-    const res = await apiClient.getMatch(match.gameId);
-    if (res.success) {
-      if (res.data.status === "ended") break;
+    try {
+      const res = await apiClient.getMatch(match.gameId);
+      if (res.status === "ended") break;
 
-      if (game.turn !== res.data.turn) {
+      if (game.turn !== res.turn) {
 
         const actions = await func.turn(game) ?? [];
 
         const actionRes = await apiClient.setAction(
           match.gameId,
           { actions },
-          match.pic,
+          { authMethods: { PIC: match.pic } }
         );
         //console.log("setActions", res);
         // if (actionRes.success === false) throw Error("Set Action Error");
 
         // console.log(actionRes);
-        game = res.data;
+        game = res;
       }
-    }
+    } catch (e) { }
     await sleep(100);
   }
   console.log("match end");
