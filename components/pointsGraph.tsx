@@ -5,7 +5,6 @@ import {
   Legend,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -30,12 +29,6 @@ const PointsGraph: NextPage<{
     });
   }, [game.log]);
 
-  const maxYAxisWidth = useMemo(() => {
-    const maxPoint = Math.max(...data.map(({ points }) => Math.max(...points)));
-    // console.log(maxPoint);
-    return maxPoint.toString().length;
-  }, [data]);
-
   const { width, height, ref } = useResizeDetector();
 
   return (
@@ -56,7 +49,7 @@ const PointsGraph: NextPage<{
           tickCount={game.totalTurn / 2}
           height={20}
         />
-        <YAxis width={maxYAxisWidth * 9} />
+        <YAxis width="auto" />
         <Tooltip labelFormatter={(props) => "Turn : " + (Number(props) + 1)} />
         <Legend />
 
