@@ -30,7 +30,7 @@
     "react-markdown": "^9.0.1",
     "react-resize-detector": "^11.0.1",
     "recharts": "^3.0.2",
-    "redoc": "2.1.5"
+    "redoc": "^2.5.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",
