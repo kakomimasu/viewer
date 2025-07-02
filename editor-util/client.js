@@ -20,7 +20,7 @@ function sleep(msec) {
   });
 }
 
-import ApiClient from "https://cdn.jsdelivr.net/gh/kakomimasu/client-js@main/esm/mod.js";
+import ApiClient from "https://cdn.jsdelivr.net/gh/kakomimasu/client-js@v1.0.0-beta.15/esm/mod.js";
 
 const func = {
   init: async (game, match) => { },
