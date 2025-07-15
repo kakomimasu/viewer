@@ -11,6 +11,7 @@ import { defineConfig, devices } from "next/experimental/testmode/playwright";
  */
 export default defineConfig({
   testDir: "./tests",
+  testMatch: "**/*.spec.ts",
   testIgnore: "**/vrt/**",
   /* Run tests in files in parallel */
   fullyParallel: true,
