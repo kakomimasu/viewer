@@ -36,7 +36,11 @@ export default defineConfig({
       maxDiffPixels: 100,
     },
   },
-
+  webServer: {
+    command: "npm run dev",
+    url: "http://localhost:3000",
+    reuseExistingServer: true,
+  },
   /* Configure projects for major browsers */
   projects: [
     {
