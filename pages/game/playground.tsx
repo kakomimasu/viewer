@@ -14,15 +14,14 @@ import {
 import PlayCircleIcon from "@mui/icons-material/PlayCircleFilled";
 import StopCircleIcon from "@mui/icons-material/StopCircle";
 import NotInterestedIcon from "@mui/icons-material/NotInterested";
-import CancelIcon from "@mui/icons-material/Cancel";
 import CodeIcon from "@mui/icons-material/Code";
 import ArticleIcon from "@mui/icons-material/Article";
 import VerticalSplitIcon from "@mui/icons-material/VerticalSplit";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { ObjectInspector } from "react-inspector";
 import { glob } from "glob";
+import { Console } from "console-feed";
 
 import MatchTypeTab, { MatchType } from "../../components/matchTypeTab";
 import { UserContext } from "../../src/userStore";
@@ -38,7 +37,7 @@ type Props = {
   definitionCode: string;
   clientJs: string[];
 };
-type Log = { type: "log" | "error" | "info"; data: any[] };
+type Log = { method: "log" | "error" | "info"; data: any[]; id: string };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const clientCode = readFileSync(
@@ -122,7 +121,14 @@ const Page: NextPage<Props> = ({
 
   const stop = () => {
     if (worker) {
-      setLog((prev) => [...prev, { type: "info", data: ["実行停止"] }]);
+      setLog((prev) => [
+        ...prev,
+        {
+          method: "info",
+          data: ["実行停止"],
+          id: prev.length.toString(),
+        },
+      ]);
       worker.terminate();
       setWorker(undefined);
       setGameUrl(undefined);
@@ -165,7 +171,7 @@ const Page: NextPage<Props> = ({
 
       const worker = new Worker(url, { type: "module" });
       worker.addEventListener("message", (event) => {
-        if (event.data.type === "match") {
+        if (event.data.method === "match") {
           setGameUrl(getGameHref(event.data.data.gameId));
         } else {
           setLog((prev) => [...prev, event.data]);
@@ -179,7 +185,10 @@ const Page: NextPage<Props> = ({
       setWorker(worker);
     };
 
-    setLog((prev) => [...prev, { type: "info", data: ["実行開始"] }]);
+    setLog((prev) => [
+      ...prev,
+      { method: "info", data: ["実行開始"], id: prev.length.toString() },
+    ]);
     if (editorMode !== "code+log" && switchEditor) {
       setEditorMode("log");
     }
@@ -426,42 +435,7 @@ const Page: NextPage<Props> = ({
               />
             </Box>
             <Box ref={logRef} sx={{ height: "100%", overflowY: "auto" }}>
-              {log.map((line, i) => {
-                return (
-                  <Box
-                    key={i}
-                    sx={{
-                      display: "flex",
-                      gap: 1,
-                      borderBottom: "solid 1px",
-                      borderColor: (t) => t.palette.divider,
-                      py: 0.2,
-                      px: 1,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        flexShrink: 0,
-                        backgroundColor: (t) => {
-                          if (line.type === "error")
-                            return t.palette.error.main;
-                          if (line.type === "info") return t.palette.info.main;
-                          else return t.palette.primary.main;
-                        },
-                        width: "5px",
-                      }}
-                    />
-                    {line.type === "error" && (
-                      <>
-                        <CancelIcon sx={{ fontSize: "1em" }} color="error" />
-                      </>
-                    )}
-                    {line.data.map((data, j) => {
-                      return <ObjectInspector data={data} key={j} />;
-                    })}
-                  </Box>
-                );
-              })}
+              <Console logs={log} />
             </Box>
           </Box>
         </Box>
