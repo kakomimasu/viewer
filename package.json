@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -23,10 +23,10 @@
     "dayjs": "^1.11.13",
     "event-source-polyfill": "^1.0.31",
     "glob": "^11.0.1",
-    "next": "^14.2.9",
-    "react": "^18.3.1",
+    "next": "15.4.1",
+    "react": "19.1.0",
     "react-code-blocks": "^0.1.6",
-    "react-dom": "^18.3.1",
+    "react-dom": "19.1.0",
     "react-markdown": "^9.0.1",
     "react-resize-detector": "^12.1.0",
     "recharts": "^3.0.2",
@@ -36,9 +36,9 @@
     "@playwright/test": "^1.47.0",
     "@types/event-source-polyfill": "^1.0.5",
     "@types/node": "22.5.4",
-    "@types/react": "^18.3.5",
+    "@types/react": "19.1.8",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.9",
+    "eslint-config-next": "15.4.1",
     "typescript": "^5.6.2"
   }
 }
