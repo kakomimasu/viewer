@@ -11,6 +11,7 @@ import { defineConfig, devices } from "next/experimental/testmode/playwright";
  */
 export default defineConfig({
   testDir: "./tests",
+  testMatch: "**/*.spec.ts",
   testIgnore: "**/vrt/**",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -35,7 +36,11 @@ export default defineConfig({
       maxDiffPixels: 100,
     },
   },
-
+  webServer: {
+    command: "npm run dev",
+    url: "http://localhost:3000",
+    reuseExistingServer: true,
+  },
   /* Configure projects for major browsers */
   projects: [
     {

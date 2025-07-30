@@ -4,10 +4,10 @@
 
 //** consoleをpostMessageに置き換え */
 console.log = (...args) => {
-  postMessage({ type: "log", data: args });
+  postMessage({ method: "log", data: args });
 };
 console.error = (...args) => {
-  postMessage({ type: "error", data: args, })
+  postMessage({ method: "error", data: args, })
 }
 
 addEventListener("unhandledrejection", (e) => {
@@ -20,7 +20,7 @@ function sleep(msec) {
   });
 }
 
-import ApiClient from "https://cdn.jsdelivr.net/gh/kakomimasu/client-js@main/esm/mod.js";
+import ApiClient from "https://cdn.jsdelivr.net/gh/kakomimasu/client-js@v1.0.0-beta.15/esm/mod.js";
 
 const func = {
   init: async (game, match) => { },
@@ -67,7 +67,7 @@ async function matching() {
     throw Error("Match Error");
   }
   match = matchRes.data;
-  postMessage({ type: "match", data: match });
+  postMessage({ method: "match", data: match });
   // console.log("match!");
 
   do {

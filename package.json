@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -16,30 +16,29 @@
     "@kakomimasu/client-js": "github:kakomimasu/client-js#v1.0.0-beta.15",
     "@monaco-editor/react": "^4.6.0",
     "@mui/icons-material": "^6.1.0",
-    "@mui/lab": "^6.0.0-beta.25",
+    "@mui/lab": "^6.0.1-beta.35",
     "@mui/material": "^6.1.0",
     "@netlify/plugin-nextjs": "^5.7.1",
+    "console-feed": "^3.8.0",
     "dayjs": "^1.11.13",
     "event-source-polyfill": "^1.0.31",
     "glob": "^11.0.1",
-    "next": "^14.2.9",
-    "react": "^18.3.1",
+    "next": "15.4.1",
+    "react": "19.1.0",
     "react-code-blocks": "^0.1.6",
-    "react-dom": "^18.3.1",
-    "react-inspector": "^6.0.2",
+    "react-dom": "19.1.0",
     "react-markdown": "^9.0.1",
-    "react-resize-detector": "^11.0.1",
-    "recharts": "^2.12.7",
-    "redoc": "2.1.5"
+    "react-resize-detector": "^12.1.0",
+    "recharts": "^3.0.2",
+    "redoc": "^2.5.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",
     "@types/event-source-polyfill": "^1.0.5",
     "@types/node": "22.5.4",
-    "@types/react": "^18.3.5",
-    "@types/recharts": "^1.8.29",
+    "@types/react": "19.1.8",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.9",
+    "eslint-config-next": "15.4.1",
     "typescript": "^5.6.2"
   }
 }

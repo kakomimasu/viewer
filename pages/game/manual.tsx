@@ -150,7 +150,7 @@ function useKeyDirection(useKey: {
 }) {
   const [direction, setDirection] = useState<NextActionType>(NextActions.NONE);
   const rawDirection = useRef<NextActionType>(NextActions.NONE);
-  const changeTime = useRef<number>();
+  const changeTime = useRef<number>(undefined);
 
   const changeDirection = useCallback((dir: NextActionType) => {
     rawDirection.current = dir;
