@@ -244,9 +244,10 @@ const Page: NextPage<{
                       label="追加ユーザ"
                       onChange={async (event) => {
                         const value = event.target.value;
-                        const req = await apiClient.getUsers(value);
-                        if (!req.success) return;
-                        setAddUserList(req.data);
+                        try {
+                          const req = await apiClient.getUsers(value);
+                          setAddUserList(req);
+                        } catch (e) {}
                       }}
                       placeholder="id or name"
                       helperText={addUserHelperText}
@@ -257,14 +258,16 @@ const Page: NextPage<{
                 <Button
                   onClick={async () => {
                     if (!addUser) return;
-                    const req = await apiClient.addTournamentUser(
-                      tournament.id,
-                      {
-                        user: addUser.id,
-                      }
-                    );
-                    console.log(req);
-                    if (req.success) router.reload();
+                    try {
+                      const req = await apiClient.addTournamentUser(
+                        tournament.id,
+                        {
+                          user: addUser.id,
+                        }
+                      );
+                      console.log(req);
+                      router.reload();
+                    } catch (e) {}
                   }}
                   disabled={!addUser || Boolean(addUserHelperText)}
                 >
@@ -391,19 +394,27 @@ Page.getInitialProps = async (ctx) => {
   let id = ctx.query.id;
   if (id === undefined || Array.isArray(id)) id = "";
 
-  const res = await apiClient.getTournament(id);
-  const tournament = res.success ? res.data : undefined;
+  let tournament = undefined;
+  try {
+    const res = await apiClient.getTournament(id);
+    tournament = res;
+  } catch (e) {}
   const games: Game[] = [];
   const users: (User | undefined)[] = [];
   if (tournament) {
     for await (const gameId of tournament.gameIds) {
-      const res = await apiClient.getMatch(gameId);
-      if (res.success) games.push(res.data);
+      try {
+        const res = await apiClient.getMatch(gameId);
+        games.push(res);
+      } catch (e) {}
     }
     for await (const userId of tournament.users) {
-      const res = await apiClient.getUser(userId);
-      if (res.success) users.push(res.data);
-      else users.push(undefined);
+      try {
+        const res = await apiClient.getUser(userId);
+        users.push(res);
+      } catch (e) {
+        users.push(undefined);
+      }
     }
   }
 

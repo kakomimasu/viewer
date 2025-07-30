@@ -13,7 +13,7 @@
     "@emotion/react": "^11.13.3",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.13.0",
-    "@kakomimasu/client-js": "github:kakomimasu/client-js#v1.0.0-beta.15",
+    "@kakomimasu/client-js": "npm:@jsr/kakomimasu__client-js@0.1.0",
     "@monaco-editor/react": "^4.6.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/lab": "^6.0.1-beta.35",

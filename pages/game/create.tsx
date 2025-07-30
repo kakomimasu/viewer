@@ -36,12 +36,10 @@ const StyledButton = styled(Button)({
 
 export const getStaticProps: GetStaticProps<{ boards: Board[] }> = async () => {
   const res = await apiClient.getBoards();
-  if (res.success) {
-    return {
-      props: { boards: res.data },
-      revalidate: 10,
-    };
-  } else throw new Error(res.data.message);
+  return {
+    props: { boards: res },
+    revalidate: 10,
+  };
 };
 
 const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
@@ -76,14 +74,15 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     sendData.playerIdentifiers = sendData.playerIdentifiers.filter((e) =>
       Boolean(e)
     );
-    const res = await apiClient.createMatch(sendData);
-    console.log(res);
-    if (!res.success) return;
-    if (query.return) {
-      router.push("/tournament/detail/" + sendData.tournamentId);
-    } else {
-      setGame(res.data);
-    }
+    try {
+      const res = await apiClient.createMatch(sendData);
+      console.log(res);
+      if (query.return) {
+        router.push("/tournament/detail/" + sendData.tournamentId);
+      } else {
+        setGame(res);
+      }
+    } catch (e) {}
   };
 
   const submitPersonal = async () => {
@@ -94,10 +93,13 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     if (!kkmmUser?.bearerToken) return;
     const idToken = kkmmUser.bearerToken;
 
-    const res = await apiClient.createMatch(sendData, `Bearer ${idToken}`);
-    console.log(res);
-    if (!res.success) return;
-    setGame(res.data);
+    try {
+      const res = await apiClient.createMatch(sendData, {
+        authMethods: { Bearer: `Bearer ${idToken}` },
+      });
+      console.log(res);
+      setGame(res);
+    } catch (e) {}
   };
 
   // 参加ユーザのHeplerTextを更新
@@ -127,9 +129,11 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
     event: React.ChangeEvent<{ value: string }>
   ) => {
     const value = event.target.value;
-    const req = await apiClient.getUsers(value);
     let q: typeof addUserInput.q = [];
-    if (req.success) q = req.data.map((user) => user.name);
+    try {
+      const req = await apiClient.getUsers(value);
+      q = req.map((user) => user.name);
+    } catch (e) {}
     setAddUserInput({ value, q });
   };
 

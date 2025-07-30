@@ -54,10 +54,9 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   );
 
   const paths = await glob(
-    path.join(
-      process.cwd(),
-      "node_modules/@kakomimasu/client-js/types/**/*.d.ts"
-    )
+    path
+      .join(process.cwd(), "node_modules/@kakomimasu/client-js/**/*.d.ts")
+      .replace(/\\/g, "/")
   );
   const clientJs = paths.map((path) => readFileSync(path, "utf-8"));
   return {

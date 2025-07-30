@@ -17,7 +17,7 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPage from "@mui/icons-material/LastPage";
 
 import Link, { getGameHref, getUserHref } from "../src/link";
-import { Game, Player } from "../src/apiClient";
+import { Game, GamePlayersInner as Player } from "../src/apiClient";
 import { useGameUsers } from "../src/useGameUsers";
 
 const StatusCircle = ({ className }: { className?: string }) => {
