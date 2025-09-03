@@ -28,7 +28,7 @@
     "react-code-blocks": "^0.1.6",
     "react-dom": "19.1.0",
     "react-markdown": "^9.0.1",
-    "react-resize-detector": "^12.1.0",
+    "react-resize-detector": "^12.3.0",
     "recharts": "^3.0.2",
     "redoc": "^2.5.0"
   },
