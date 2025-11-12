@@ -19,7 +19,7 @@ import Box from "@mui/material/Box";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Cell, Pie, PieChart } from "recharts";
 import Section, { SubSection } from "../../../components/section";
 import Content from "../../../components/content";
 import GameList from "../../../components/gamelist";
@@ -41,7 +41,7 @@ const StyledContent = styled(Content)({
   flexDirection: "column",
 });
 
-const PieGraph = styled("div")({ height: 300 });
+const StyledPieChart = styled(PieChart)({ height: 300 });
 const wsReq: StreamMatchesReq = {
   q: "sort:startAtUnixTime-desc type:personal",
 };
@@ -260,66 +260,62 @@ const Detail: NextPage<{}> = () => {
                 </div>
               </Section>
               <Section title="勝敗記録">
-                <PieGraph>
-                  <ResponsiveContainer>
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        fill="#8884d8"
-                        label={({
-                          cx: cx_,
-                          cy: cy_,
-                          midAngle: midAngle_,
-                          innerRadius: innerRadius_,
-                          outerRadius: outerRadius_,
-                          percent: percent_,
-                        }) => {
-                          const [
-                            cx,
-                            cy,
-                            midAngle,
-                            innerRadius,
-                            outerRadius,
-                            percent,
-                          ] = [
-                            cx_,
-                            cy_,
-                            midAngle_,
-                            innerRadius_,
-                            outerRadius_,
-                            percent_,
-                          ].map(Number);
-                          const RADIAN = Math.PI / 180;
-                          const radius =
-                            innerRadius + (outerRadius - innerRadius) * 0.5;
-                          const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                          const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                <StyledPieChart responsive>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    fill="#8884d8"
+                    label={({
+                      cx: cx_,
+                      cy: cy_,
+                      midAngle: midAngle_,
+                      innerRadius: innerRadius_,
+                      outerRadius: outerRadius_,
+                      percent: percent_,
+                    }) => {
+                      const [
+                        cx,
+                        cy,
+                        midAngle,
+                        innerRadius,
+                        outerRadius,
+                        percent,
+                      ] = [
+                        cx_,
+                        cy_,
+                        midAngle_,
+                        innerRadius_,
+                        outerRadius_,
+                        percent_,
+                      ].map(Number);
+                      const RADIAN = Math.PI / 180;
+                      const radius =
+                        innerRadius + (outerRadius - innerRadius) * 0.5;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-                          return (
-                            <text
-                              x={x}
-                              y={y}
-                              fill="white"
-                              textAnchor={x > cx ? "start" : "end"}
-                              dominantBaseline="central"
-                            >
-                              {`${(percent * 100).toFixed(0)}%`}
-                            </text>
-                          );
-                        }}
-                        labelLine={false}
-                      >
-                        <Cell fill="#D92546" />
-                        <Cell fill="#A7D4D9" />
-                        <Cell fill="#F2BB9B" />
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </PieGraph>
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          fill="white"
+                          textAnchor={x > cx ? "start" : "end"}
+                          dominantBaseline="central"
+                        >
+                          {`${(percent * 100).toFixed(0)}%`}
+                        </text>
+                      );
+                    }}
+                    labelLine={false}
+                  >
+                    <Cell fill="#D92546" />
+                    <Cell fill="#A7D4D9" />
+                    <Cell fill="#F2BB9B" />
+                  </Pie>
+                </StyledPieChart>
               </Section>
               <Section title="参加ゲーム一覧">
                 <GameList games={games} />
