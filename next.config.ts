@@ -1,5 +1,6 @@
-/** @type {import('next').NextConfig} */
-module.exports = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     dangerouslyAllowSVG: true,
@@ -7,13 +8,15 @@ module.exports = {
       { protocol: "https", hostname: "img.shields.io", pathname: "/badge/*" },
       {
         protocol: "https",
-        hostname: "i.imgur.com", pathname: "/*"
-      }
+        hostname: "i.imgur.com",
+        pathname: "/*",
+      },
     ],
     unoptimized: true,
   },
   experimental: {
     testProxy: true,
   },
-  output: 'standalone',
-}
+};
+
+export default nextConfig;
