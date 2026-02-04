@@ -22,7 +22,7 @@
     "console-feed": "^3.8.0",
     "dayjs": "^1.11.19",
     "event-source-polyfill": "^1.0.31",
-    "glob": "^11.1.0",
+    "glob": "^13.0.0",
     "next": "16.0.8",
     "react": "19.2.3",
     "react-code-blocks": "^0.1.6",
