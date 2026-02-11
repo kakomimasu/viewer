@@ -1,5 +1,19 @@
 # Kakomimasu Viewer
 
+## セットアップ
+
+パッケージをインストールする
+
+```
+npm install
+```
+
+ローカル環境で実行する
+
+```
+npm run dev
+```
+
 ## 環境変数
 
 [Basic Features: Environment Variables | Next.js](https://nextjs-ja-translation-docs.vercel.app/docs/basic-features/environment-variables)
