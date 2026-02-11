@@ -42,21 +42,21 @@ type Log = { method: "log" | "error" | "info"; data: any[]; id: string };
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const clientCode = readFileSync(
     path.join(process.cwd(), "editor-util/client.js"),
-    "utf-8"
+    "utf-8",
   );
   const sampleCode = readFileSync(
     path.join(process.cwd(), "editor-util/sample.js"),
-    "utf-8"
+    "utf-8",
   );
   const definitionCode = readFileSync(
     path.join(process.cwd(), "editor-util/client.d.ts"),
-    "utf-8"
+    "utf-8",
   );
 
   const paths = await glob(
     path
       .join(process.cwd(), "node_modules/@kakomimasu/client-js/**/*.d.ts")
-      .replace(/\\/g, "/")
+      .replace(/\\/g, "/"),
   );
   const clientJs = paths.map((path) => readFileSync(path, "utf-8"));
   return {
@@ -81,11 +81,11 @@ const Page: NextPage<Props> = ({
 
   const [autoScroll, setAutoScroll] = useStateWithStorage<boolean>(
     "playground:autoScroll",
-    true
+    true,
   );
   const [switchEditor, setSwitchEditor] = useStateWithStorage<boolean>(
     "playground:switchEditor",
-    false
+    false,
   );
   const [editorMode, setEditorMode] = useStateWithStorage<
     "code" | "log" | "code+log"
@@ -159,7 +159,7 @@ const Page: NextPage<Props> = ({
       ],
       {
         type: "text/javascript",
-      }
+      },
     );
 
     const fr = new FileReader();
@@ -363,8 +363,8 @@ const Page: NextPage<Props> = ({
               editorMode === "code"
                 ? `"code code"`
                 : editorMode === "log"
-                ? `"log log"`
-                : `"code log"`,
+                  ? `"log log"`
+                  : `"code log"`,
             gridTemplateRows: `${codeAreaHeight}`,
           }}
         >

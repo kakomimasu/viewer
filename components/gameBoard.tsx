@@ -282,7 +282,7 @@ export default function Gamefield({
         }
       };
       const nConflict = lastErrActLog.filter(
-        (a) => a.x === x && a.y === y
+        (a) => a.x === x && a.y === y,
       ).length;
 
       return (
@@ -331,7 +331,7 @@ export default function Gamefield({
               const history = [];
               for (let i = 0; i < log.length; i++) {
                 const act = log[i].players[pIdx].actions?.find(
-                  (e) => e.agentId === aIdx
+                  (e) => e.agentId === aIdx,
                 );
                 let type = "";
                 if (act) {

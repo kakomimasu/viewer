@@ -32,15 +32,15 @@ export const Component: React.FC<{
 }> = ({ disabled = false, onChange }) => {
   const [type, setType] = useStateWithStorage<MatchType["type"]>(
     "matchTypeTab:type",
-    "free"
+    "free",
   );
   const [aiName, setAiName] = useStateWithStorage<AiName>(
     "matchTypeTab:aiName",
-    aiList[0].name
+    aiList[0].name,
   );
   const [boardName, setBoardName] = useStateWithStorage<string | undefined>(
     "matchTypeTab:boardName",
-    undefined
+    undefined,
   );
   const [gameId, setGameId] = useState<string>("");
 

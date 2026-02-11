@@ -182,7 +182,7 @@ function useKeyDirection(useKey: {
 
       changeDirection(dir);
     },
-    [changeDirection, useKey]
+    [changeDirection, useKey],
   );
   useEffect(() => {
     document.addEventListener("keydown", onKeyChange, false);
@@ -358,7 +358,7 @@ const Page: NextPage = () => {
         }, 50);
       }
     },
-    [controllerList]
+    [controllerList],
   );
 
   useEffect(() => {
@@ -406,7 +406,7 @@ const Page: NextPage = () => {
         let x = playerIndex === 0 ? 1 : field.width - 2;
 
         const y = Math.floor(
-          ((field.height - 1) / (enableAgents.length - 1)) * i
+          ((field.height - 1) / (enableAgents.length - 1)) * i,
         );
         const action = { agentId, x, y, type: "PUT" } as const;
         return action;
@@ -469,7 +469,7 @@ const Page: NextPage = () => {
   const changeAgentController = useCallback(
     (
       e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-      agentId: number
+      agentId: number,
     ) => {
       setControllerList((prev) => {
         const list = [...prev];
@@ -489,7 +489,7 @@ const Page: NextPage = () => {
         return list;
       });
     },
-    []
+    [],
   );
 
   const nextTiles = useMemo(() => {
@@ -596,7 +596,7 @@ const Page: NextPage = () => {
           >
             {new Array(6).fill(0).map((_, i) => {
               const controllerIndex = controllerList.findIndex(
-                (c) => c.agentId === i
+                (c) => c.agentId === i,
               );
               return (
                 <TextField

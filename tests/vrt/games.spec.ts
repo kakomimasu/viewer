@@ -12,7 +12,7 @@ test("/game", async ({ page, next }) => {
       req.url.match(new RegExp("^http://localhost:8880/v1/matches"))
     ) {
       const initialData = `event: message\ndata: ${JSON.stringify(
-        gameDummySSEData
+        gameDummySSEData,
       )}\n\n`;
       const encoder = new TextEncoder();
 
@@ -48,7 +48,7 @@ test("/game/create", async ({ page }) => {
 test("/game/manual", async ({ page, browserName }) => {
   test.skip(
     browserName === "webkit",
-    "PlaywrightのWebkitはnavigator.getGamepadsが未実装？のため。理想的には未実装の場合でも動作してほしい"
+    "PlaywrightのWebkitはnavigator.getGamepadsが未実装？のため。理想的には未実装の場合でも動作してほしい",
   );
 
   await page.goto(`/game/manual`);

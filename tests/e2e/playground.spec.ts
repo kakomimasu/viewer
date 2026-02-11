@@ -15,7 +15,7 @@ test("Playgroundが正常に動作するかの確認", async ({ page }) => {
   await expect(stopButton, "停止ボタンは有効になっている").toBeEnabled();
   await expect(
     page.getByRole("link", { name: "ゲーム詳細へ" }),
-    "ゲーム詳細に行くボタンは有効になっている"
+    "ゲーム詳細に行くボタンは有効になっている",
   ).toBeEnabled();
 
   // スクリプトの停止
@@ -23,6 +23,6 @@ test("Playgroundが正常に動作するかの確認", async ({ page }) => {
   await expect(startButton, "実行ボタンは有効になっている").toBeEnabled();
   await expect(
     page.getByRole("button", { name: "ゲーム詳細へ" }),
-    "ゲーム詳細に行くボタンは無効になっている"
+    "ゲーム詳細に行くボタンは無効になっている",
   ).toBeDisabled();
 });

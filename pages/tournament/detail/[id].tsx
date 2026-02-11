@@ -64,7 +64,7 @@ const Page: NextPage<{
     const game = games.find(
       (e) =>
         (e.reservedUsers[0] === mUserId && e.reservedUsers[1] === oUserId) ||
-        (e.reservedUsers[0] === oUserId && e.reservedUsers[1] === mUserId)
+        (e.reservedUsers[0] === oUserId && e.reservedUsers[1] === mUserId),
     );
     if (game) {
       const url = `/game/detail/` + game.id;
@@ -96,7 +96,7 @@ const Page: NextPage<{
     const params = new URLSearchParams();
     params.append(
       "name",
-      `${tournament.name}:${mUser.screenName} vs ${oUser.screenName}`
+      `${tournament.name}:${mUser.screenName} vs ${oUser.screenName}`,
     );
     params.append("n-player", "2");
     params.append("player", mUser.name);
@@ -263,7 +263,7 @@ const Page: NextPage<{
                         tournament.id,
                         {
                           user: addUser.id,
-                        }
+                        },
                       );
                       console.log(req);
                       router.reload();

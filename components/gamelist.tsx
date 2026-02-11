@@ -57,7 +57,7 @@ const GameList = (props: {
       games.flatMap((game) => {
         return game.players.map((p) => p.id);
       }),
-    [games]
+    [games],
   );
   const users = useGameUsers(playerIds);
 
@@ -120,7 +120,7 @@ const GameList = (props: {
             {(rowsPerPage > 0
               ? games.slice(
                   page * rowsPerPage,
-                  page * rowsPerPage + rowsPerPage
+                  page * rowsPerPage + rowsPerPage,
                 )
               : games
             ).map((game) => (
@@ -229,7 +229,7 @@ const GameList = (props: {
                   }}
                   onPageChange={(_, newPage) => setPage(newPage)}
                   onRowsPerPageChange={(
-                    event: React.ChangeEvent<{ value: string }>
+                    event: React.ChangeEvent<{ value: string }>,
                   ) => {
                     setRowsPerPage(parseInt(event.target.value, 10));
                     setPage(0);
@@ -251,32 +251,32 @@ function TablePaginationActions(props: {
   rowsPerPage: number;
   onPageChange: (
     event: React.MouseEvent<HTMLButtonElement>,
-    newPage: number
+    newPage: number,
   ) => void;
 }) {
   const theme = useTheme();
   const { count, page, rowsPerPage, onPageChange } = props;
 
   const handleFirstPageButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement>
+    event: React.MouseEvent<HTMLButtonElement>,
   ) => {
     onPageChange(event, 0);
   };
 
   const handleBackButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement>
+    event: React.MouseEvent<HTMLButtonElement>,
   ) => {
     onPageChange(event, page - 1);
   };
 
   const handleNextButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement>
+    event: React.MouseEvent<HTMLButtonElement>,
   ) => {
     onPageChange(event, page + 1);
   };
 
   const handleLastPageButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement>
+    event: React.MouseEvent<HTMLButtonElement>,
   ) => {
     onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
   };

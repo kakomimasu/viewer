@@ -9,13 +9,9 @@
       "post": {
         "description": "指定したゲームIDのゲームに参加できます。\u003Cbr\u003E`guestName`を指定してゲスト参加する場合、認証情報は要りません。",
         "summary": "ゲーム参加(ID指定)",
-        "tags": [
-          "Matches API"
-        ],
+        "tags": ["Matches API"],
         "security": [
-          {
-
-          },
+          {},
           {
             "Bearer": []
           }
@@ -93,10 +89,7 @@
           "application/json": {
             "schema": {
               "type": "object",
-              "required": [
-                "errorCode",
-                "message"
-              ],
+              "required": ["errorCode", "message"],
               "properties": {
                 "errorCode": {
                   "type": "integer",
@@ -121,13 +114,7 @@
           "application/json": {
             "schema": {
               "type": "object",
-              "required": [
-                "userId",
-                "spec",
-                "gameId",
-                "index",
-                "pic"
-              ],
+              "required": ["userId", "spec", "gameId", "index", "pic"],
               "properties": {
                 "userId": {
                   "type": "string",
