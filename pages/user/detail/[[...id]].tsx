@@ -252,11 +252,6 @@ const Detail: NextPage<{}> = () => {
                   <SubSection title="表示名">{user.screenName}</SubSection>
                   <SubSection title="ユーザネーム">{user.name}</SubSection>
                   <SubSection title="ユーザID">{user.id}</SubSection>
-                  {"bearerToken" in user && (
-                    <SubSection title="BearerToken(この値は他人に教えないようにしてください)">
-                      {user.bearerToken}
-                    </SubSection>
-                  )}
                 </div>
               </Section>
               <Section title="勝敗記録">
