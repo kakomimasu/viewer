@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test("手動対戦が正しく実行できるかの確認", async ({ page, browserName }) => {
   test.skip(
     browserName === "webkit",
-    "PlaywrightのWebkitはnavigator.getGamepadsが未実装？のため。理想的には未実装の場合でも動作してほしい"
+    "PlaywrightのWebkitはnavigator.getGamepadsが未実装？のため。理想的には未実装の場合でも動作してほしい",
   );
 
   const startButton = page.getByRole("button", { name: "参加する" });
@@ -22,7 +22,7 @@ test("手動対戦が正しく実行できるかの確認", async ({ page, brows
   await expect(stopButton, "停止ボタンは有効になっている").toBeEnabled();
   await expect(
     gameDetailButton,
-    "ゲーム詳細に行くボタンは有効になっている"
+    "ゲーム詳細に行くボタンは有効になっている",
   ).toBeEnabled();
 
   // スクリプトの停止
@@ -30,6 +30,6 @@ test("手動対戦が正しく実行できるかの確認", async ({ page, brows
   await expect(startButton, "実行ボタンは有効になっている").toBeEnabled();
   await expect(
     gameDetailButton,
-    "ゲーム詳細に行くボタンは無効になっている"
+    "ゲーム詳細に行くボタンは無効になっている",
   ).toBeDisabled();
 });

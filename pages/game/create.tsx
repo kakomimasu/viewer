@@ -72,7 +72,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
   const submit = async () => {
     const sendData = { ...data };
     sendData.playerIdentifiers = sendData.playerIdentifiers.filter((e) =>
-      Boolean(e)
+      Boolean(e),
     );
     try {
       const res = await apiClient.createMatch(sendData);
@@ -88,7 +88,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
   const submitPersonal = async () => {
     const sendData = { ...data, isMySelf: true };
     sendData.playerIdentifiers = sendData.playerIdentifiers.filter((e) =>
-      Boolean(e)
+      Boolean(e),
     );
     if (!kkmmUser?.bearerToken) return;
     const idToken = kkmmUser.bearerToken;
@@ -126,7 +126,7 @@ const Page = ({ boards }: InferGetStaticPropsType<typeof getStaticProps>) => {
   }, [data]);
 
   const addHandleChange = async (
-    event: React.ChangeEvent<{ value: string }>
+    event: React.ChangeEvent<{ value: string }>,
   ) => {
     const value = event.target.value;
     let q: typeof addUserInput.q = [];

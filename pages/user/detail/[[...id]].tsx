@@ -55,7 +55,7 @@ const UserDeleteButton = ({ user }: { user: AuthedUser }) => {
     try {
       await apiClient.deleteUserMe(
         {},
-        { authMethods: { Bearer: `Bearer ${user.bearerToken}` } }
+        { authMethods: { Bearer: `Bearer ${user.bearerToken}` } },
       );
       setDialogOpen(false);
       window.location.href = "/";
@@ -156,7 +156,7 @@ const Detail: NextPage<{}> = () => {
   const kkmmUser = useContext(UserContext).user;
 
   const [user, setUser] = useState<User | AuthedUser | undefined | null>(
-    undefined
+    undefined,
   );
   const myGames = useGameStream(wsReq, kkmmUser?.bearerToken);
 

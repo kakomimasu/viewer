@@ -9,6 +9,6 @@ test("ログイン時にGitHubのページに遷移するかの確認", async ({
 
   // 遷移を確認
   await expect(page, "GitHubログインページへ遷移する").toHaveURL(
-    /^https:\/\/github.com\/login/
+    /^https:\/\/github.com\/login/,
   );
 });

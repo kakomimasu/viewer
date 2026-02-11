@@ -34,7 +34,7 @@ const Page: NextPage<{ id?: string }> = ({ id }) => {
   const [req, setReq] = useState<StreamMatchesReq>();
   const query = useMemo(
     () => ["sort:startAtUnixTime-desc", `type:${gameType}`],
-    [gameType]
+    [gameType],
   );
   const selectedGameReq = useMemo(() => {
     const q = (id ? [`id:${id}`] : query).join(" ");

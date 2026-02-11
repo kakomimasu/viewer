@@ -21,7 +21,7 @@ export default function Header() {
   const user = useContext(UserContext).user;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
 
   const accountMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -46,7 +46,7 @@ export default function Header() {
         return url;
       }
     },
-    [successUrl]
+    [successUrl],
   );
 
   return (

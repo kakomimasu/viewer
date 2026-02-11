@@ -82,7 +82,7 @@ export default function FieldEditor({
         .map((e, i) =>
           e.agents.map((e_, j) => {
             return { agent: e_, player: i, n: j };
-          })
+          }),
         )
         .flat()
         .find((e) => e.agent.x === x && e.agent.y === y);

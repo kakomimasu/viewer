@@ -10,11 +10,11 @@ test("ゲーム作成が正しくできるかの確認", async ({ page }) => {
 
   await expect(
     createButton,
-    "ゲーム作成ボタンは無効になっている"
+    "ゲーム作成ボタンは無効になっている",
   ).toBeDisabled();
   await expect(
     myCreateButton,
-    "マイゲーム作成ボタンは無効になっている"
+    "マイゲーム作成ボタンは無効になっている",
   ).toBeDisabled();
 
   // ゲーム名を入力
@@ -26,11 +26,11 @@ test("ゲーム作成が正しくできるかの確認", async ({ page }) => {
 
   await expect(
     createButton,
-    "ゲーム作成ボタンは有効になっている"
+    "ゲーム作成ボタンは有効になっている",
   ).toBeEnabled();
   await expect(
     page.getByText("ボードプレビュー"),
-    "ボードプレビューが表示されている"
+    "ボードプレビューが表示されている",
   ).toBeEnabled();
 
   // プレイヤー数を入力
@@ -39,7 +39,7 @@ test("ゲーム作成が正しくできるかの確認", async ({ page }) => {
 
   await expect(
     myCreateButton,
-    "マイゲーム作成ボタンは無効になっている"
+    "マイゲーム作成ボタンは無効になっている",
   ).toBeDisabled();
 
   await createButton.click();

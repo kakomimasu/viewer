@@ -14,7 +14,7 @@ export const apiClient = new ApiClient("http://localhost:8880");
 const openapi = JSON.parse(
   readFileSync(resolve(__dirname, "./dummy-data/openapi.json"), {
     encoding: "utf-8",
-  })
+  }),
 );
 
 const mockGetOpenapi = (next: NextFixture, path: string) => {

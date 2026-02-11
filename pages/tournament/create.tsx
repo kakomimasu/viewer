@@ -64,7 +64,7 @@ export default function Create() {
   };
 
   const addHandleChange = async (
-    event: React.ChangeEvent<{ value: string }>
+    event: React.ChangeEvent<{ value: string }>,
   ) => {
     const value = event.target.value;
 
