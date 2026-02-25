@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { readFileSync } from "fs";
 import path from "node:path";
 import { GetStaticProps, NextPage } from "next";
@@ -19,8 +19,8 @@ import ArticleIcon from "@mui/icons-material/Article";
 import VerticalSplitIcon from "@mui/icons-material/VerticalSplit";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import RepeatIcon from "@mui/icons-material/Repeat";
+import { build, RolldownChunk } from "tsdown";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { glob } from "glob";
 import { Console } from "console-feed";
 
 import MatchTypeTab, { MatchType } from "../../components/matchTypeTab";
@@ -35,41 +35,46 @@ type Props = {
   sampleCode: string;
   clientCode: string;
   definitionCode: string;
-  clientJs: string[];
 };
 type Log = { method: "log" | "error" | "info"; data: any[]; id: string };
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  const clientCode = readFileSync(
-    path.join(process.cwd(), "editor-util/client.js"),
-    "utf-8",
+function getCode(chunks: RolldownChunk[], name: string): string {
+  const chunk = chunks.find(
+    (chunk) => chunk.type === "chunk" && chunk.name === name,
   );
+  if (chunk?.type === "chunk") {
+    return chunk.code;
+  }
+  return "";
+}
+
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  /** Playground実行用のファイルをビルドする */
+  const buildResult = await build({
+    entry: [path.join(process.cwd(), "editor-util/client.ts")],
+    dts: { resolver: "tsc" },
+    write: false,
+    platform: "browser",
+    minify: true,
+    inlineOnly: ["@kakomimasu/client-js"],
+    noExternal: ["@kakomimasu/client-js"],
+  });
+  const chunks = buildResult[0].chunks;
+
+  const clientCode = getCode(chunks, "client");
+  const definitionCode = getCode(chunks, "client.d");
+
   const sampleCode = readFileSync(
     path.join(process.cwd(), "editor-util/sample.js"),
     "utf-8",
   );
-  const definitionCode = readFileSync(
-    path.join(process.cwd(), "editor-util/client.d.ts"),
-    "utf-8",
-  );
 
-  const paths = await glob(
-    path
-      .join(process.cwd(), "node_modules/@kakomimasu/client-js/**/*.d.ts")
-      .replace(/\\/g, "/"),
-  );
-  const clientJs = paths.map((path) => readFileSync(path, "utf-8"));
   return {
-    props: { sampleCode, clientCode, definitionCode, clientJs },
+    props: { sampleCode, clientCode, definitionCode },
   };
 };
 
-const Page: NextPage<Props> = ({
-  sampleCode,
-  clientCode,
-  definitionCode,
-  clientJs,
-}) => {
+const Page: NextPage<Props> = ({ sampleCode, clientCode, definitionCode }) => {
   const kkmmUser = useContext(UserContext).user;
 
   const logRef = useRef<HTMLDivElement>(null);
@@ -195,14 +200,9 @@ const Page: NextPage<Props> = ({
 
   const monacoOnMount: OnMount = (_, monaco) => {
     // 型定義を追加
-    const libs: { content: string }[] = [];
-    clientJs.map((content) => {
-      libs.push({
-        content: `declare module "@kakomimasu/client-js" { ${content} }`,
-      });
-    });
-    libs.push({ content: definitionCode });
-    monaco.languages.typescript.javascriptDefaults.setExtraLibs(libs);
+    monaco.languages.typescript.javascriptDefaults.setExtraLibs([
+      { content: definitionCode },
+    ]);
   };
 
   useEffect(() => {

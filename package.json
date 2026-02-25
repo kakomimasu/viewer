@@ -23,13 +23,13 @@
     "console-feed": "^3.8.0",
     "dayjs": "^1.11.19",
     "event-source-polyfill": "^1.0.31",
-    "glob": "^13.0.0",
     "next": "16.0.8",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-resize-detector": "^12.3.0",
     "recharts": "^3.6.0",
-    "redoc": "^2.5.2"
+    "redoc": "^2.5.2",
+    "tsdown": "^0.20.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
