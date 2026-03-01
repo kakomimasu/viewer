@@ -28,7 +28,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-resize-detector": "^12.3.0",
-    "recharts": "^3.6.0",
+    "recharts": "^3.7.0",
     "redoc": "^2.5.2"
   },
   "devDependencies": {
