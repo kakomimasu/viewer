@@ -19,7 +19,7 @@ import Box from "@mui/material/Box";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
-import { Cell, Pie, PieChart } from "recharts";
+import { Pie, PieChart, PieSectorShapeProps, Sector } from "recharts";
 import Section, { SubSection } from "../../../components/section";
 import Content from "../../../components/content";
 import GameList from "../../../components/gamelist";
@@ -35,6 +35,8 @@ import {
 } from "../../../src/apiClient";
 import Link from "../../../src/link";
 
+const pieColors = ["#D92546", "#A7D4D9", "#F2BB9B"];
+
 const StyledContent = styled(Content)({
   display: "flex",
   alignItems: "center",
@@ -42,6 +44,9 @@ const StyledContent = styled(Content)({
 });
 
 const StyledPieChart = styled(PieChart)({ height: 300 });
+const PieShape = (props: PieSectorShapeProps) => (
+  <Sector {...props} fill={pieColors[props.index % pieColors.length]} />
+);
 const wsReq: StreamMatchesReq = {
   q: "sort:startAtUnixTime-desc type:personal",
 };
@@ -305,11 +310,8 @@ const Detail: NextPage<{}> = () => {
                       );
                     }}
                     labelLine={false}
-                  >
-                    <Cell fill="#D92546" />
-                    <Cell fill="#A7D4D9" />
-                    <Cell fill="#F2BB9B" />
-                  </Pie>
+                    shape={PieShape}
+                  ></Pie>
                 </StyledPieChart>
               </Section>
               <Section title="参加ゲーム一覧">
