@@ -63,11 +63,13 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
   const clientCode = getCode(chunks, "client");
   const definitionCode = getCode(chunks, "client.d");
+  console.log("clientCode", clientCode);
 
   const sampleCode = readFileSync(
     path.join(process.cwd(), "editor-util/sample.js"),
     "utf-8",
   );
+  console.log("sampleCode", sampleCode);
 
   return {
     props: { sampleCode, clientCode, definitionCode },
