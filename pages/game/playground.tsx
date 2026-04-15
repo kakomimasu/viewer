@@ -1,7 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { readFileSync } from "fs";
-import path from "node:path";
-import { GetStaticProps, NextPage } from "next";
+import { useContext, useEffect, useRef, useState } from "react";
+import { NextPage } from "next";
 import {
   Box,
   Button,
@@ -20,7 +18,6 @@ import VerticalSplitIcon from "@mui/icons-material/VerticalSplit";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { glob } from "glob";
 import { Console } from "console-feed";
 
 import MatchTypeTab, { MatchType } from "../../components/matchTypeTab";
@@ -31,45 +28,13 @@ import { getGameHref } from "../../src/link";
 import Head from "next/head";
 import { useStateWithStorage } from "../../src/useStateWithStorage";
 
-type Props = {
-  sampleCode: string;
-  clientCode: string;
-  definitionCode: string;
-  clientJs: string[];
-};
+import clientCode from "../../editor-util/dist/client.mjs?raw";
+import definitionCode from "../../editor-util/dist/client.d.mts?raw";
+import sampleCode from "../../editor-util/sample.js?raw";
+
 type Log = { method: "log" | "error" | "info"; data: any[]; id: string };
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  const clientCode = readFileSync(
-    path.join(process.cwd(), "editor-util/client.js"),
-    "utf-8",
-  );
-  const sampleCode = readFileSync(
-    path.join(process.cwd(), "editor-util/sample.js"),
-    "utf-8",
-  );
-  const definitionCode = readFileSync(
-    path.join(process.cwd(), "editor-util/client.d.ts"),
-    "utf-8",
-  );
-
-  const paths = await glob(
-    path
-      .join(process.cwd(), "node_modules/@kakomimasu/client-js/**/*.d.ts")
-      .replace(/\\/g, "/"),
-  );
-  const clientJs = paths.map((path) => readFileSync(path, "utf-8"));
-  return {
-    props: { sampleCode, clientCode, definitionCode, clientJs },
-  };
-};
-
-const Page: NextPage<Props> = ({
-  sampleCode,
-  clientCode,
-  definitionCode,
-  clientJs,
-}) => {
+const Page: NextPage = () => {
   const kkmmUser = useContext(UserContext).user;
 
   const logRef = useRef<HTMLDivElement>(null);
@@ -195,14 +160,9 @@ const Page: NextPage<Props> = ({
 
   const monacoOnMount: OnMount = (_, monaco) => {
     // 型定義を追加
-    const libs: { content: string }[] = [];
-    clientJs.map((content) => {
-      libs.push({
-        content: `declare module "@kakomimasu/client-js" { ${content} }`,
-      });
-    });
-    libs.push({ content: definitionCode });
-    monaco.languages.typescript.javascriptDefaults.setExtraLibs(libs);
+    monaco.languages.typescript.javascriptDefaults.setExtraLibs([
+      { content: definitionCode },
+    ]);
   };
 
   useEffect(() => {
