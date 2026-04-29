@@ -194,7 +194,13 @@ async function matching() {
           { authMethods: { PIC: __match.pic } },
         );
       }
-    } catch (e) {}
+    } catch (e) {
+      const isTransitionStepError =
+        e instanceof Error && e.message.includes('"errorCode":105');
+      if (!isTransitionStepError) {
+        console.error(e);
+      }
+    }
     await sleep(100);
   }
   console.log("match end");
