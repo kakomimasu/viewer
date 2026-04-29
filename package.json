@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "dev": "npm run build:editor-util && next dev --webpack",
+    "build": "npm run build:editor-util && next build --webpack",
+    "build:editor-util": "npx tsdown -c editor-util/tsdown.config.mts",
     "start": "next start",
     "lint": "eslint .",
     "fmt": "prettier -c ."
@@ -23,13 +24,13 @@
     "console-feed": "^3.8.0",
     "dayjs": "^1.11.19",
     "event-source-polyfill": "^1.0.31",
-    "glob": "^13.0.0",
     "next": "^16.2.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-resize-detector": "^12.3.0",
     "recharts": "^3.8.1",
-    "redoc": "^2.5.2"
+    "redoc": "^2.5.2",
+    "tsdown": "^0.20.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
@@ -39,6 +40,7 @@
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.2.3",
     "prettier": "^3.8.1",
+    "raw-loader": "^4.0.2",
     "typescript": "^5.9.3"
   }
 }

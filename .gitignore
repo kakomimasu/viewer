@@ -41,3 +41,5 @@ next-env.d.ts
 /playwright/.cache/
 
 certificates
+
+/editor-util/dist
