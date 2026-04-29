@@ -19,7 +19,7 @@ import Box from "@mui/material/Box";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
-import { Pie, PieChart, PieSectorShapeProps, Sector } from "recharts";
+import { Legend, Pie, PieChart } from "recharts";
 import Section, { SubSection } from "../../../components/section";
 import Content from "../../../components/content";
 import GameList from "../../../components/gamelist";
@@ -44,9 +44,6 @@ const StyledContent = styled(Content)({
 });
 
 const StyledPieChart = styled(PieChart)({ height: 300 });
-const PieShape = (props: PieSectorShapeProps) => (
-  <Sector {...props} fill={pieColors[props.index % pieColors.length]} />
-);
 const wsReq: StreamMatchesReq = {
   q: "sort:startAtUnixTime-desc type:personal",
 };
@@ -212,9 +209,9 @@ const Detail: NextPage<{}> = () => {
       });
     }
     const pieData = [
-      { name: "Win", value: result[0] },
-      { name: "Lose", value: result[1] },
-      { name: "Even", value: result[2] },
+      { name: "勝ち", value: result[0], fill: pieColors[0] },
+      { name: "負け", value: result[1], fill: pieColors[1] },
+      { name: "引き分け", value: result[2], fill: pieColors[2] },
     ];
     return pieData;
   }, [user, games]);
@@ -310,8 +307,8 @@ const Detail: NextPage<{}> = () => {
                       );
                     }}
                     labelLine={false}
-                    shape={PieShape}
-                  ></Pie>
+                  />
+                  <Legend />
                 </StyledPieChart>
               </Section>
               <Section title="参加ゲーム一覧">
