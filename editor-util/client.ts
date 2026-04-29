@@ -184,6 +184,7 @@ async function matching() {
       if (res.status === "ended") break;
 
       if (__game.turn !== res.turn) {
+        __game = res;
         const actions = ((await func.turn(__game as Game)) ??
           []) as SetActionRequest["actions"];
 
@@ -192,7 +193,6 @@ async function matching() {
           { actions },
           { authMethods: { PIC: __match.pic } },
         );
-        __game = res;
       }
     } catch (e) {}
     await sleep(100);
