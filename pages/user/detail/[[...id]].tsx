@@ -183,6 +183,7 @@ const Detail: NextPage<{}> = () => {
     {
       name: string;
       value: number;
+      fill: string;
     }[]
   >(() => {
     const result = [0, 0, 0]; // 勝ち、負け、引き分け
