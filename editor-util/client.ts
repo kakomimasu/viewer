@@ -125,7 +125,7 @@ globalThis.xy2idx = (x: number, y: number) => {
 };
 
 const apiClient = new ApiClient({
-  baseUrl: option.apiHost + "v1",
+  baseUrl: new URL("v1", option.apiHost).href,
 });
 
 /** 内部でのゲーム情報保持用 */
