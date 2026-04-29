@@ -4,7 +4,7 @@ import {
   JoinMatchResponse,
   SetActionRequest,
 } from "@kakomimasu/client-js";
-import { MatchType } from "../components/matchTypeTab";
+import type { MatchType } from "../components/matchTypeTab";
 
 type Expand<T> = T extends object
   ? T extends infer O
