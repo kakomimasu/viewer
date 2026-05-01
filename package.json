@@ -26,7 +26,7 @@
     "event-source-polyfill": "^1.0.31",
     "next": "^16.2.3",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react-dom": "19.2.5",
     "react-resize-detector": "^12.3.0",
     "recharts": "^3.8.1",
     "redoc": "^2.5.2",
