@@ -12,7 +12,6 @@ const nextConfig: NextConfig = {
         pathname: "/*",
       },
     ],
-    unoptimized: true,
   },
   experimental: {
     testProxy: true,

@@ -6,29 +6,20 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import { ThemeProvider, styled } from "@mui/material/styles";
-import { CacheProvider, EmotionCache } from "@emotion/react";
+import { AppCacheProvider } from "@mui/material-nextjs/v16-pagesRouter";
 
 import Footer from "../components/footer";
 import Header from "../components/header";
 
 import theme from "../src/theme";
-import createEmotionCache from "../src/createEmotionCache";
 import { host } from "../src/apiClient";
 import { StateProvider } from "../src/userStore";
-
-const clientSideEmotionCache = createEmotionCache();
 
 const Main = styled("main")({
   flexGrow: 1,
 });
 
-function MyApp({
-  Component,
-  pageProps,
-  emotionCache = clientSideEmotionCache,
-}: AppProps & {
-  emotionCache?: EmotionCache;
-}) {
+function MyApp({ Component, pageProps, ...otherProps }: AppProps) {
   const [apiFailBar, setApiFailBar] = useState(false);
 
   useEffect(() => {
@@ -46,7 +37,7 @@ function MyApp({
   }, []);
 
   return (
-    <CacheProvider value={emotionCache}>
+    <AppCacheProvider {...otherProps}>
       <Head>
         <title>囲みマス</title>
         <meta
@@ -76,7 +67,7 @@ function MyApp({
           </Snackbar>
         </StateProvider>
       </ThemeProvider>
-    </CacheProvider>
+    </AppCacheProvider>
   );
 }
 export default MyApp;
