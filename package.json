@@ -22,7 +22,7 @@
     "@mui/material": "^6.1.0",
     "@mui/material-nextjs": "^9.0.0",
     "console-feed": "^3.8.0",
-    "dayjs": "^1.11.19",
+    "dayjs": "^1.11.21",
     "event-source-polyfill": "^1.0.31",
     "next": "^16.2.4",
     "react": "19.2.3",
