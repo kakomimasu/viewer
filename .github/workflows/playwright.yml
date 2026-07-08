@@ -9,6 +9,8 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:51214/template1?sslmode=disable
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,11 +26,15 @@ jobs:
           repository: kakomimasu/server
           ref: main
           path: server
-      - uses: denoland/setup-deno@v2
+      - uses: jdx/mise-action@v4
         with:
-          deno-version: v2.0.2
-      - name: Install server dependancies
-        run: cd server && deno task cache
+          working_directory: server
+      - name: Start Prisma dev
+        run: |
+          cd server && deno task prisma:dev --name kakomimasu-ci --port 51213 --db-port 51214 --shadow-db-port 51215 --detach
+      - name: Generate and Push Prisma schema
+        run: |
+          cd server && deno task prisma:generate && deno task prisma:push
       - name: Init server database
         run: cd server && deno task db:init
 
