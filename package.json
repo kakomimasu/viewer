@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npm run build:editor-util && next dev --webpack",
+    "dev:https": "npm run build:editor-util && next dev --webpack --experimental-https --hostname=local.kakomimasu.com",
     "build": "npm run build:editor-util && next build --webpack",
     "build:editor-util": "npx tsdown -c editor-util/tsdown.config.mts",
     "start": "next start",
