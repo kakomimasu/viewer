@@ -387,7 +387,7 @@ const Page: NextPage = () => {
                       console.log("onchange", v);
                       setAutoScroll(v);
                     }}
-                    inputProps={{ "aria-label": "controlled" }}
+                    slotProps={{ input: { "aria-label": "controlled" } }}
                   />
                 }
                 label="自動スクロール"
