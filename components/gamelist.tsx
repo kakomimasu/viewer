@@ -221,11 +221,13 @@ const GameList = (props: {
                   count={games.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
-                  SelectProps={{
-                    inputProps: {
-                      "aria-label": "1ページあたりの行数",
+                  slotProps={{
+                    select: {
+                      inputProps: {
+                        "aria-label": "1ページあたりの行数",
+                      },
+                      native: true,
                     },
-                    native: true,
                   }}
                   onPageChange={(_, newPage) => setPage(newPage)}
                   onRowsPerPageChange={(
