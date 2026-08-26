@@ -29,7 +29,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-resize-detector": "^12.3.0",
-    "recharts": "^3.8.1",
+    "recharts": "^3.10.1",
     "redoc": "^2.5.3",
     "tsdown": "^0.22.14"
   },
