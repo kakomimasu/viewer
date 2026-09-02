@@ -5,11 +5,8 @@ import {
   expect,
   NextFixture,
 } from "next/experimental/testmode/playwright";
-import ApiClient from "@kakomimasu/client-js";
 
 // import openApi from "./dummy-data/openapi.json" with {type: "json"};
-
-export const apiClient = new ApiClient("http://localhost:8880");
 
 const openapi = JSON.parse(
   readFileSync(resolve(__dirname, "./dummy-data/openapi.json"), {
