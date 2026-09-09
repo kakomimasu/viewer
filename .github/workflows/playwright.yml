@@ -10,7 +10,7 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:51214/template1?sslmode=disable
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5001/template1?sslmode=disable
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,7 +31,7 @@ jobs:
           working_directory: server
       - name: Start Prisma dev
         run: |
-          cd server && deno task prisma:dev --name kakomimasu-ci --port 51213 --db-port 51214 --shadow-db-port 51215 --detach
+          cd server && deno task prisma:dev --name kakomimasu-ci --port 5000 --db-port 5001 --shadow-db-port 5002 --detach
       - name: Generate and Push Prisma schema
         run: |
           cd server && deno task prisma:generate && deno task prisma:push
