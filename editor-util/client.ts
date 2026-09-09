@@ -62,8 +62,8 @@ declare global {
 }
 
 // consoleをpostMessageとしても送るように置き換え
-let originalConsoleLog = console.log;
-let originalConsoleError = console.error;
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
 console.log = (...args) => {
   originalConsoleLog(...args);
   postMessage({ method: "log", data: args });
@@ -159,8 +159,12 @@ async function matching() {
         authMethods: { Bearer: auth },
       });
     }
-  } catch (e: any) {
-    console.error(e.toString());
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(e.toString());
+    } else {
+      console.error(e);
+    }
     throw Error("Match Error");
   }
   __match = matchRes;
@@ -168,7 +172,7 @@ async function matching() {
 
   do {
     try {
-      let gameRes = await apiClient.getMatch(__match.gameId);
+      const gameRes = await apiClient.getMatch(__match.gameId);
       __game = gameRes;
     } catch (e) {
       throw Error("Get Match Error");

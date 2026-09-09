@@ -32,7 +32,7 @@ import clientCode from "../../editor-util/dist/client.mjs?raw";
 import definitionCode from "../../editor-util/dist/client.d.mts?raw";
 import sampleCode from "../../editor-util/sample.js?raw";
 
-type Log = { method: "log" | "error" | "info"; data: any[]; id: string };
+type Log = { method: "log" | "error" | "info"; data: unknown[]; id: string };
 
 const Page: NextPage = () => {
   const kkmmUser = useContext(UserContext).user;
