@@ -403,7 +403,7 @@ const Page: NextPage = () => {
         // エージェントが配置されていない場合は既定の場所に配置
         // TODO: 既定の場所が配置できない場合はどうする？
         const playerIndex = matchRes.index;
-        let x = playerIndex === 0 ? 1 : field.width - 2;
+        const x = playerIndex === 0 ? 1 : field.width - 2;
 
         const y = Math.floor(
           ((field.height - 1) / (enableAgents.length - 1)) * i,
