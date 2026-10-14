@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    testProxy: true,
+    // testProxy: true,
   },
   redirects() {
     return [
