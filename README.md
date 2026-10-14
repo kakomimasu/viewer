@@ -1,5 +1,7 @@
 # Kakomimasu Viewer
 
+test
+
 ## セットアップ
 
 パッケージをインストールする
