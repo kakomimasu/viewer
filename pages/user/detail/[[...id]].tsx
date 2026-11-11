@@ -146,7 +146,7 @@ const UserBearerTokenArea = ({ user }: { user: AuthedUser }) => {
   );
 };
 
-const Detail: NextPage<{}> = () => {
+const Detail: NextPage = () => {
   const router = useRouter();
   const { id: id_ } = router.query;
   const id = (() => {
