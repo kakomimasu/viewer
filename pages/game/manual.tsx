@@ -202,7 +202,7 @@ const useGamepads = () => {
   useEffect(() => {
     let requestId: number | undefined;
     const updateGamepads = () => {
-      const gps = navigator.getGamepads();
+      const gps = navigator.getGamepads().slice(0, 4);
       setGamepads((prev) => {
         const isUpdate = !gps.every((gp, i) => gp === prev[i]);
         return isUpdate ? gps : prev;
