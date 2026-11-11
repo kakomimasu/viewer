@@ -26,8 +26,8 @@
     "dayjs": "^1.11.21",
     "event-source-polyfill": "^1.0.31",
     "next": "^16.3.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-resize-detector": "^12.3.0",
     "recharts": "^3.10.1",
     "redoc": "^2.5.3",
@@ -45,7 +45,7 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-    "react": "19.2.3",
+    "react": "19.3.1",
     "postcss": "8.5.10"
   }
 }
